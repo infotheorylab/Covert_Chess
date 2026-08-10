@@ -36,7 +36,7 @@ huggingface-cli login
 # Paste token from https://huggingface.co/settings/tokens
 # Must have accepted Llama licence at:
 # https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct
-
+pip install "transformers==4.46.3" "tokenizers>=0.20,<0.21"
 ## 5. Start server inside screen (survives terminal disconnect)
 fuser -k 8000/tcp   # clear port first
 screen -S bam

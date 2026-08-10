@@ -483,6 +483,16 @@ function handleMsg(d){
       clearMsgs();addSys('Make a move, type a prompt, click Send.\nClick Decode on the AI\'s reply to reveal the hidden chess move.');
       updateSend();break;
     case 'status': status(d.msg);break;
+    case 'queue':
+      // Position in the shared-GPU queue. ahead>0 means others are generating
+      // first; ahead==0 means this user's turn is now being processed.
+      if(d.ahead && d.ahead > 0){
+        const n=d.ahead;
+        status(`Waiting for the GPU — ${n} ${n===1?'turn':'turns'} ahead of you…`);
+      }
+      // ahead==0: generation is starting; the subsequent status/token messages
+      // will overwrite this, so no action needed here.
+      break;
     case 'token':
       if(d.agent==='llm1'&&curABub){
         rmCur(curABub);curABub.__t=(curABub.__t||'')+d.text;

@@ -40,6 +40,11 @@ _DEFAULT_PROMPT_B = (
 )
 _MAX_HISTORY    = 8
 _MAX_NEW_TOKENS = 150
+# Hard ceiling on a single generation phase (Agent A or Agent B). A pathological
+# turn (stuck forward pass, Sinkhorn edge case) must not hold the shared GPU lock
+# forever and wedge every other waiting user. On timeout the phase aborts, the
+# lock is released, and the turn surfaces an error the client can recover from.
+_GEN_TIMEOUT_SEC = 90.0
 
 
 class DemoSession:
@@ -311,9 +316,17 @@ class DemoSession:
 
         async with self._gen_lock:   # ← serialises GPU: at most one generation at a time
             thread.start()
+            timed_out = False
 
             while True:
-                item = await queue.get()
+                try:
+                    # Bound the wait for each token. A healthy model emits tokens
+                    # steadily; if nothing arrives within the timeout the turn is
+                    # wedged — abort so the lock frees for the next user.
+                    item = await asyncio.wait_for(queue.get(), timeout=_GEN_TIMEOUT_SEC)
+                except asyncio.TimeoutError:
+                    timed_out = True
+                    break
                 if item is None:
                     break
                 tok_id, tok_str, belief = item
@@ -321,7 +334,14 @@ class DemoSession:
                     raise RuntimeError(tok_str)
                 yield tok_id, tok_str, belief
 
-            thread.join(timeout=10.0)
+            # Don't block lock release on a stuck worker thread (it's a daemon
+            # and will be reaped); only join briefly on the normal path.
+            thread.join(timeout=0.0 if timed_out else 10.0)
+
+        if timed_out:
+            raise TimeoutError(
+                f"generation exceeded {_GEN_TIMEOUT_SEC:.0f}s and was aborted"
+            )
 
 
 # ── module-level helpers ─────────────────────────────────────────────────

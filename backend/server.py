@@ -8,6 +8,7 @@ workers MUST be 1: the shared model lives in a single process.
 from __future__ import annotations
 import asyncio
 import os
+from typing import Callable
 from pathlib import Path
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -32,6 +33,29 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 pool: SharedModelPool | None = None
 sessions: dict[str, DemoSession] = {}
 gen_lock: asyncio.Semaphore | None = None   # one GPU generation at a time
+
+# Ordered list of session_ids whose turns are waiting or in progress. The GPU
+# processes one turn at a time (gen_lock), so index 0 is generating and everyone
+# else is queued behind it. Used only to tell waiting users their position;
+# it does not itself serialise anything (gen_lock does that).
+turn_queue: list[str] = []
+_send_by_session: dict[str, Callable] = {}
+
+
+async def _broadcast_queue_positions() -> None:
+    """Tell each waiting session how many turns are ahead of it."""
+    for pos, sid in enumerate(turn_queue):
+        send = _send_by_session.get(sid)
+        if send is None:
+            continue
+        try:
+            if pos == 0:
+                # Front of the line — actively generating; clear any queue notice.
+                await send({"type": "queue", "position": 0, "ahead": 0})
+            else:
+                await send({"type": "queue", "position": pos, "ahead": pos})
+        except Exception:
+            pass
 
 
 @app.on_event("startup")
@@ -103,16 +127,32 @@ async def ws_endpoint(websocket: WebSocket, session_id: str) -> None:
     async def send(msg: dict) -> None:
         await websocket.send_json(msg)
 
+    # Register this session's sender so the queue broadcaster can reach it.
+    _send_by_session[session_id] = send
+
     try:
         while True:
             data = await websocket.receive_json()
             t    = data.get("type")
             if t == "user_turn":
-                await session.handle_user_turn(
-                    chat=str(data.get("chat", "")),
-                    move_uci=str(data.get("move", "")),
-                    send=send,
-                )
+                # Join the queue and tell everyone their position. If someone is
+                # already generating, this user is told how many are ahead.
+                turn_queue.append(session_id)
+                await _broadcast_queue_positions()
+                try:
+                    await session.handle_user_turn(
+                        chat=str(data.get("chat", "")),
+                        move_uci=str(data.get("move", "")),
+                        send=send,
+                    )
+                finally:
+                    # Leave the queue whether the turn succeeded or errored, and
+                    # refresh everyone still waiting so positions advance.
+                    try:
+                        turn_queue.remove(session_id)
+                    except ValueError:
+                        pass
+                    await _broadcast_queue_positions()
             elif t == "reset":
                 session.reset()
                 await send({"type": "reset_ok", "fen": "start", "turn": 0})
@@ -145,3 +185,12 @@ async def ws_endpoint(websocket: WebSocket, session_id: str) -> None:
         # Free the slot — without this, sessions accumulate until MAX_SESSIONS
         # is hit and every new visitor gets "server at capacity".
         sessions.pop(session_id, None)
+        _send_by_session.pop(session_id, None)
+        # If the user disconnected mid-turn, drop them from the queue and let
+        # the rest advance.
+        removed = False
+        while session_id in turn_queue:
+            turn_queue.remove(session_id)
+            removed = True
+        if removed:
+            await _broadcast_queue_positions()
