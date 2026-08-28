@@ -118,10 +118,11 @@ main{display:flex;flex-direction:row;flex:1 1 0;min-height:0;overflow:hidden}
 #difficulty-row{width:100%;max-width:var(--bsz);margin-top:10px;
                 display:flex;align-items:center;gap:8px}
 .diff-label{font-family:var(--mono);font-size:12px;color:var(--muted)}
-#difficulty-select{font-family:var(--mono);font-size:12px;padding:4px 8px;
+#difficulty-select,#model-select{font-family:var(--mono);font-size:12px;padding:4px 8px;
                    border:1px solid var(--line);border-radius:6px;
                    background:var(--surf);color:var(--ink);cursor:pointer}
-#difficulty-select:hover{border-color:var(--blue)}
+#difficulty-select:hover,#model-select:hover{border-color:var(--blue)}
+#model-select:disabled{opacity:.5;cursor:wait}
 
 /* info icon tooltip */
 .info-icon{position:relative;display:inline-flex;align-items:center;justify-content:center;
@@ -161,6 +162,8 @@ main{display:flex;flex-direction:row;flex:1 1 0;min-height:0;overflow:hidden}
 .bwrap.b{align-self:flex-start;align-items:flex-start}
 .blabel{font-family:var(--mono);font-size:10.5px;color:var(--muted);
         letter-spacing:.05em;padding:0 3px;margin-bottom:3px}
+.blabel .tok-count{color:var(--ink2);opacity:.85}
+.blabel .tok-count::before{content:"·";margin:0 5px;opacity:.6}
 .bubble{border-radius:14px;padding:10px 13px;font-size:14px;line-height:1.6;word-break:break-word}
 .bwrap.a .bubble{background:var(--blue);color:#F4EFE2;border-bottom-right-radius:4px}
 .bwrap.b .bubble{background:var(--surf);border:1px solid var(--line);
@@ -305,6 +308,8 @@ main{display:flex;flex-direction:row;flex:1 1 0;min-height:0;overflow:hidden}
           <option value="14">Hard</option>
           <option value="20">Maximum</option>
         </select>
+        <span class="diff-label" style="margin-left:14px;">Model:</span>
+        <select id="model-select"><!-- populated from server 'ready' --></select>
       </div>
     </div>
     <div id="chat">
@@ -481,6 +486,7 @@ function handleMsg(d){
       document.getElementById('connect-panel').classList.remove('show');
       setConn(true);status('Ready — drag a piece to start');
       clearMsgs();addSys('Make a move, type a prompt, click Send.\nClick Decode on the AI\'s reply to reveal the hidden chess move.');
+      if(d.models){populateModels(d.models, d.active_model);}
       updateSend();break;
     case 'status': status(d.msg);break;
     case 'queue':
@@ -503,9 +509,11 @@ function handleMsg(d){
       }
       break;
     case 'turn_done':
-      if(d.agent==='llm1'&&curABub){rmCur(curABub);curABub.textContent=d.text;scroll();}
+      if(d.agent==='llm1'&&curABub){rmCur(curABub);curABub.textContent=d.text;
+        setTokenCount(curABub,d.n_tokens);scroll();}
       else if(d.agent==='llm2'&&curBBub){
         rmCur(curBBub);curBBub.textContent=d.text;
+        setTokenCount(curBBub,d.n_tokens);
         // Snapshot engine data inside addDecodeBtn (still set here, before
         // board_update clears it), and resolve SAN lazily at click time.
         addDecodeBtn(curBBub);
@@ -590,6 +598,14 @@ function handleMsg(d){
       }
       break;
     case 'difficulty_ok': status(`Engine: ${document.getElementById('difficulty-select').options[document.getElementById('difficulty-select').selectedIndex].text}`);break;
+    case 'model_ok': {
+      const sel=document.getElementById('model-select');
+      sel.disabled=false;
+      if(d.model){sel.value=d.model;}
+      const lbl=sel.options[sel.selectedIndex]?sel.options[sel.selectedIndex].text:d.label;
+      status(`Model: ${lbl}`);
+      break;
+    }
     case 'error':
       addSys(`Error: ${d.msg}`);
       // If the turn failed before the server committed a board_update, the
@@ -714,6 +730,27 @@ document.getElementById('difficulty-select').addEventListener('change', function
   }
 });
 
+function populateModels(models, activeId){
+  const sel=document.getElementById('model-select');
+  sel.innerHTML='';
+  models.forEach(m=>{
+    const o=document.createElement('option');
+    o.value=m.id; o.textContent=m.label;
+    if(m.id===activeId)o.selected=true;
+    sel.appendChild(o);
+  });
+  sel.disabled=false;
+}
+document.getElementById('model-select').addEventListener('change', function(){
+  if(ws&&ws.readyState===WebSocket.OPEN){
+    // Switching model is a global, blocking operation on the shared GPU; disable
+    // the control until the server confirms with model_ok.
+    this.disabled=true;
+    status(`Loading ${this.options[this.selectedIndex].text}…`);
+    ws.send(JSON.stringify({type:'set_model', model:this.value}));
+  }
+});
+
 // ── websocket connection ──────────────────────────────────────────────
 function connect(manualUrl) {
   const url = getWsUrl(manualUrl);
@@ -742,6 +779,14 @@ function mkBwrap(side,label){
   const l=document.createElement('div');l.className='blabel';l.textContent=label;
   const b=document.createElement('div');b.className='bubble';
   w.appendChild(l);w.appendChild(b);return w;
+}
+function setTokenCount(bubble,n){
+  if(n==null)return;
+  const label=bubble.parentElement&&bubble.parentElement.querySelector('.blabel');
+  if(!label)return;
+  let tc=label.querySelector('.tok-count');
+  if(!tc){tc=document.createElement('span');tc.className='tok-count';label.appendChild(tc);}
+  tc.textContent=`${n} ${n===1?'token':'tokens'}`;
 }
 function addCur(el){const c=document.createElement('span');c.className='tcur';c.id='__cur__';el.appendChild(c)}
 function rmCur(el){const c=el.querySelector('#__cur__');if(c)c.remove()}

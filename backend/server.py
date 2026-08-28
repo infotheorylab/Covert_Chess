@@ -25,6 +25,15 @@ STOCKFISH_PATH = os.getenv("STOCKFISH_PATH", "/usr/games/stockfish")
 SKILL_LEVEL    = int(os.getenv("SKILL_LEVEL",  "5"))
 MAX_SESSIONS   = int(os.getenv("MAX_SESSIONS", "20"))  # raised for group pod
 
+# Models the UI may switch between. Keys are HF ids; values are short labels
+# the frontend shows. Model selection is GLOBAL (one shared GPU, one resident
+# model): switching rebuilds every active session onto the new model.
+ALLOWED_MODELS = {
+    "meta-llama/Llama-3.1-8B-Instruct": "llama8b",
+    "microsoft/phi-4":                  "phi4-14b",
+}
+active_model: str = MODEL_NAME
+
 STATIC_DIR = Path(__file__).parent / "static"
 
 app = FastAPI(title="BAM Chess Demo")
@@ -82,6 +91,7 @@ async def health():
 
 @app.websocket("/ws/{session_id}")
 async def ws_endpoint(websocket: WebSocket, session_id: str) -> None:
+    global active_model
     await websocket.accept()
 
     if session_id not in sessions:
@@ -92,8 +102,8 @@ async def ws_endpoint(websocket: WebSocket, session_id: str) -> None:
             await websocket.close()
             return
         sessions[session_id] = DemoSession(
-            lm1=pool.make_backend(),
-            lm2=pool.make_backend(),
+            lm1=pool.make_backend(active_model),
+            lm2=pool.make_backend(active_model),
             stockfish_path=STOCKFISH_PATH,
             gen_lock=gen_lock,
             # Values match the reference implementation (compare.py):
@@ -122,6 +132,8 @@ async def ws_endpoint(websocket: WebSocket, session_id: str) -> None:
     await websocket.send_json({
         "type": "ready", "session_id": session_id,
         "fen": session.chess.fen(), "turn": session.turn_count,
+        "active_model": active_model,
+        "models": [{"id": mid, "label": lbl} for mid, lbl in ALLOWED_MODELS.items()],
     })
 
     async def send(msg: dict) -> None:
@@ -168,6 +180,34 @@ async def ws_endpoint(websocket: WebSocket, session_id: str) -> None:
                 level = int(data.get("level", 10))
                 session.chess.set_skill_level(level)
                 await send({"type": "difficulty_ok", "level": level})
+            elif t == "set_model":
+                requested = str(data.get("model", ""))
+                if requested not in ALLOWED_MODELS:
+                    await send({"type": "error",
+                                "msg": f"Unknown model: {requested}"})
+                elif requested == active_model:
+                    await send({"type": "model_ok", "model": active_model,
+                                "label": ALLOWED_MODELS[active_model]})
+                else:
+                    # Global switch. Serialize on the GPU lock so no generation is
+                    # mid-flight, then rebuild EVERY active session onto the new
+                    # model (the pool evicts the old weights, so stale backends
+                    # would otherwise crash on their next turn).
+                    await send({"type": "status",
+                                "msg": f"Loading {ALLOWED_MODELS[requested]} — this can take a moment…"})
+                    async with gen_lock:
+                        loop = asyncio.get_event_loop()
+                        await loop.run_in_executor(None, pool.switch_model, requested)
+                        for sess in list(sessions.values()):
+                            sess.set_model(pool, requested)
+                        active_model = requested
+                    # Notify everyone the model changed.
+                    for sid, snd in list(_send_by_session.items()):
+                        try:
+                            await snd({"type": "model_ok", "model": active_model,
+                                       "label": ALLOWED_MODELS[active_model]})
+                        except Exception:
+                            pass
             elif t == "get_prompts":
                 await send({"type": "prompts_loaded",
                             "prompt_a": session.prompt_a,

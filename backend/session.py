@@ -79,13 +79,8 @@ class DemoSession:
             sinkhorn_method="sinkhorn_log",
         )
         self.bam_cfg = cfg_bam
-        self.adapter = ArcMarkAdapter(lm1, cfg_arc)
-
-        # User→AI direction
-        self.encoder_1 = CovertEncoder(lm1, self.adapter, cfg_bam)
-        self.decoder_2  = Decoder(lm2, self.adapter, cfg_bam)
-        # AI→user direction
-        self.encoder_2 = CovertEncoder(lm2, self.adapter, cfg_bam)
+        self.adapter_cfg = cfg_arc
+        self._build_bam_stack(lm1, lm2)
 
         self.chess = ChessInterface(stockfish_path)
         self.history_1: list[dict] = []
@@ -96,6 +91,22 @@ class DemoSession:
         self.prompt_b = _DEFAULT_PROMPT_B
         # Shared GPU lock — prevents concurrent model inference across sessions
         self._gen_lock = gen_lock or asyncio.Semaphore(1)
+
+    def _build_bam_stack(self, lm1: HFLMBackend, lm2: HFLMBackend) -> None:
+        """(Re)build the adapter + encoders/decoder for the given backends.
+
+        Called at init and again whenever the underlying model changes (the
+        adapter caches vocab-sized permutations, so it MUST be rebuilt when the
+        tokenizer/vocab changes).
+        """
+        self.lm1 = lm1
+        self.lm2 = lm2
+        self.adapter = ArcMarkAdapter(lm1, self.adapter_cfg)
+        # User→AI direction
+        self.encoder_1 = CovertEncoder(lm1, self.adapter, self.bam_cfg)
+        self.decoder_2 = Decoder(lm2, self.adapter, self.bam_cfg)
+        # AI→user direction
+        self.encoder_2 = CovertEncoder(lm2, self.adapter, self.bam_cfg)
 
     # ── public API ───────────────────────────────────────────────────────
 
@@ -137,7 +148,8 @@ class DemoSession:
             await send(msg)
 
         text_1 = _strip_wrapping_quotes("".join(text_1_buf).strip())
-        await send({"type": "turn_done", "agent": "llm1", "text": text_1})
+        await send({"type": "turn_done", "agent": "llm1", "text": text_1,
+                    "n_tokens": len(text_1_buf)})
 
         # 4. Recover decoded move
         # Adaptive stopping rules (paper §adaptive-stopping):
@@ -222,7 +234,8 @@ class DemoSession:
             await send({"type": "status",
                         "msg": f"Agent B embedding fell back to plain text ({exc})."})
 
-        await send({"type": "turn_done", "agent": "llm2", "text": text_2})
+        await send({"type": "turn_done", "agent": "llm2", "text": text_2,
+                    "n_tokens": len(text_2_buf)})
 
         # 9. Apply engine move; send board update (client applies on Decode click)
         engine_san = self.chess.push(engine_move)
@@ -244,6 +257,25 @@ class DemoSession:
         self.history_1.clear()
         self.history_2.clear()
         self.turn_count = 0
+        _force_reset(self.encoder_1)
+        _force_reset(self.encoder_2)
+        self.decoder_2.reset()
+
+    # ── model switching ───────────────────────────────────────────────────
+
+    def set_model(self, pool, model_name: str) -> None:
+        """Switch the underlying LLM for BOTH agents and rebuild the BAM stack.
+
+        Both parties must use identical weights for the covert channel, so this
+        swaps lm1 and lm2 together. The adapter caches vocab-sized permutations,
+        so it is rebuilt; any in-flight covert message is dropped (the new vocab
+        invalidates it). The chess game and conversation history are preserved.
+        """
+        pool.switch_model(model_name)
+        lm1 = pool.make_backend(model_name)
+        lm2 = pool.make_backend(model_name)
+        self._build_bam_stack(lm1, lm2)
+        # Drop any half-embedded message — it is meaningless under the new vocab.
         _force_reset(self.encoder_1)
         _force_reset(self.encoder_2)
         self.decoder_2.reset()
