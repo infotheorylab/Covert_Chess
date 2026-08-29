@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Inference-Time Covert Communication over LLM-Agent Conversations</title>
-<meta name="description" content="Feedback coding embeds hidden payloads in agentic dialogue at high rate and low error — reliable, provably secure, and requiring no shared model or prompt." />
+<meta name="description" content="Play Chess with AI by Embedding Moves in Chats" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -306,14 +306,14 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <section class="section" id="abstract">
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">abstract</p>
-    <p class="abstract-body">As large language models (LLMs) are increasingly used to automate digital interactions, users can leverage LLM-generated text as cover for covert communication within seemingly benign conversations. Existing LLM steganography, however, is predominantly white-box, requiring the sender and receiver to share the cover statistics, typically through access to the model weights and prompt. Black-box schemes remove this requirement by allowing the receiver to operate solely on the generated text, but current approaches rely on fixed-length, open-loop watermarking techniques that suffer from high decoding error rates under variable-length token generation. We recast black-box LLM steganography as a sequential communication problem with causal, noiseless feedback: every generated token is observed by both parties and can guide subsequent embedding. Based on this perspective, we introduce <b>B</b>urnashev <b>A</b>daptive Posterior <b>M</b>atching (BAM), a feedback-coding scheme that combines posterior matching with a decode-and-confirm phase. The design is inspired by classical information-theoretic feedback-coding principles, while its security is established through a cryptographic reduction proof. Across three open-weight language models, we demonstrate that BAM attains 0&ndash;0.1% empirical message error on an 8-bit payload in around 50 tokens, across 1000 trials, versus 10&ndash;17% for the strongest black-box baseline at comparable length. Building on the proposed steganography algorithm, we demonstrate the feasibility of an end-to-end communication protocol that achieves high communication rates across multiple conversational settings.</p>
+    <p class="abstract-body">As large language models (LLMs) are increasingly used to automate digital interactions, users can leverage LLM-generated text as cover for covert communication within seemingly benign conversations. Existing LLM steganography, however, is predominantly white-box, requiring the sender and receiver to share the cover statistics, typically through access to the model weights and prompt. Black-box schemes remove this requirement by allowing the receiver to operate solely on the generated text, but current approaches rely on fixed-length, open-loop watermarking techniques that suffer from high decoding error rates under variable-length token generation. We recast black-box LLM steganography as a sequential communication problem with causal, noiseless feedback: every generated token is observed by both parties and can guide subsequent embedding. Based on this perspective, we introduce <b>B</b>urnashev <b>A</b>daptive Posterior <b>M</b>atching (BAM), a feedback-coding scheme that combines posterior matching with a decode-and-confirm phase. The design is inspired by classical information-theoretic feedback-coding principles, while its security is established through a cryptographic reduction proof. Across three open-weight language models, we demonstrate that BAM attains <b>0&ndash;0.1% empirical message error on an 8-bit payload in around 50 tokens, across 1000 trials, versus 10&ndash;17% for the strongest black-box baseline at comparable length</b>. Building on the proposed steganography algorithm, we demonstrate the feasibility of an end-to-end communication protocol that achieves high communication rates across multiple conversational settings.</p>
   </div>
 </section>
 
 <!-- ============ RESULTS ============ -->
 <section class="section" id="results">
   <div class="wrap reveal-on-scroll">
-    <p class="eyebrow">results</p>
+    <p class="eyebrow">results: Feedback coding embeds hidden payloads in agentic dialogue at high rate and low error — reliable, provably secure, and requiring no shared model or prompt.</p>
 
     <figure class="figure">
       <img src="./img/bam_fig.png" alt="Message error probability vs average token length for BAM and five baselines across Llama-3.1-8B, Qwen3.5-9B-Base, and Mistral-7B."/>
@@ -340,8 +340,8 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     <p class="eyebrow">try it live</p>
     <h2>Watch two agents talk — and decode the secret</h2>
     <div class="steps">
-      <div class="step"><div class="k">STEP 1</div><h3>Play a chess game with AI</h3><p>Make a chess move and enter a prompt to emit an AI mediated message.</p></div>
-      <div class="step"><div class="k">STEP 2</div><h3>Run the conversation</h3><p>The agents chat naturally while the payload rides along underneath.</p></div>
+      <div class="step"><div class="k">STEP 1</div><h3>Play a chess game with AI</h3><p>Make a chess move and enter a prompt to emit an AI mediated message. The opposing agent never sees your prompt.</p></div>
+      <div class="step"><div class="k">STEP 2</div><h3>Run the conversation</h3><p>The agents chat naturally while the payload rides along underneath. The LLM text generation is distortion-free.</p></div>
       <div class="step"><div class="k">STEP 3</div><h3>Reveal &amp; decode</h3><p>See the hidden message recovered from the text alone, turn by turn.</p></div>
     </div>
     <div class="btn-row"><a class="btn primary" href="https://v39ttdcqg3i0yh-8000.proxy.runpod.net/">Launch the demo →</a></div>
