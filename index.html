@@ -137,6 +137,8 @@ strong { color: var(--ink); font-weight: 600; }
 .section.tight { padding: 64px 0; }
 .lede { font-size: clamp(19px, 2.3vw, 23px); color: var(--ink); line-height: 1.5; max-width: 760px; font-weight: 500; }
 .lede b, .lede .key { font-weight: 700; }
+.abstract-body { font-size: 17.5px; line-height: 1.7; color: var(--ink-2); }
+.abstract-body b { color: var(--ink); font-weight: 700; }
 .body-col { max-width: none; }
 .body-col p { font-size: 17.5px; }
 .reveal-on-scroll { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
@@ -171,7 +173,7 @@ strong { color: var(--ink); font-weight: 600; }
 @media (max-width: 720px) { .compare { grid-template-columns: 1fr; } }
 
 /* result figure */
-.figure { margin-top: 30px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 20px 22px 16px; max-width: 940px; }
+.figure { margin-top: 34px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 22px 24px 18px; width: min(1080px, 94vw); max-width: none; margin-left: 50%; transform: translateX(-50%); }
 .figure img { width: 100%; height: auto; display: block; border-radius: 6px; }
 .figcap { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--ink-2); margin: 14px 2px 0; letter-spacing: 0; }
 .figcap b { color: var(--ink); font-weight: 700; }
@@ -277,10 +279,10 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 
     <!-- resource buttons -->
     <div class="btn-row cover-cta">
-      <a class="btn primary" href="https://arxiv.org/abs/XXXX.XXXXX"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg>Paper</a>
+      <a class="btn primary" href="https://v39ttdcqg3i0yh-8000.proxy.runpod.net/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>Demo</a>
+      <a class="btn" href="https://arxiv.org/abs/XXXX.XXXXX"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg>Paper</a>
       <a class="btn" href="https://arxiv.org/abs/XXXX.XXXXX"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 4h16v12H4z"/><path d="M2 20h20"/></svg>arXiv</a>
       <a class="btn" href="https://github.com/infotheorylab/Covert_Chess"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12 12 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>Code</a>
-      <a class="btn" href="https://v39ttdcqg3i0yh-8000.proxy.runpod.net/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>Demo</a>
     </div>
 
     <!-- institution logos -->
@@ -301,11 +303,17 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 </header>
 
 <!-- ============ 1 · THE GAP ============ -->
-<section class="section" id="gap">
+<section class="section" id="abstract">
   <div class="wrap reveal-on-scroll">
-    <p class="eyebrow">the gap</p>
-    <h2>Reliably and securely hiding high-rate messages in inference-time LLM text — model- and prompt-agnostic.</h2>
-    <p class="lede" style="margin-top:20px;"> Our algorithm Burnashev Adaptive Posterior Matching (BAM) Steganography closes that gap on three fronts at once: <span class="key">reliability</span>, <span class="key">security</span>, and <span class="key">rate</span>. The BAM algorithm is designed for conversational steganography, not watermarking application, but our algorithm outperforms current multi-bit watermark on the same setting by a wide margin.</p>
+    <p class="eyebrow">abstract</p>
+    <p class="abstract-body">As large language models (LLMs) are increasingly used to automate digital interactions, users can leverage LLM-generated text as cover for covert communication within seemingly benign conversations. Existing LLM steganography, however, is predominantly white-box, requiring the sender and receiver to share the cover statistics, typically through access to the model weights and prompt. Black-box schemes remove this requirement by allowing the receiver to operate solely on the generated text, but current approaches rely on fixed-length, open-loop watermarking techniques that suffer from high decoding error rates under variable-length token generation. We recast black-box LLM steganography as a sequential communication problem with causal, noiseless feedback: every generated token is observed by both parties and can guide subsequent embedding. Based on this perspective, we introduce <b>B</b>urnashev <b>A</b>daptive Posterior <b>M</b>atching (BAM), a feedback-coding scheme that combines posterior matching with a decode-and-confirm phase. The design is inspired by classical information-theoretic feedback-coding principles, while its security is established through a cryptographic reduction proof. Across three open-weight language models, we demonstrate that BAM attains 0&ndash;0.1% empirical message error on an 8-bit payload in around 50 tokens, across 1000 trials, versus 10&ndash;17% for the strongest black-box baseline at comparable length. Building on the proposed steganography algorithm, we demonstrate the feasibility of an end-to-end communication protocol that achieves high communication rates across multiple conversational settings.</p>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section class="section" id="results">
+  <div class="wrap reveal-on-scroll">
+    <p class="eyebrow">results</p>
 
     <figure class="figure">
       <img src="./img/bam_fig.png" alt="Message error probability vs average token length for BAM and five baselines across Llama-3.1-8B, Qwen3.5-9B-Base, and Mistral-7B."/>
