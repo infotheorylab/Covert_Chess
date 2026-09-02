@@ -40,6 +40,7 @@ _DEFAULT_PROMPT_B = (
 )
 _MAX_HISTORY    = 8
 _MAX_NEW_TOKENS = 150
+_LN2 = float(np.log(2.0))
 # Hard ceiling on a single generation phase (Agent A or Agent B). A pathological
 # turn (stuck forward pass, Sinkhorn edge case) must not hold the shared GPU lock
 # forever and wedge every other waiting user. On timeout the phase aborts, the
@@ -134,14 +135,16 @@ class DemoSession:
                                          relay=True)
         prompt_ids1 = self.lm1.encode_tensor(prompt_1)
         text_1_buf: list[str] = []
+        ent_1_buf:  list[float] = []   # per-token LM entropy (bits)
 
-        async for tok_id, tok_str, belief in self._stream(
+        async for tok_id, tok_str, belief, h_bits in self._stream(
             lm=self.lm1,
             enc_tracker=self.encoder_1.tracker,
             dec_tracker=self.decoder_2.tracker,
             m_true=m, prompt_ids=prompt_ids1,
         ):
             text_1_buf.append(tok_str)
+            ent_1_buf.append(h_bits)
             msg: dict = {"type": "token", "agent": "llm1", "text": tok_str}
             if belief:
                 msg["belief"] = belief
@@ -149,7 +152,8 @@ class DemoSession:
 
         text_1 = _strip_wrapping_quotes("".join(text_1_buf).strip())
         await send({"type": "turn_done", "agent": "llm1", "text": text_1,
-                    "n_tokens": len(text_1_buf)})
+                    "n_tokens": len(text_1_buf),
+                    "avg_entropy_bits": _mean_or_none(ent_1_buf)})
 
         # 4. Recover decoded move
         # Adaptive stopping rules (paper §adaptive-stopping):
@@ -215,14 +219,16 @@ class DemoSession:
         prompt_2    = self._build_prompt(self.lm2, self.history_2, text_1, self.prompt_b)
         prompt_ids2 = self.lm2.encode_tensor(prompt_2)
         text_2_buf: list[str] = []
+        ent_2_buf:  list[float] = []   # per-token LM entropy (bits)
         try:
-            async for _, tok_str, _ in self._stream(
+            async for _, tok_str, _, h_bits in self._stream(
                 lm=self.lm2,
                 enc_tracker=self.encoder_2.tracker,
                 dec_tracker=None,
                 m_true=m_star, prompt_ids=prompt_ids2,
             ):
                 text_2_buf.append(tok_str)
+                ent_2_buf.append(h_bits)
                 await send({"type": "token", "agent": "llm2", "text": tok_str})
             text_2 = "".join(text_2_buf).strip()
         except Exception as exc:
@@ -235,7 +241,8 @@ class DemoSession:
                         "msg": f"Agent B embedding fell back to plain text ({exc})."})
 
         await send({"type": "turn_done", "agent": "llm2", "text": text_2,
-                    "n_tokens": len(text_2_buf)})
+                    "n_tokens": len(text_2_buf),
+                    "avg_entropy_bits": _mean_or_none(ent_2_buf)})
 
         # 9. Apply engine move; send board update (client applies on Decode click)
         engine_san = self.chess.push(engine_move)
@@ -339,7 +346,7 @@ class DemoSession:
                     asyncio.run_coroutine_threadsafe(queue.put(item), loop).result()
             except Exception as exc:
                 asyncio.run_coroutine_threadsafe(
-                    queue.put(("__err__", str(exc), None)), loop
+                    queue.put(("__err__", str(exc), None, None)), loop
                 ).result()
             finally:
                 asyncio.run_coroutine_threadsafe(queue.put(None), loop).result()
@@ -361,10 +368,10 @@ class DemoSession:
                     break
                 if item is None:
                     break
-                tok_id, tok_str, belief = item
+                tok_id, tok_str, belief, h_bits = item
                 if tok_id == "__err__":
                     raise RuntimeError(tok_str)
-                yield tok_id, tok_str, belief
+                yield tok_id, tok_str, belief, h_bits
 
             # Don't block lock release on a stuck worker thread (it's a daemon
             # and will be reaped); only join briefly on the normal path.
@@ -394,6 +401,11 @@ def _strip_wrapping_quotes(text: str) -> str:
     return t
 
 
+def _mean_or_none(xs: list[float]) -> Optional[float]:
+    """Round-average of per-token entropies; None if no tokens were produced."""
+    return round(float(sum(xs) / len(xs)), 3) if xs else None
+
+
 def _force_reset(enc: CovertEncoder) -> None:
     enc.tracker      = None
     enc.true_message = None
@@ -415,6 +427,11 @@ def _generate_tokens(
     for _ in range(max_new_tokens):
         with torch.no_grad():
             p = lm.next_token_distribution(ids)
+            # Shannon entropy (bits) of the LM's next-token distribution at this
+            # step -- i.e. how much "room" the cover text has for embedding.
+            # torch.special.entr(x) = -x*ln(x) with entr(0) = 0.
+            h_bits = float(torch.special.entr(p.to(torch.float32)).sum().item()
+                           / _LN2)
         p_np = p.detach().to(torch.float64).cpu().numpy()
 
         if enc_tracker is not None and not enc_tracker.done:
@@ -443,4 +460,4 @@ def _generate_tokens(
             [ids, torch.tensor([[tok_id]], device=lm.device)], dim=1
         )
         tok_str = lm.decode([tok_id])
-        yield tok_id, tok_str, belief
+        yield tok_id, tok_str, belief, h_bits

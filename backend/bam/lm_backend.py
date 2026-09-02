@@ -12,11 +12,21 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
+# Default sampling temperature for BOTH agents. Logits are divided by this
+# before the softmax in next_token_distribution(), so it applies uniformly to
+# the BAM-coupled encoder steps and to the plain multinomial steps. The BAM
+# decoder is distribution-free (it only looks at token angles), so changing
+# this cannot desync encoder and decoder. Override at runtime with the
+# LM_TEMPERATURE environment variable (see lm_backend_shared.make_backend).
+DEFAULT_TEMPERATURE: float = 2.0
+
+
 @dataclass
 class HFLMBackend:
     model_name: str
     device: Optional[str] = None
     dtype: Optional[torch.dtype] = None   # auto: bf16 on CUDA, fp32 on CPU
+    temperature: float = DEFAULT_TEMPERATURE
 
     tokenizer: AutoTokenizer = field(init=False)
     model: AutoModelForCausalLM = field(init=False)
@@ -49,6 +59,11 @@ class HFLMBackend:
     def next_token_distribution(self, input_ids: torch.LongTensor) -> torch.Tensor:
         """Return p(x_t | x_<t) as a length-V tensor on `self.device`."""
         logits = self.model(input_ids.to(self.device)).logits[:, -1, :]
+        # getattr: SharedModelPool builds backends via object.__new__, which
+        # bypasses dataclass defaults.
+        T = float(getattr(self, "temperature", DEFAULT_TEMPERATURE))
+        if T != 1.0:
+            logits = logits / T
         return torch.softmax(logits, dim=-1).squeeze(0)
 
     # ---------- tokenizer convenience ----------
