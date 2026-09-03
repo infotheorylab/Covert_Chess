@@ -397,7 +397,7 @@ main{display:flex;flex-direction:row;flex:1 1 0;min-height:0;overflow:hidden}
           <span class="fl-arrow">→</span>
           <span class="fl-box">decodes move · Stockfish · embeds reply</span>
         </div>
-        <span class="fl-note">Agent B never sees the chess move explicitly</span>
+        <span class="fl-note">Agent B never sees the chess move or the prompt inputed for Agent A</span>
       </div>
       <div id="msgs"></div>
       <div id="input-wrap">
@@ -407,8 +407,8 @@ main{display:flex;flex-direction:row;flex:1 1 0;min-height:0;overflow:hidden}
           <!-- Fix 3: drag hint with info icon -->
           <span id="drag-hint">← Drag a piece to select your move</span>
           <span class="info-icon" tabindex="0" aria-label="How this works">ⓘ
-            <span class="info-tip">Whatever you type here is paraphrased by Agent A into a longer, natural-sounding message — that cover text secretly carries your chess move.
-Model: Llama-3.1-8B-Instruct (open source), which can occasionally make mistakes or produce repetitive text.</span>
+            <span class="info-tip">Whatever you type here is paraphrased by Agent A into a longer, natural-sounding message — that cover text secretly carries your chess move. The instruction prompt to Agent A can be changed on top right setting, the generation is distortion-free. 
+Weaker open-weight models can make mistakes or produce repetitive text.</span>
           </span>
         </div>
         <textarea id="prompt-input" rows="2"
