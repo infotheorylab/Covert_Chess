@@ -18,7 +18,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 # decoder is distribution-free (it only looks at token angles), so changing
 # this cannot desync encoder and decoder. Override at runtime with the
 # LM_TEMPERATURE environment variable (see lm_backend_shared.make_backend).
-DEFAULT_TEMPERATURE: float = 1.1
+DEFAULT_TEMPERATURE: float = 1.0
 
 
 @dataclass

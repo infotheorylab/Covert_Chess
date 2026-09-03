@@ -114,7 +114,7 @@ async def ws_endpoint(websocket: WebSocket, session_id: str) -> None:
                 eps_noise_comm=0.4,
                 eps_noise_conf=0.4,
                 gamma_1=0.5,
-                rho_ack=None,      # auto = 1 - 1/M per message (reference ra=1-1/L)
+                rho_ack=0.99,      # auto = 1 - 1/M per message (reference ra=1-1/L)
                 rho_nack=0.75,
                 p_field=4,
             ),
