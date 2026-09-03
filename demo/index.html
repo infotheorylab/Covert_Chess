@@ -732,7 +732,7 @@ function addDecodeBtn(bub){
 const diagOverlay=document.getElementById('diag-overlay');
 const diagBody=document.getElementById('diag-body');
 const diagTitle=document.getElementById('diag-title');
-function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function diagEsc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 function closeDiag(){diagOverlay.classList.remove('show');diagBody.innerHTML='';}
 document.getElementById('diag-close').addEventListener('click',closeDiag);
 diagOverlay.addEventListener('click',e=>{if(e.target===diagOverlay)closeDiag();});
@@ -763,9 +763,9 @@ function openDiag(d){
   diagTitle.textContent=`Diagnosis — ${who}`;
   let h='';
   h+=`<div class="diag-sum">
-    <div class="diag-kv"><b>hidden move</b>${esc(cand(d.m_true))} <span style="opacity:.7">(#${d.m_true+1} of ${d.M})</span></div>
+    <div class="diag-kv"><b>hidden move</b>${diagEsc(cand(d.m_true))} <span style="opacity:.7">(#${d.m_true+1} of ${d.M})</span></div>
     <div class="diag-kv"><b>tracker steps</b>${oc.t??T} tok · COMM ${oc.n_comm??'–'} · CONF ${oc.n_conf??'–'}</div>
-    <div class="diag-kv"><b>decoded</b>${esc(cand(decodedIdx))} <span class="${correct?'ok':'bad'}">${correct?'✓ match':'✗ mismatch'}</span></div>
+    <div class="diag-kv"><b>decoded</b>${diagEsc(cand(decodedIdx))} <span class="${correct?'ok':'bad'}">${correct?'✓ match':'✗ mismatch'}</span></div>
     <div class="diag-kv"><b>via</b>${via}${ackAt!=null?` @ token ${ackAt}`:''}${nacks?` · ${nacks} NACK`:''}</div>
     <div class="diag-kv"><b>thresholds</b>γ₁ ${g1} · ρ<sub>ack</sub> ${ra!=null?Number(ra).toFixed(3):'–'} · ρ<sub>nack</sub> ${d.cfg.rho_nack}</div>
   </div>`;
@@ -823,7 +823,7 @@ function openDiag(d){
   if(!order.some(([,i])=>i===d.m_true))order.push([last.pi[d.m_true],d.m_true]);
   h+=`<div class="diag-sec">Final belief (top ${Math.min(8,d.M)} of ${d.M} candidates)</div><div class="diag-bars">`;
   order.forEach(([p,i])=>{const t=i===d.m_true;
-    h+=`<div class="diag-bar"><span class="lab ${t?'true':''}">${esc(cand(i))}${t?' ★':''}</span>
+    h+=`<div class="diag-bar"><span class="lab ${t?'true':''}">${diagEsc(cand(i))}${t?' ★':''}</span>
         <div class="trk"><div class="fil ${t?'true':''}" style="width:${(p*100).toFixed(1)}%"></div></div>
         <span>${p.toFixed(3)}</span></div>`;});
   h+='</div>';
@@ -832,9 +832,9 @@ function openDiag(d){
   h+=`<div class="diag-sec">Per-token trace</div><div class="diag-tbl-wrap"><table class="diag-tbl">
     <tr><th>t</th><th>token</th><th>phase</th><th>top</th><th>P(top)</th><th>P(true)</th><th>ρ<sub>ack</sub></th><th>event</th><th>H bits</th></tr>`;
   S.forEach(st=>{
-    h+=`<tr class="${st.phase}"><td>${st.t}</td><td class="tok" title="${esc(st.tok)}">${esc(JSON.stringify(st.tok).slice(1,-1))}</td>
-      <td>${st.phase}${st.candidate!=null&&st.phase==='CONF'?' ('+esc(cand(st.candidate))+')':''}</td>
-      <td>${esc(cand(st.top_idx))}</td><td>${st.top_prob.toFixed(3)}</td>
+    h+=`<tr class="${st.phase}"><td>${st.t}</td><td class="tok" title="${diagEsc(st.tok)}">${diagEsc(JSON.stringify(st.tok).slice(1,-1))}</td>
+      <td>${st.phase}${st.candidate!=null&&st.phase==='CONF'?' ('+diagEsc(cand(st.candidate))+')':''}</td>
+      <td>${diagEsc(cand(st.top_idx))}</td><td>${st.top_prob.toFixed(3)}</td>
       <td>${st.p_true!=null?st.p_true.toFixed(3):'–'}</td>
       <td>${st.rho_ack!=null?st.rho_ack.toFixed(3):'–'}</td>
       <td class="ev ${st.event||''}">${st.event?{ack:'ACK',nack:'NACK',gamma1_cross:'γ₁ → CONF'}[st.event]:''}</td>

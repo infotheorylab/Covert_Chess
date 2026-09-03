@@ -342,6 +342,7 @@ class DemoSession:
         dec_tracker: Optional[BAMTracker],
         m_true:      Optional[int],
         prompt_ids:  torch.Tensor,
+        trace:       Optional[list] = None,
     ):
         queue: asyncio.Queue = asyncio.Queue()
         loop  = asyncio.get_event_loop()

@@ -48,7 +48,7 @@ chmod +x /usr/local/bin/stockfish
 
 ## 2. Clone repo and install deps
 git clone https://github.com/infotheorylab/Covert_Chess.git
-cd /Covert_Chess/backend
+cd /Covert_Chess
 pip install -r requirements.txt
 
 ## 3. Fix arcmark (needs pyproject.toml — pip install -e fails otherwise)
