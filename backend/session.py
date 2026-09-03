@@ -136,12 +136,14 @@ class DemoSession:
         prompt_ids1 = self.lm1.encode_tensor(prompt_1)
         text_1_buf: list[str] = []
         ent_1_buf:  list[float] = []   # per-token LM entropy (bits)
+        trace_1:    list[dict]  = []   # receiver belief after each token
+        cands_1 = [self.chess.board.san(mv) for mv in self.chess.legal_moves()]
 
         async for tok_id, tok_str, belief, h_bits in self._stream(
             lm=self.lm1,
             enc_tracker=self.encoder_1.tracker,
             dec_tracker=self.decoder_2.tracker,
-            m_true=m, prompt_ids=prompt_ids1,
+            m_true=m, prompt_ids=prompt_ids1, trace=trace_1,
         ):
             text_1_buf.append(tok_str)
             ent_1_buf.append(h_bits)
@@ -153,7 +155,9 @@ class DemoSession:
         text_1 = _strip_wrapping_quotes("".join(text_1_buf).strip())
         await send({"type": "turn_done", "agent": "llm1", "text": text_1,
                     "n_tokens": len(text_1_buf),
-                    "avg_entropy_bits": _mean_or_none(ent_1_buf)})
+                    "avg_entropy_bits": _mean_or_none(ent_1_buf),
+                    "diag": _diag_summary(self.decoder_2.tracker, "llm1", m,
+                                          cands_1, trace_1, self.bam_cfg)})
 
         # 4. Recover decoded move
         # Adaptive stopping rules (paper §adaptive-stopping):
@@ -220,12 +224,15 @@ class DemoSession:
         prompt_ids2 = self.lm2.encode_tensor(prompt_2)
         text_2_buf: list[str] = []
         ent_2_buf:  list[float] = []   # per-token LM entropy (bits)
+        trace_2:    list[dict]  = []   # mirrored receiver belief after each token
+        cands_2 = [self.chess.board.san(mv) for mv in self.chess.legal_moves()]
+        enc2_trk = self.encoder_2.tracker   # keep a handle: _force_reset drops it on error
         try:
             async for _, tok_str, _, h_bits in self._stream(
                 lm=self.lm2,
-                enc_tracker=self.encoder_2.tracker,
+                enc_tracker=enc2_trk,
                 dec_tracker=None,
-                m_true=m_star, prompt_ids=prompt_ids2,
+                m_true=m_star, prompt_ids=prompt_ids2, trace=trace_2,
             ):
                 text_2_buf.append(tok_str)
                 ent_2_buf.append(h_bits)
@@ -242,7 +249,9 @@ class DemoSession:
 
         await send({"type": "turn_done", "agent": "llm2", "text": text_2,
                     "n_tokens": len(text_2_buf),
-                    "avg_entropy_bits": _mean_or_none(ent_2_buf)})
+                    "avg_entropy_bits": _mean_or_none(ent_2_buf),
+                    "diag": _diag_summary(enc2_trk, "llm2", m_star,
+                                          cands_2, trace_2, self.bam_cfg)})
 
         # 9. Apply engine move; send board update (client applies on Decode click)
         engine_san = self.chess.push(engine_move)
@@ -341,7 +350,7 @@ class DemoSession:
             try:
                 for item in _generate_tokens(
                     lm, enc_tracker, dec_tracker,
-                    m_true, prompt_ids, _MAX_NEW_TOKENS,
+                    m_true, prompt_ids, _MAX_NEW_TOKENS, trace=trace,
                 ):
                     asyncio.run_coroutine_threadsafe(queue.put(item), loop).result()
             except Exception as exc:
@@ -406,6 +415,69 @@ def _mean_or_none(xs: list[float]) -> Optional[float]:
     return round(float(sum(xs) / len(xs)), 3) if xs else None
 
 
+def _diag_step(
+    trk: BAMTracker, phase_before: str, tok_id: int, is_stop: bool,
+    lm: HFLMBackend, m_true: Optional[int], h_bits: float,
+) -> dict:
+    """Snapshot of the receiver-side belief AFTER consuming one token."""
+    eff = trk.effective_pi()
+    if trk.done:
+        event = "ack"
+    elif phase_before == "COMM" and trk.phase == "CONF":
+        event = "gamma1_cross"
+    elif phase_before == "CONF" and trk.phase == "COMM":
+        event = "nack"
+    else:
+        event = None
+    return {
+        "t":         int(trk.t),
+        "tok":       "<eos>" if is_stop else lm.decode([tok_id]),
+        "phase":     phase_before,                 # phase the token was consumed in
+        "pi":        [round(float(x), 4) for x in eff],
+        "top_idx":   int(eff.argmax()),
+        "top_prob":  round(float(eff.max()), 4),
+        "p_true":    (round(float(eff[m_true]), 4) if m_true is not None else None),
+        "candidate": trk.candidate,
+        "rho_ack":   (round(float(trk.rho[0]), 4) if trk.rho is not None else None),
+        "event":     event,
+        "h_bits":    round(float(h_bits), 3),
+    }
+
+
+def _diag_summary(
+    trk: Optional[BAMTracker], agent: str, m_true: int, candidates: list[str],
+    steps: list[dict], cfg: BAMConfig,
+) -> dict:
+    """Round-level diagnosis payload attached to turn_done."""
+    out: dict = {
+        "agent":      agent,
+        "M":          len(candidates),
+        "m_true":     int(m_true),
+        "candidates": candidates,        # SAN of every legal move, index-aligned
+        "steps":      steps,
+        "cfg": {
+            "gamma_1":  float(cfg.gamma_1),
+            "rho_ack":  (float(getattr(trk, "_rho_ack", 0.0)) if trk is not None
+                         else (cfg.rho_ack if cfg.rho_ack is not None else None)),
+            "rho_nack": float(cfg.rho_nack),
+            "p_field":  int(cfg.p_field),
+        },
+    }
+    if trk is not None:
+        eff = trk.effective_pi()
+        out["outcome"] = {
+            "done":     bool(trk.done),
+            "decoded":  (int(trk.decoded) if trk.decoded is not None else None),
+            "argmax":   int(eff.argmax()),
+            "n_comm":   int(trk.n_comm),
+            "n_conf":   int(trk.n_conf),
+            "t":        int(trk.t),
+        }
+    else:
+        out["outcome"] = None
+    return out
+
+
 def _force_reset(enc: CovertEncoder) -> None:
     enc.tracker      = None
     enc.true_message = None
@@ -418,11 +490,19 @@ def _generate_tokens(
     m_true:      Optional[int],
     prompt_ids:  torch.Tensor,
     max_new_tokens: int,
+    trace:       Optional[list] = None,
 ):
     ids      = prompt_ids
     stop_ids: set[int] = set()
     if lm.eos_token_id is not None:
         stop_ids.add(lm.eos_token_id)
+
+    # Diagnosis: which tracker holds the receiver-side belief for this turn.
+    # Agent A's turn is decoded live by decoder_2; Agent B's turn is not
+    # decoded server-side, but the encoder's tracker runs the identical
+    # belief update on the same tokens, so it mirrors what the receiver
+    # would compute.
+    diag_trk = dec_tracker if dec_tracker is not None else enc_tracker
 
     for _ in range(max_new_tokens):
         with torch.no_grad():
@@ -433,6 +513,10 @@ def _generate_tokens(
             h_bits = float(torch.special.entr(p.to(torch.float32)).sum().item()
                            / _LN2)
         p_np = p.detach().to(torch.float64).cpu().numpy()
+
+        # Snapshot tracker state BEFORE this token is consumed (for the trace).
+        active_before = diag_trk is not None and not diag_trk.done
+        phase_before  = diag_trk.phase if active_before else None
 
         if enc_tracker is not None and not enc_tracker.done:
             tok_id = enc_tracker.step_encoder(p_np, m_true)
@@ -449,6 +533,15 @@ def _generate_tokens(
                 "phase":    dec_tracker.phase,
                 "done":     dec_tracker.done,
             }
+
+        # Diagnosis trace: one entry per token consumed by the tracker
+        # (including a stop token, which the tracker sees but the client
+        # never displays -- it can be the step that fires the ACK).
+        if trace is not None and active_before:
+            trace.append(_diag_step(
+                diag_trk, phase_before, tok_id, tok_id in stop_ids,
+                lm, m_true, h_bits,
+            ))
 
         # Stop tokens (EOS / <|eot_id|>) must be processed by the decoder
         # above (already done) but must NOT be streamed to the client as

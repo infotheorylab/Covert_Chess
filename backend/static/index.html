@@ -25,6 +25,64 @@ html,body{height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
           font-family:var(--sans);font-size:15px;-webkit-font-smoothing:antialiased}
 #app{display:flex;flex-direction:column;height:100vh;height:100dvh;overflow:hidden}
 
+/* diagnosis modal */
+#diag-overlay{position:fixed;inset:0;background:rgba(23,40,77,.38);z-index:300;
+              display:none;align-items:center;justify-content:center;padding:20px}
+#diag-overlay.show{display:flex}
+#diag-panel{width:min(760px,96vw);max-height:86vh;display:flex;flex-direction:column;
+            background:var(--surf);border:1px solid var(--line);border-radius:14px;
+            box-shadow:0 12px 40px rgba(23,40,77,.28);overflow:hidden}
+#diag-hdr{display:flex;align-items:center;justify-content:space-between;
+          padding:13px 16px 10px;border-bottom:1px solid var(--line)}
+#diag-title{font-family:var(--disp);font-size:15px;font-weight:600;color:var(--ink)}
+#diag-close{background:none;border:none;font-size:20px;cursor:pointer;
+            color:var(--muted);line-height:1;padding:0 2px}
+#diag-close:hover{color:var(--ink)}
+#diag-body{overflow-y:auto;padding:12px 16px 16px}
+.diag-sum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+          gap:8px 14px;margin-bottom:12px}
+.diag-kv{font-family:var(--mono);font-size:11.5px;color:var(--ink2);line-height:1.5}
+.diag-kv b{display:block;font-size:10px;font-weight:700;letter-spacing:.06em;
+           color:var(--muted);text-transform:uppercase}
+.diag-kv .ok{color:var(--green);font-weight:700}
+.diag-kv .bad{color:var(--red);font-weight:700}
+.diag-sec{font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.06em;
+          color:var(--muted);text-transform:uppercase;margin:12px 0 6px}
+.diag-chart{width:100%;height:auto;display:block;background:var(--bg);
+            border:1px solid var(--line);border-radius:10px}
+.diag-legend{display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:6px;
+             font-family:var(--mono);font-size:10.5px;color:var(--ink2)}
+.diag-legend i{display:inline-block;width:14px;height:0;border-top:2px solid;
+               vertical-align:middle;margin-right:5px}
+.diag-legend i.dash{border-top-style:dashed}
+.diag-bars{display:flex;flex-direction:column;gap:3px}
+.diag-bar{display:grid;grid-template-columns:64px 1fr 52px;align-items:center;gap:8px;
+          font-family:var(--mono);font-size:11.5px;color:var(--ink2)}
+.diag-bar .lab.true{color:var(--blue);font-weight:700}
+.diag-bar .trk{height:9px;background:var(--surf2);border:1px solid var(--line);
+               border-radius:4px;overflow:hidden}
+.diag-bar .fil{height:100%;background:var(--ink2);opacity:.55}
+.diag-bar .fil.true{background:var(--blue);opacity:1}
+.diag-tbl-wrap{max-height:260px;overflow:auto;border:1px solid var(--line);border-radius:10px}
+.diag-tbl{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11px;
+          color:var(--ink2)}
+.diag-tbl th{position:sticky;top:0;background:var(--surf2);text-align:left;
+             font-weight:700;padding:5px 8px;border-bottom:1px solid var(--line);
+             letter-spacing:.04em;font-size:10px;color:var(--muted)}
+.diag-tbl td{padding:3px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.diag-tbl td.tok{color:var(--ink);max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.diag-tbl tr.CONF td{background:var(--green-s)}
+.diag-tbl td.ev{font-weight:700}
+.diag-tbl td.ev.ack{color:var(--green)}
+.diag-tbl td.ev.nack{color:var(--red)}
+.diag-tbl td.ev.gamma1_cross{color:var(--amber)}
+.diag-empty{font-family:var(--mono);font-size:12px;color:var(--muted);padding:10px 0}
+.blabel .diag-btn{font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;
+                  color:var(--blue);background:none;border:1px solid var(--line);
+                  border-radius:5px;padding:1px 7px;cursor:pointer;margin-left:6px;
+                  vertical-align:baseline;transition:all .15s}
+.blabel .diag-btn:hover{border-color:var(--blue);background:var(--blue-s)}
+
 /* settings panel */
 #settings-panel{position:fixed;top:66px;right:16px;width:380px;
                 background:var(--surf);border:1px solid var(--line);
@@ -261,6 +319,18 @@ main{display:flex;flex-direction:row;flex:1 1 0;min-height:0;overflow:hidden}
     <button class="hdr-btn danger" id="reset-btn">New game</button>
     <button class="hdr-btn" id="settings-btn" title="Settings">⚙</button>
   </header>
+
+
+  <!-- diagnosis modal — belief propagation of the covert decoder for one round -->
+  <div id="diag-overlay">
+    <div id="diag-panel" role="dialog" aria-modal="true" aria-labelledby="diag-title">
+      <div id="diag-hdr">
+        <span id="diag-title">Diagnosis</span>
+        <button id="diag-close" title="Close">×</button>
+      </div>
+      <div id="diag-body"></div>
+    </div>
+  </div>
 
   <!-- settings panel — floats below header on the right -->
   <div id="settings-panel">
@@ -512,10 +582,10 @@ function handleMsg(d){
       break;
     case 'turn_done':
       if(d.agent==='llm1'&&curABub){rmCur(curABub);curABub.textContent=d.text;
-        setTokenCount(curABub,d.n_tokens,d.avg_entropy_bits);scroll();}
+        setTokenCount(curABub,d.n_tokens,d.avg_entropy_bits);addDiagBtn(curABub,d.diag);scroll();}
       else if(d.agent==='llm2'&&curBBub){
         rmCur(curBBub);curBBub.textContent=d.text;
-        setTokenCount(curBBub,d.n_tokens,d.avg_entropy_bits);
+        setTokenCount(curBBub,d.n_tokens,d.avg_entropy_bits);addDiagBtn(curBBub,d.diag);
         // Snapshot engine data inside addDecodeBtn (still set here, before
         // board_update clears it), and resolve SAN lazily at click time.
         addDecodeBtn(curBBub);
@@ -656,6 +726,121 @@ function addDecodeBtn(bub){
     scroll();
     status('Your turn');
   });
+}
+
+// ── diagnosis modal (belief propagation) ─────────────────────────────
+const diagOverlay=document.getElementById('diag-overlay');
+const diagBody=document.getElementById('diag-body');
+const diagTitle=document.getElementById('diag-title');
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function closeDiag(){diagOverlay.classList.remove('show');diagBody.innerHTML='';}
+document.getElementById('diag-close').addEventListener('click',closeDiag);
+diagOverlay.addEventListener('click',e=>{if(e.target===diagOverlay)closeDiag();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&diagOverlay.classList.contains('show'))closeDiag();});
+
+function addDiagBtn(bubble,diag){
+  if(!diag)return;
+  const label=bubble.parentElement&&bubble.parentElement.querySelector('.blabel');
+  if(!label)return;
+  if(label.querySelector('.diag-btn'))return;
+  const b=document.createElement('button');b.className='diag-btn';b.textContent='diagnosis';
+  b.title='Show how the receiver\'s belief over the legal moves evolved token by token';
+  b.addEventListener('click',()=>openDiag(diag));
+  label.appendChild(b);
+}
+
+function openDiag(d){
+  const who=d.agent==='llm1'?'Agent A → Agent B':'Agent B → you';
+  const cand=i=>(i==null||d.candidates[i]==null)?'?':d.candidates[i];
+  const S=d.steps||[], T=S.length, oc=d.outcome||{};
+  const decodedIdx=oc.decoded!=null?oc.decoded:oc.argmax;
+  const via=oc.decoded!=null?'ACK':(oc.done?'done':'forced argmax');
+  const correct=decodedIdx===d.m_true;
+  const ackAt=(S.find(s=>s.event==='ack')||{}).t;
+  const nacks=S.filter(s=>s.event==='nack').length;
+  const g1=d.cfg.gamma_1, ra=d.cfg.rho_ack;
+
+  diagTitle.textContent=`Diagnosis — ${who}`;
+  let h='';
+  h+=`<div class="diag-sum">
+    <div class="diag-kv"><b>hidden move</b>${esc(cand(d.m_true))} <span style="opacity:.7">(#${d.m_true+1} of ${d.M})</span></div>
+    <div class="diag-kv"><b>tracker steps</b>${oc.t??T} tok · COMM ${oc.n_comm??'–'} · CONF ${oc.n_conf??'–'}</div>
+    <div class="diag-kv"><b>decoded</b>${esc(cand(decodedIdx))} <span class="${correct?'ok':'bad'}">${correct?'✓ match':'✗ mismatch'}</span></div>
+    <div class="diag-kv"><b>via</b>${via}${ackAt!=null?` @ token ${ackAt}`:''}${nacks?` · ${nacks} NACK`:''}</div>
+    <div class="diag-kv"><b>thresholds</b>γ₁ ${g1} · ρ<sub>ack</sub> ${ra!=null?Number(ra).toFixed(3):'–'} · ρ<sub>nack</sub> ${d.cfg.rho_nack}</div>
+  </div>`;
+
+  if(T===0){
+    h+=`<div class="diag-empty">No covert steps were recorded for this round (the tracker was not active).</div>`;
+    diagBody.innerHTML=h;diagOverlay.classList.add('show');return;
+  }
+
+  // ---- chart --------------------------------------------------------
+  const W=680,H=210,pl=38,pr=12,pt=12,pb=26;
+  const x=i=>pl+(T===1?0:i*(W-pl-pr)/(T-1));
+  const y=p=>pt+(1-Math.max(0,Math.min(1,p)))*(H-pt-pb);
+  const path=(arr,key)=>{let s='',pen=false;arr.forEach((st,i)=>{const v=st[key];
+    if(v==null){pen=false;return;}s+=(pen?'L':'M')+x(i).toFixed(1)+' '+y(v).toFixed(1)+' ';pen=true;});return s;};
+  let svg=`<svg class="diag-chart" viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">`;
+  // CONF shading
+  let run=null;
+  S.forEach((st,i)=>{const c=st.phase==='CONF';
+    if(c&&run==null)run=i;
+    if((!c||i===T-1)&&run!=null){const e=c?i:i-1;
+      svg+=`<rect x="${x(run)-(T>1?(W-pl-pr)/(T-1)/2:6)}" y="${pt}" width="${Math.max(2,(x(e)-x(run))+(T>1?(W-pl-pr)/(T-1):12))}" height="${H-pt-pb}" fill="var(--green-s)"/>`;run=null;}});
+  // grid + axes
+  [0,.25,.5,.75,1].forEach(v=>{svg+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="1"/>
+    <text x="${pl-6}" y="${y(v)+3.5}" text-anchor="end" font-size="9" font-family="var(--mono)" fill="var(--muted)">${v}</text>`;});
+  const xt=Math.max(1,Math.round(T/8));
+  S.forEach((st,i)=>{if(i%xt===0||i===T-1)svg+=`<text x="${x(i)}" y="${H-pb+14}" text-anchor="middle" font-size="9" font-family="var(--mono)" fill="var(--muted)">${st.t}</text>`;});
+  svg+=`<text x="${W-pr}" y="${H-3}" text-anchor="end" font-size="9" font-family="var(--mono)" fill="var(--muted)">token index</text>`;
+  // thresholds
+  svg+=`<line x1="${pl}" x2="${W-pr}" y1="${y(g1)}" y2="${y(g1)}" stroke="var(--amber)" stroke-width="1" stroke-dasharray="4 3"/>`;
+  if(ra!=null)svg+=`<line x1="${pl}" x2="${W-pr}" y1="${y(ra)}" y2="${y(ra)}" stroke="var(--green)" stroke-width="1" stroke-dasharray="4 3"/>`;
+  // curves
+  svg+=`<path d="${path(S,'top_prob')}" fill="none" stroke="var(--ink2)" stroke-width="1.4" stroke-dasharray="3 3"/>`;
+  svg+=`<path d="${path(S,'p_true')}" fill="none" stroke="var(--blue)" stroke-width="2"/>`;
+  svg+=`<path d="${path(S,'rho_ack')}" fill="none" stroke="var(--green)" stroke-width="2"/>`;
+  // event markers
+  S.forEach((st,i)=>{if(!st.event)return;
+    const col=st.event==='ack'?'var(--green)':st.event==='nack'?'var(--red)':'var(--amber)';
+    const yy=st.event==='gamma1_cross'?y(st.top_prob):st.event==='ack'?y(st.rho_ack??1):y(st.p_true??0);
+    svg+=`<circle cx="${x(i)}" cy="${yy}" r="4" fill="${col}" stroke="var(--surf)" stroke-width="1.5"><title>${st.event} @ t=${st.t}</title></circle>`;});
+  svg+='</svg>';
+  h+=`<div class="diag-sec">Belief propagation</div>${svg}
+  <div class="diag-legend">
+    <span><i style="border-color:var(--blue)"></i>P(true move)</span>
+    <span><i class="dash" style="border-color:var(--ink2)"></i>P(top candidate)</span>
+    <span><i style="border-color:var(--green)"></i>ρ<sub>ack</sub> (CONF)</span>
+    <span><i class="dash" style="border-color:var(--amber)"></i>γ₁ threshold</span>
+    <span><i class="dash" style="border-color:var(--green)"></i>ρ<sub>ack</sub> threshold</span>
+    <span><i style="border-color:var(--green-s);border-top-width:8px"></i>CONF phase</span>
+  </div>`;
+
+  // ---- final belief bars -------------------------------------------
+  const last=S[T-1];
+  const order=last.pi.map((p,i)=>[p,i]).sort((a,b)=>b[0]-a[0]).slice(0,8);
+  if(!order.some(([,i])=>i===d.m_true))order.push([last.pi[d.m_true],d.m_true]);
+  h+=`<div class="diag-sec">Final belief (top ${Math.min(8,d.M)} of ${d.M} candidates)</div><div class="diag-bars">`;
+  order.forEach(([p,i])=>{const t=i===d.m_true;
+    h+=`<div class="diag-bar"><span class="lab ${t?'true':''}">${esc(cand(i))}${t?' ★':''}</span>
+        <div class="trk"><div class="fil ${t?'true':''}" style="width:${(p*100).toFixed(1)}%"></div></div>
+        <span>${p.toFixed(3)}</span></div>`;});
+  h+='</div>';
+
+  // ---- per-token table ---------------------------------------------
+  h+=`<div class="diag-sec">Per-token trace</div><div class="diag-tbl-wrap"><table class="diag-tbl">
+    <tr><th>t</th><th>token</th><th>phase</th><th>top</th><th>P(top)</th><th>P(true)</th><th>ρ<sub>ack</sub></th><th>event</th><th>H bits</th></tr>`;
+  S.forEach(st=>{
+    h+=`<tr class="${st.phase}"><td>${st.t}</td><td class="tok" title="${esc(st.tok)}">${esc(JSON.stringify(st.tok).slice(1,-1))}</td>
+      <td>${st.phase}${st.candidate!=null&&st.phase==='CONF'?' ('+esc(cand(st.candidate))+')':''}</td>
+      <td>${esc(cand(st.top_idx))}</td><td>${st.top_prob.toFixed(3)}</td>
+      <td>${st.p_true!=null?st.p_true.toFixed(3):'–'}</td>
+      <td>${st.rho_ack!=null?st.rho_ack.toFixed(3):'–'}</td>
+      <td class="ev ${st.event||''}">${st.event?{ack:'ACK',nack:'NACK',gamma1_cross:'γ₁ → CONF'}[st.event]:''}</td>
+      <td>${st.h_bits!=null?st.h_bits.toFixed(2):'–'}</td></tr>`;});
+  h+='</table></div>';
+  diagBody.innerHTML=h;diagOverlay.classList.add('show');
 }
 
 // ── settings panel ────────────────────────────────────────────────────

@@ -18,12 +18,13 @@ be rebuilt after a switch. DemoSession.set_model handles that.
 from __future__ import annotations
 
 import gc
+import os
 from typing import Optional
 
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-from bam.lm_backend import HFLMBackend          # bam package
+from bam.lm_backend import HFLMBackend, DEFAULT_TEMPERATURE   # bam package
 
 
 class _LoadedModel:
@@ -111,6 +112,8 @@ class SharedModelPool:
         backend.dtype      = self.dtype
         backend.tokenizer  = entry.tokenizer
         backend.model      = entry.model
+        # Sampling temperature: LM_TEMPERATURE env var, else the repo default.
+        backend.temperature = float(os.environ.get("LM_TEMPERATURE", DEFAULT_TEMPERATURE))
         return backend
 
     # ---- diagnostics ----------------------------------------------------
