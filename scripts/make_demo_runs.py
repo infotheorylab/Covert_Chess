@@ -402,14 +402,10 @@ def build_conversation() -> dict:
         "id": "conversation",
         "kind": "conversation",
         "eyebrow": "example 01 · conversation",
-        "title": "Four ordinary turns, one complete dispatch",
-        "blurb": (
-            "Two assistants arrange a weekend walk. Both transcripts come from the "
-            "same model and the same prompt; the right-hand one additionally carries "
-            "a four-symbol order drawn from a 256-entry codebook the two parties "
-            "share. Nothing in the wording is chosen by the payload — BAM only "
-            "steers which of the equally likely continuations gets sampled, so the "
-            "text distribution is untouched."
+        "prompt": (
+            "You are a friendly AI having a casual conversation. Reply naturally to "
+            "the message you receive, continuing the topic in a warm, conversational "
+            "way. Keep it 2–3 sentences."
         ),
         "model": "Llama-3.1-8B-Instruct",
         "codebook": book,
@@ -467,16 +463,8 @@ def build_image() -> dict:
         "id": "image",
         "kind": "image",
         "eyebrow": "example 02 · image",
-        "title": "Two samples of one prompt, one of them speaking",
-        "blurb": (
-            "The same diffusion prompt, sampled twice. The right-hand sample spends "
-            "its sampling randomness on a 24-bit tag instead of on nothing. Because "
-            "BAM couples to the sampler rather than editing the output, the stego "
-            "sample is a legitimate draw from the model's own distribution — the "
-            "residual below is ordinary sampling noise, not an embedding artefact."
-        ),
-        "model": "SD-XL · 40-step DDIM",
         "prompt": "a lighthouse on a rocky shore at dusk, long exposure",
+        "model": "SD-XL · 40-step DDIM",
         "codebook": book,
         "codebookNote": "one byte per round · 8 bits",
         "payload": {
@@ -578,14 +566,10 @@ def build_code() -> dict:
         "id": "code",
         "kind": "code",
         "eyebrow": "example 03 · code",
-        "title": "A code review that ships three hidden bytes",
-        "blurb": (
-            "The same request — “load a config file and apply environment "
-            "overrides” — answered twice. Both completions pass the same tests; "
-            "the right-hand one also carries the three bytes <code>B A M</code> in the "
-            "places where the model was genuinely undecided between "
-            "<code>fh</code> and <code>handle</code>, <code>raw</code> and "
-            "<code>parsed</code>, a list comprehension and a sorted one."
+        "prompt": (
+            "Write load_config(path, env=None): read a YAML config file, layer "
+            "environment-variable overrides on top, and raise ConfigError if a "
+            "required key is missing."
         ),
         "model": "Qwen2.5-Coder-7B",
         "codebook": book,

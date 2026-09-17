@@ -50,23 +50,28 @@
 <section class="ex" id="image" data-demo="image"></section>
 <section class="ex" id="code" data-demo="code"></section>
 
-<section class="ex" id="reading">
+<section class="ex" id="about">
   <div class="wrap">
-    <p class="eyebrow">how to read the diagnosis</p>
-    <h2>What the receiver actually does</h2>
+    <p class="eyebrow">what is bam</p>
+    <h2>Choosing, not altering</h2>
     <p class="blurb">
-      The receiver never sees the prompt, the weights or the cover distribution — only the
-      emitted tokens. Each token multiplies its posterior over the candidate set
-      (<b>communication phase</b>). When the posterior crosses <b>γ₁ = 0.5</b> the decoder
-      stops accumulating, fixes a candidate and asks the sender to confirm it
-      (<b>confirmation phase</b>, shaded green in the chart). An <b>ACK</b> closes the round;
-      a <b>NACK</b> knocks the candidate down and returns to the communication phase — which
-      is why the blue curve sometimes collapses and climbs again. That feedback loop is what
-      buys the order-of-magnitude error reduction over fixed-budget watermarking.
+      Every token a model samples is a choice among many continuations it considers roughly
+      equally good. <b>BAM</b> — Burnashev Adaptive Posterior Matching — treats that choice as
+      a communication channel. The sender steers <em>which</em> of the likely continuations gets
+      sampled; the receiver, reading only the finished output, refines a belief about what was
+      meant. Nothing is edited after the fact, so what ships is still an honest sample from the
+      model's own distribution.
     </p>
-    <div class="btn-row" style="margin-top:22px">
-      <a class="rchip" href="./index.html#results" style="padding:9px 16px">← Back to the results</a>
-      <a class="rchip" href="https://v39ttdcqg3i0yh-8000.proxy.runpod.net/" style="padding:9px 16px">Play it live ▸</a>
+    <p class="blurb">
+      The two sides both watch the same output as it appears, so the sender always knows what
+      the receiver currently believes and can spend the next token on whatever is still in
+      doubt. That feedback is what makes the scheme reliable on short, ordinary turns — and it
+      needs no shared weights, no shared prompt and no shared cover statistics.
+    </p>
+    <div class="cta-row">
+      <a class="btn primary" href="https://arxiv.org/abs/XXXX.XXXXX">Read the paper on arXiv →</a>
+      <a class="btn" href="./index.html#results">Results</a>
+      <a class="btn" href="https://v39ttdcqg3i0yh-8000.proxy.runpod.net/">Play it live</a>
     </div>
   </div>
 </section>

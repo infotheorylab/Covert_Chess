@@ -73,8 +73,9 @@ describe a real run:
 | field | meaning |
 | --- | --- |
 | `kind` | `conversation` \| `image` \| `code` — picks the renderer |
-| `eyebrow`, `title`, `blurb` | section copy (`blurb` may contain HTML) |
-| `model`, `prompt` | shown in the pane headers |
+| `eyebrow` | the section label, which doubles as its heading |
+| `prompt` | the only copy an example gets — shown above the panes |
+| `model` | shown in the pane headers |
 | `payload` | `{label, parts[], bits}` — the strip above the panes |
 | `cover` / `stego` | the two panes; shape depends on `kind` (see below) |
 | `rounds[]` | `{label, symbol, note, diag}` — one clickable decode each |

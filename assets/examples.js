@@ -372,7 +372,6 @@
     var res = shot(demo.residual.label);
     extra.appendChild(res.wrap);
     extra.appendChild(el('div', null,
-      '<div class="prompt-line">prompt · “' + esc(demo.prompt) + '”</div>' +
       '<p>The difference between the two panes is the sampling noise BAM steers — ' +
       'high-frequency, unstructured, and the same order as the difference between ' +
       'any two draws of the same prompt. There is no embedding residual to find ' +
@@ -410,9 +409,11 @@
       return;
     }
     var wrap = el('div', 'wrap');
-    wrap.appendChild(el('p', 'eyebrow', esc(demo.eyebrow)));
-    wrap.appendChild(el('h2', null, esc(demo.title)));
-    wrap.appendChild(el('p', 'blurb', demo.blurb));   // blurb may carry <code>
+    // the eyebrow doubles as the section heading — the prompt is the copy
+    wrap.appendChild(el('h2', 'eyebrow', esc(demo.eyebrow)));
+    wrap.appendChild(el('div', 'prompt-box',
+      '<span class="plab">prompt</span><span class="ptext">“' +
+      esc(demo.prompt) + '”</span>'));
     wrap.appendChild(payloadStrip(demo));
     RENDERERS[demo.kind](demo, wrap);
     wrap.appendChild(roundChips(demo));
