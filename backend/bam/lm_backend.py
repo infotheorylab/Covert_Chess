@@ -18,7 +18,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 # decoder is distribution-free (it only looks at token angles), so changing
 # this cannot desync encoder and decoder. Override at runtime with the
 # LM_TEMPERATURE environment variable (see lm_backend_shared.make_backend).
-DEFAULT_TEMPERATURE: float = 1.01
+DEFAULT_TEMPERATURE: float = 1.0
 
 
 @dataclass
@@ -53,6 +53,16 @@ class HFLMBackend:
     @property
     def eos_token_id(self) -> Optional[int]:
         return self.tokenizer.eos_token_id
+
+    @property
+    def stop_token_ids(self) -> set[int]:
+        """All terminator ids: tokenizer EOS plus every id listed in the
+        model's generation_config (phi-4 and Qwen3 list two)."""
+        ids = {self.tokenizer.eos_token_id}
+        gc_eos = getattr(self.model.generation_config, "eos_token_id", None)
+        if gc_eos is not None:
+            ids.update(gc_eos if isinstance(gc_eos, (list, tuple)) else [gc_eos])
+        return {i for i in ids if i is not None}
 
     # ---------- core LM ops ----------
     @torch.no_grad()

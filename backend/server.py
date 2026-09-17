@@ -29,8 +29,9 @@ MAX_SESSIONS   = int(os.getenv("MAX_SESSIONS", "20"))  # raised for group pod
 # the frontend shows. Model selection is GLOBAL (one shared GPU, one resident
 # model): switching rebuilds every active session onto the new model.
 ALLOWED_MODELS = {
-    "meta-llama/Llama-3.1-8B-Instruct": "llama8b",
-    "microsoft/phi-4":                  "phi4-14b",
+    "meta-llama/Llama-3.1-8B-Instruct":     "llama8b",
+    "microsoft/phi-4":                      "phi4-14b",
+    "Qwen/Qwen3-30B-A3B-Instruct-2507":     "qwen3-30b-a3b",
 }
 active_model: str = MODEL_NAME
 

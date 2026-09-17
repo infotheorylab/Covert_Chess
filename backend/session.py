@@ -494,9 +494,7 @@ def _generate_tokens(
     trace:       Optional[list] = None,
 ):
     ids      = prompt_ids
-    stop_ids: set[int] = set()
-    if lm.eos_token_id is not None:
-        stop_ids.add(lm.eos_token_id)
+    stop_ids: set[int] = set(lm.stop_token_ids)
 
     # Diagnosis: which tracker holds the receiver-side belief for this turn.
     # Agent A's turn is decoded live by decoder_2; Agent B's turn is not
