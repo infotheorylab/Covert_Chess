@@ -76,6 +76,14 @@
     return strip;
   }
 
+  function promptLine(demo) {
+    return '<div class="prompt-line">prompt · “' + esc(demo.prompt) + '”</div>';
+  }
+
+  function promptBox(demo) {
+    return el('div', 'prompt-after', promptLine(demo));
+  }
+
   function roundChips(demo) {
     var row = el('div', 'rounds');
     row.appendChild(el('span', 'rlab', 'open a decode'));
@@ -372,6 +380,7 @@
     var res = shot(demo.residual.label);
     extra.appendChild(res.wrap);
     extra.appendChild(el('div', null,
+      promptLine(demo) +
       '<p>The difference between the two panes is the sampling noise BAM steers — ' +
       'high-frequency, unstructured, and the same order as the difference between ' +
       'any two draws of the same prompt. There is no embedding residual to find ' +
@@ -409,13 +418,13 @@
       return;
     }
     var wrap = el('div', 'wrap');
-    // the eyebrow doubles as the section heading — the prompt is the copy
+    // the eyebrow doubles as the section heading
     wrap.appendChild(el('h2', 'eyebrow', esc(demo.eyebrow)));
-    wrap.appendChild(el('div', 'prompt-box',
-      '<span class="plab">prompt</span><span class="ptext">“' +
-      esc(demo.prompt) + '”</span>'));
     wrap.appendChild(payloadStrip(demo));
     RENDERERS[demo.kind](demo, wrap);
+    // the prompt sits under the generation it produced; the image example
+    // carries its own inside the residual box
+    if (demo.kind !== 'image') wrap.appendChild(promptBox(demo));
     wrap.appendChild(roundChips(demo));
     wrap.appendChild(statsRow(demo));
     section.appendChild(wrap);
