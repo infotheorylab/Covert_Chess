@@ -217,6 +217,8 @@ code { font-family: var(--font-mono); font-size: .92em; background: var(--surfac
                color: var(--accent); line-height: 1.1; }
 .stats .s .k { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .06em;
                text-transform: uppercase; color: var(--ink-2); margin-top: 6px; }
+.run-note { font-family: var(--font-mono); font-size: 11px; color: var(--muted);
+            margin: 10px 2px 0; line-height: 1.6; }
 
 /* ---------- diagnosis modal ---------- */
 #diag-overlay { position: fixed; inset: 0; background: rgba(23,40,77,.40); z-index: 300;

@@ -1,5 +1,11 @@
 #!/usr/bin/env python3
-"""Generate the placeholder BAM runs consumed by examples.html.
+"""Generate *placeholder* BAM runs for examples.html.
+
+SUPERSEDED. data/runs/ now holds real recordings (Llama-3.1-8B-Instruct,
+Janus-Pro-7B, Qwen3-Coder-30B-A3B-Instruct), produced by the make_demo_*.py
+scripts named in each file's header. Running this script would overwrite them
+with simulated ones, so it refuses to write unless you pass --overwrite-real.
+It is kept only as a way to regenerate stand-in data without model access.
 
 The belief traces are produced by a dependency-free port of
 ``backend/bam/bam_tracker.py`` driven by a *simulated* token channel: no
@@ -616,6 +622,16 @@ def emit(demo: dict) -> None:
 
 
 def main() -> None:
+    import sys
+    if "--overwrite-real" not in sys.argv:
+        existing = sorted(p.name for p in OUT_DIR.glob("*.js")) if OUT_DIR.exists() else []
+        if existing:
+            print("refusing to run: data/runs/ holds recorded runs "
+                  f"({', '.join(existing)}).")
+            print("These are real model recordings; this script writes simulated "
+                  "placeholders.")
+            print("Pass --overwrite-real if you really mean to replace them.")
+            raise SystemExit(1)
     print("generating placeholder BAM runs:")
     for build in (build_conversation, build_image, build_code):
         emit(build())

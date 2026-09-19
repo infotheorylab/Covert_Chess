@@ -188,7 +188,7 @@ window.BAMDiagnostic = (function () {
     h += '</table></div>';
 
     h += '<p class="diag-note">The receiver runs this update on the emitted ' +
-      (demo.kind === 'image' ? 'latent steps' : 'tokens') + ' alone — it never sees the ' +
+      (demo.kind === 'image' ? 'image tokens' : 'tokens') + ' alone — it never sees the ' +
       'prompt, the model weights or the cover distribution. Once the posterior crosses ' +
       'γ₁ the decoder stops accumulating and asks the sender to confirm its candidate; ' +
       'a NACK knocks that candidate down and returns to the communication phase.</p>';

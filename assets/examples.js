@@ -4,7 +4,7 @@
 
    Nothing about the artefacts lives in the HTML: each demo object is
    loaded from its own data file (window.COVERT_DEMOS) and rendered here,
-   so swapping placeholder runs for real ones is a data change only.
+   so re-recording a run is a data change only.
    =================================================================== */
 
 (function () {
@@ -95,6 +95,30 @@
       row.appendChild(b);
     });
     return row;
+  }
+
+  /* Provenance line from data/runs/<id>_runs.json — the distribution over
+     every generation, next to the one generation shown. Fetched rather than
+     inlined, so it simply does not appear when the page is opened from disk
+     (file:// blocks fetch) or when the file is absent. */
+  function attachRunStats(demo, wrap) {
+    if (!window.fetch) return;
+    fetch('./data/runs/' + demo.id + '_runs.json')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || !d.attempts || !d.attempts.length) return;
+        var a = d.attempts;
+        var tok = a.map(function (x) { return x.carrier_tokens; })
+                   .sort(function (p, q) { return p - q; });
+        var med = tok[Math.floor(tok.length / 2)];
+        var h = a.reduce(function (s, x) { return s + x.mean_h_bits; }, 0) / a.length;
+        var unit = demo.kind === 'image' ? 'steps' : 'tokens';
+        wrap.appendChild(el('p', 'run-note',
+          'Shown: best of ' + d.n_attempts + ' generations. Across all ' +
+          d.n_attempts + ' — median ' + med + ' carrier ' + unit +
+          ', mean token entropy ' + h.toFixed(2) + ' bits.'));
+      })
+      .catch(function () { /* provenance is optional */ });
   }
 
   function statsRow(demo) {
@@ -223,11 +247,10 @@
     return (a + (b - a) * fx) + ((c + (d - c) * fx) - (a + (b - a) * fx)) * fy;
   }
 
-  /* A stand-in for the diffusion sample: a deterministic dusk seascape.
-     `content` drives the scene (identical in both panes, because both are
-     the same prompt) and `fine` drives only the last, highest-frequency
-     octave — the part sampling randomness actually moves, and therefore the
-     only thing BAM's coupling can steer. */
+  /* Fallback for a run that ships no image of its own: a deterministic dusk
+     seascape drawn from `render` seeds. The recorded runs in data/runs/ all
+     carry real PNGs on `cover.src` / `stego.src`, so this is only reached by
+     a demo defined without them. */
   function renderScene(canvas, content, fine) {
     canvas.width = IMG_N; canvas.height = IMG_N;
     var ctx = canvas.getContext('2d');
@@ -312,8 +335,8 @@
     return ctx;
   }
 
-  /* Paint one pane: a real run supplies `src`, the placeholder supplies
-     `render` seeds. Either way the caller gets the 2d context back. */
+  /* Paint one pane: a recorded run supplies `src`, a demo without images
+     supplies `render` seeds. Either way the caller gets the 2d context back. */
   function paint(canvas, spec, done) {
     if (spec.src) {
       var img = new Image();
@@ -381,11 +404,12 @@
     extra.appendChild(res.wrap);
     extra.appendChild(el('div', null,
       promptLine(demo) +
-      '<p>The difference between the two panes is the sampling noise BAM steers — ' +
-      'high-frequency, unstructured, and the same order as the difference between ' +
-      'any two draws of the same prompt. There is no embedding residual to find ' +
-      'because nothing was embedded: the stego sample is an honest draw from the ' +
-      'model\'s own distribution, chosen rather than altered.</p>'));
+      '<p>The two panes are independent samples of one prompt, so they are different ' +
+      'pictures — not a picture and a tampered copy of it. Janus-Pro draws an image as a ' +
+      'sequence of tokens, and BAM only decides which of the tokens the model was already ' +
+      'willing to draw gets picked; the payload never touches a pixel. What the residual ' +
+      'shows is the ordinary distance between two draws of the same prompt, which is why ' +
+      'there is no embedding artefact in it to find.</p>'));
     host.appendChild(extra);
 
     // both panes may load asynchronously (real runs); residual waits for both
@@ -427,6 +451,7 @@
     if (demo.kind !== 'image') wrap.appendChild(promptBox(demo));
     wrap.appendChild(roundChips(demo));
     wrap.appendChild(statsRow(demo));
+    attachRunStats(demo, wrap);
     section.appendChild(wrap);
   }
 

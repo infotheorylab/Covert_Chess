@@ -28,19 +28,19 @@
     <p class="eyebrow">concrete examples</p>
     <h1>The same output, twice — one of them is talking</h1>
     <p class="lede">
-      Three pairs below. On the left, what the model produces on its own. On the right,
-      what it produces while <b>BAM</b> steers the sampling: the same task, the same
-      distribution, plus a payload. <b>Click any right-hand artefact</b> to open the
-      receiver's belief propagation for that round — the same diagnosis view the live
-      demo shows, replayed from a stored run.
+      Three pairs below, from three different models. On the left, what the model produces
+      on its own. On the right, what it produces while <b>BAM</b> steers the sampling: the
+      same task, the same distribution, plus a payload. <b>Click any right-hand artefact</b>
+      to open the receiver's belief propagation for that round — the same diagnosis view the
+      live demo shows.
     </p>
     <div class="banner">
       <span class="ico">note</span>
-      <p><b>These are placeholder runs.</b> The belief traces are produced by the real BAM
-      decoder (the maths in <code>backend/bam/bam_tracker.py</code>, ported verbatim) driven
-      by a simulated token channel — no language model or diffusion model was run, and the
-      images are procedural stand-ins. The stored files use exactly the schema the live
-      backend emits, so real runs drop straight into <code>data/runs/</code>.</p>
+      <p><b>These are recorded runs, not illustrations.</b> Every token below is the model's
+      own sample, drawn from the ArcMark optimal-transport coupling, and every belief trace
+      was recorded live as the receiver decoded it. Each example shows the best of 100
+      generations; the full distribution over all 100 is in
+      <code>data/runs/*_runs.json</code>.</p>
     </div>
   </div>
 </header>
