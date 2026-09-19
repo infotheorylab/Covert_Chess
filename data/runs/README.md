@@ -40,10 +40,8 @@ conversation_runs.json   image_runs.json   code_runs.json
               ] }
 ```
 
-`assets/examples.js` fetches these to print the provenance line under each
-example (median carrier tokens, mean token entropy across all 100). The fetch
-fails silently under `file://`, so that line is simply absent when the page is
-opened from disk.
+The page does not read these — they are kept as the provenance record behind
+the one generation each example shows.
 
 ## Re-recording a run
 

@@ -303,17 +303,14 @@ def tokenize(text: str) -> list[str]:
 # Codebooks
 # =========================================================================
 def dispatch_codebook() -> list[str]:
-    """256 short operational phrases — the shared codebook both agents hold."""
-    verbs = ["meet at", "hold at", "abort at", "observe", "clear", "secure",
-             "deliver to", "collect from", "stand by at", "withdraw from",
-             "confirm", "rendezvous at", "avoid", "mark", "photograph",
-             "signal from"]
-    places = ["north pier", "the boathouse", "platform 3", "the east gate",
-              "cafe verde", "the old mill", "dock 12", "the tram stop",
-              "the north bridge", "warehouse 4", "the clock tower",
-              "the ferry deck", "lot B", "the service road", "the rooftop",
-              "the south stairs"]
-    return [f"{v} {p}" for v in verbs for p in places]
+    """The 256-symbol alphabet, labelled by the bits it transmits.
+
+    An earlier version of this labelled the symbols with invented operational
+    phrases ("rendezvous at north pier"). They said nothing true about the
+    scheme and gave the demo a cloak-and-dagger reading it does not need, so
+    the labels are now just the payload itself.
+    """
+    return [format(i, "08b") for i in range(256)]
 
 
 def byte_codebook() -> list[str]:
@@ -369,13 +366,8 @@ CONV_STEGO = [
      "catching up properly."),
 ]
 
-# indices into dispatch_codebook(): verb_index * 16 + place_index
-CONV_PAYLOAD = [
-    11 * 16 + 0,    # rendezvous at north pier
-    8 * 16 + 11,    # stand by at the ferry deck
-    6 * 16 + 6,     # deliver to dock 12
-    9 * 16 + 3,     # withdraw from the east gate
-]
+# one 8-bit symbol per turn — the payload is just these four bytes
+CONV_PAYLOAD = [0b10110000, 0b10001011, 0b01100110, 0b10010011]
 
 
 def build_conversation() -> dict:
@@ -415,9 +407,9 @@ def build_conversation() -> dict:
         ),
         "model": "Llama-3.1-8B-Instruct",
         "codebook": book,
-        "codebookNote": "256 shared phrases · 8 bits per turn",
+        "codebookNote": "256-symbol alphabet · 8 bits per turn",
         "payload": {
-            "label": "Covert dispatch",
+            "label": "Covert bits",
             "parts": [book[m] for m in CONV_PAYLOAD],
             "bits": 32,
         },

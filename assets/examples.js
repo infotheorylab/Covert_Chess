@@ -97,30 +97,6 @@
     return row;
   }
 
-  /* Provenance line from data/runs/<id>_runs.json — the distribution over
-     every generation, next to the one generation shown. Fetched rather than
-     inlined, so it simply does not appear when the page is opened from disk
-     (file:// blocks fetch) or when the file is absent. */
-  function attachRunStats(demo, wrap) {
-    if (!window.fetch) return;
-    fetch('./data/runs/' + demo.id + '_runs.json')
-      .then(function (r) { return r.ok ? r.json() : null; })
-      .then(function (d) {
-        if (!d || !d.attempts || !d.attempts.length) return;
-        var a = d.attempts;
-        var tok = a.map(function (x) { return x.carrier_tokens; })
-                   .sort(function (p, q) { return p - q; });
-        var med = tok[Math.floor(tok.length / 2)];
-        var h = a.reduce(function (s, x) { return s + x.mean_h_bits; }, 0) / a.length;
-        var unit = demo.kind === 'image' ? 'steps' : 'tokens';
-        wrap.appendChild(el('p', 'run-note',
-          'Shown: best of ' + d.n_attempts + ' generations. Across all ' +
-          d.n_attempts + ' — median ' + med + ' carrier ' + unit +
-          ', mean token entropy ' + h.toFixed(2) + ' bits.'));
-      })
-      .catch(function () { /* provenance is optional */ });
-  }
-
   function statsRow(demo) {
     var row = el('div', 'stats');
     demo.stats.forEach(function (s) {
@@ -451,7 +427,6 @@
     if (demo.kind !== 'image') wrap.appendChild(promptBox(demo));
     wrap.appendChild(roundChips(demo));
     wrap.appendChild(statsRow(demo));
-    attachRunStats(demo, wrap);
     section.appendChild(wrap);
   }
 
