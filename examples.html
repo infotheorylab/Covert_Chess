@@ -26,12 +26,13 @@
 <header class="page-head">
   <div class="wrap">
     <p class="eyebrow">generative steganography examples</p>
-    <h1>The same output, twice — one of them is talking</h1>
+    <h1>Covert payloads in text, image and code generation</h1>
     <p class="lede">
-      Three pairs below, from three different models. On the left, what the model produces
-      on its own. On the right, what it produces while <b>BAM</b> steers the sampling: the
-      same task, the same distribution, plus a payload. <b>Click any right-hand artefact</b>
-      to open the receiver's belief propagation for that round.
+      Three matched pairs, each from a different open-weight model. On the left, the model's
+      unmodified output. On the right, the output of the same model on the same prompt while
+      <b>BAM</b> steers the sampling, carrying a payload at no cost to the output
+      distribution. <b>Select any right-hand artefact</b> to inspect the receiver's belief
+      propagation for that round.
     </p>
   </div>
 </header>
@@ -43,26 +44,14 @@
 
 <section class="ex" id="about">
   <div class="wrap">
-    <p class="eyebrow">what is bam</p>
-    <h2>Choosing, not altering</h2>
+    <h2 class="eyebrow">the algorithm</h2>
     <p class="blurb">
-      Every token a model samples is a choice among many continuations it considers roughly
-      equally good. <b>BAM</b> — Burnashev Adaptive Posterior Matching — treats that choice as
-      a communication channel. The sender steers <em>which</em> of the likely continuations gets
-      sampled; the receiver, reading only the finished output, refines a belief about what was
-      meant. Nothing is edited after the fact, so what ships is still an honest sample from the
-      model's own distribution.
-    </p>
-    <p class="blurb">
-      The two sides both watch the same output as it appears, so the sender always knows what
-      the receiver currently believes and can spend the next token on whatever is still in
-      doubt. That feedback is what makes the scheme reliable on short, ordinary turns — and it
-      needs no shared weights, no shared prompt and no shared cover statistics.
+      For a detailed explanation of BAM (Burnashev Adaptive Posterior Matching), see the paper.
     </p>
     <div class="cta-row">
       <a class="btn primary" href="https://arxiv.org/abs/XXXX.XXXXX">Read the paper on arXiv →</a>
       <a class="btn" href="./index.html#results">Results</a>
-      <a class="btn" href="https://v39ttdcqg3i0yh-8000.proxy.runpod.net/">Play it live</a>
+      <a class="btn" href="https://v39ttdcqg3i0yh-8000.proxy.runpod.net/">Live demo</a>
     </div>
   </div>
 </section>

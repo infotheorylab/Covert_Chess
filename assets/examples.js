@@ -76,12 +76,16 @@
     return strip;
   }
 
-  function promptLine(demo) {
-    return '<div class="prompt-line">prompt · “' + esc(demo.prompt) + '”</div>';
+  /* What produced the two panes: the model, and the prompt it was given. */
+  function metaLines(demo) {
+    return '<div class="meta-line"><span class="mlab">model</span>' +
+           '<span class="mval">' + esc(demo.model) + '</span></div>' +
+           '<div class="meta-line"><span class="mlab">prompt</span>' +
+           '<span class="mval">“' + esc(demo.prompt) + '”</span></div>';
   }
 
   function promptBox(demo) {
-    return el('div', 'prompt-after', promptLine(demo));
+    return el('div', 'prompt-after', metaLines(demo));
   }
 
   function roundChips(demo) {
@@ -120,14 +124,14 @@
   }
 
   function renderConversation(demo, host) {
-    var cover = paneShell('cover', demo.cover.label, demo.model);
+    var cover = paneShell('cover', demo.cover.label);
     var chatC = el('div', 'chat');
     demo.cover.turns.forEach(function (t) {
       chatC.appendChild(turnBlock(t.who, t.agent, esc(t.text)));
     });
     cover.body.appendChild(chatC);
 
-    var stego = paneShell('stego', demo.stego.label, demo.model);
+    var stego = paneShell('stego', demo.stego.label);
     var chatS = el('div', 'chat');
     demo.stego.turns.forEach(function (t) {
       var r = demo.rounds[t.round];
@@ -161,10 +165,10 @@
   }
 
   function renderCode(demo, host) {
-    var cover = paneShell('cover', demo.cover.label, demo.model);
+    var cover = paneShell('cover', demo.cover.label);
     cover.body.appendChild(el('pre', 'code', highlight(demo.cover.code)));
 
-    var stego = paneShell('stego', demo.stego.label, demo.model);
+    var stego = paneShell('stego', demo.stego.label);
     var pre = el('pre', 'code');
     var src = demo.stego.code, cursor = 0;
 
@@ -360,11 +364,11 @@
   }
 
   function renderImage(demo, host) {
-    var cover = paneShell('cover', demo.cover.label, demo.model);
+    var cover = paneShell('cover', demo.cover.label);
     var sc = shot('sample #1');
     cover.body.appendChild(sc.wrap);
 
-    var stego = paneShell('stego', demo.stego.label, demo.model);
+    var stego = paneShell('stego', demo.stego.label);
     var ss = shot('sample #2 — carries ' + demo.payload.bits + ' bits');
     var p = probe(demo, 0, 'belief trace ▸');
     p.appendChild(ss.wrap);
@@ -379,7 +383,7 @@
     var res = shot(demo.residual.label);
     extra.appendChild(res.wrap);
     extra.appendChild(el('div', null,
-      promptLine(demo) +
+      '<div class="meta-block">' + metaLines(demo) + '</div>' +
       '<p>The two panes are independent samples of one prompt, so they are different ' +
       'pictures — not a picture and a tampered copy of it. Janus-Pro draws an image as a ' +
       'sequence of tokens, and BAM only decides which of the tokens the model was already ' +
