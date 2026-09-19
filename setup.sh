@@ -93,7 +93,42 @@ uvicorn server:app --host 0.0.0.0 --port 8000 --workers 1
 # Test: https://XXXXXXXX-8000.proxy.runpod.net/health
 # Expected: {"status":"ok","sessions":0,...}
 
-## 7. Update GitHub Pages site with live URL
+## 7. Keeping the connection stable (do this before recording or demoing)
+# Two different connections can drop here, and they need different fixes.
+
+# (a) THE TERMINAL — already handled by step 5, but know how to verify it.
+# The RunPod web terminal is just a shell: when the tab closes or your network
+# blips, its child processes get SIGHUP and die. Running uvicorn inside screen
+# makes it a child of the screen session instead, so the terminal becomes
+# disposable. After any disconnect, from a fresh terminal:
+screen -ls                        # expect a detached "bam" session
+curl -s localhost:8000/health     # expect {"status":"ok",...} — it never went down
+screen -r bam                     # reattach only if you need the logs
+# If screen -ls lists nothing, uvicorn was started outside screen — redo step 5.
+
+# (b) THE BROWSER'S WEBSOCKET — the one that will interrupt a demo.
+# The app talks over a WebSocket and *.proxy.runpod.net sits in front of it.
+# uvicorn[standard] already sends protocol-level pings every 20s, so the socket
+# is not silently idle, but the proxy is still an extra hop that can drop a
+# long-lived connection — and the client has no auto-reconnect: ws.onclose just
+# shows "Disconnected" and reopens the connect panel.
+#
+# For anything that must not break mid-session (recording a video, a live
+# talk), skip the proxy with an SSH tunnel and point the browser at localhost.
+# Run this on your LOCAL machine and leave it running:
+# ssh -N -L 8000:localhost:8000 root@POD_IP -p SSH_PORT -i ~/.ssh/id_ed25519 \
+#     -o ServerAliveInterval=30 -o ServerAliveCountMax=6
+#
+# POD_IP and SSH_PORT come from: dashboard → your pod → Connect → SSH.
+# Then browse http://localhost:8000 instead of the proxy URL. Lower latency, no
+# proxy idle timeout, and the URL bar reads "localhost" rather than your pod
+# hostname — worth having if the recording is going public.
+# ServerAliveInterval stops the SSH tunnel itself from idling out.
+
+# (c) POD TYPE. Use an on-demand / secure pod, not spot or community. Spot
+# instances can be preempted, and it will happen mid-take.
+
+## 8. Update GitHub Pages site with live URL
 # On your LOCAL machine:
 # In index.html, change the demo button href to:
 #   ./demo/?backend=wss://XXXXXXXX-8000.proxy.runpod.net

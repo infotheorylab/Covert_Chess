@@ -8,3 +8,6 @@ venv/
 *.safetensors
 model-cache/
 .DS_Store
+
+# screen-recording sources — only the encoded mp4 belongs in the repo
+media/*.mov
