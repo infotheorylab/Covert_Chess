@@ -42,6 +42,29 @@
 <section class="ex" id="image" data-demo="image"></section>
 <section class="ex" id="code" data-demo="code"></section>
 
+<!-- Hidden until media/live-demo.mp4 exists; examples.js reveals it.
+     See media/README.md for how to record and encode the file. -->
+<section class="ex" id="recording" data-video="./media/live-demo.mp4" hidden>
+  <div class="wrap">
+    <h2 class="eyebrow">recorded session</h2>
+    <figure class="video">
+      <video controls preload="metadata" playsinline poster="./media/live-demo-poster.jpg">
+        <source src="./media/live-demo.mp4" type="video/mp4" />
+        <p>This browser cannot play the recording.
+           <a href="./media/live-demo.mp4">Download the file</a>.</p>
+      </video>
+    </figure>
+    <div class="prompt-after">
+      <div class="meta-line">
+        <span class="mlab">shown</span>
+        <span class="mval">An unedited session of the live demo: a move is entered, the two
+        agents exchange messages, and the receiver recovers the hidden move from the text
+        alone.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
 <section class="ex" id="about">
   <div class="wrap">
     <h2 class="eyebrow">the algorithm</h2>

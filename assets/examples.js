@@ -101,6 +101,18 @@
     return row;
   }
 
+  /* The recorded-session section ships hidden and is revealed only if its
+     video is actually there, so the page never shows a broken player before
+     the recording has been made. A HEAD request cannot run from file://, so
+     the section stays hidden when the page is opened straight from disk. */
+  function revealRecording() {
+    var sec = document.querySelector('[data-video]');
+    if (!sec || !window.fetch) return;
+    fetch(sec.dataset.video, { method: 'HEAD' })
+      .then(function (r) { if (r.ok) sec.hidden = false; })
+      .catch(function () { /* no recording yet */ });
+  }
+
   function statsRow(demo) {
     var row = el('div', 'stats');
     demo.stats.forEach(function (s) {
@@ -437,6 +449,7 @@
   window.addEventListener('DOMContentLoaded', function () {
     window.BAMDiagnostic.mount();
     document.querySelectorAll('.ex[data-demo]').forEach(build);
+    revealRecording();
     var yr = document.getElementById('yr');
     if (yr) yr.textContent = new Date().getFullYear();
 
