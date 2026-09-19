@@ -1,0 +1,807 @@
+{
+ "script": "make_demo_conversation.py",
+ "model": "Llama-3.1-8B-Instruct",
+ "n_attempts": 100,
+ "attempts": [
+  {
+   "attempt": 0,
+   "seed": 20260917,
+   "failed_rounds": 1,
+   "carrier_tokens": 84,
+   "nacks": 1,
+   "mean_h_bits": 2.292
+  },
+  {
+   "attempt": 1,
+   "seed": 20260918,
+   "failed_rounds": 0,
+   "carrier_tokens": 102,
+   "nacks": 1,
+   "mean_h_bits": 2.438
+  },
+  {
+   "attempt": 2,
+   "seed": 20260919,
+   "failed_rounds": 1,
+   "carrier_tokens": 131,
+   "nacks": 0,
+   "mean_h_bits": 2.554
+  },
+  {
+   "attempt": 3,
+   "seed": 20260920,
+   "failed_rounds": 0,
+   "carrier_tokens": 113,
+   "nacks": 1,
+   "mean_h_bits": 2.526
+  },
+  {
+   "attempt": 4,
+   "seed": 20260921,
+   "failed_rounds": 0,
+   "carrier_tokens": 112,
+   "nacks": 0,
+   "mean_h_bits": 2.791
+  },
+  {
+   "attempt": 5,
+   "seed": 20260922,
+   "failed_rounds": 1,
+   "carrier_tokens": 102,
+   "nacks": 0,
+   "mean_h_bits": 2.49
+  },
+  {
+   "attempt": 6,
+   "seed": 20260923,
+   "failed_rounds": 2,
+   "carrier_tokens": 123,
+   "nacks": 1,
+   "mean_h_bits": 2.333
+  },
+  {
+   "attempt": 7,
+   "seed": 20260924,
+   "failed_rounds": 0,
+   "carrier_tokens": 78,
+   "nacks": 1,
+   "mean_h_bits": 2.625
+  },
+  {
+   "attempt": 8,
+   "seed": 20260925,
+   "failed_rounds": 2,
+   "carrier_tokens": 166,
+   "nacks": 1,
+   "mean_h_bits": 2.883
+  },
+  {
+   "attempt": 9,
+   "seed": 20260926,
+   "failed_rounds": 0,
+   "carrier_tokens": 83,
+   "nacks": 1,
+   "mean_h_bits": 2.681
+  },
+  {
+   "attempt": 10,
+   "seed": 20260927,
+   "failed_rounds": 3,
+   "carrier_tokens": 123,
+   "nacks": 3,
+   "mean_h_bits": 2.313
+  },
+  {
+   "attempt": 11,
+   "seed": 20260928,
+   "failed_rounds": 0,
+   "carrier_tokens": 99,
+   "nacks": 1,
+   "mean_h_bits": 2.366
+  },
+  {
+   "attempt": 12,
+   "seed": 20260929,
+   "failed_rounds": 2,
+   "carrier_tokens": 108,
+   "nacks": 0,
+   "mean_h_bits": 2.45
+  },
+  {
+   "attempt": 13,
+   "seed": 20260930,
+   "failed_rounds": 2,
+   "carrier_tokens": 131,
+   "nacks": 1,
+   "mean_h_bits": 2.152
+  },
+  {
+   "attempt": 14,
+   "seed": 20260931,
+   "failed_rounds": 1,
+   "carrier_tokens": 107,
+   "nacks": 0,
+   "mean_h_bits": 2.402
+  },
+  {
+   "attempt": 15,
+   "seed": 20260932,
+   "failed_rounds": 0,
+   "carrier_tokens": 97,
+   "nacks": 1,
+   "mean_h_bits": 2.344
+  },
+  {
+   "attempt": 16,
+   "seed": 20260933,
+   "failed_rounds": 1,
+   "carrier_tokens": 104,
+   "nacks": 2,
+   "mean_h_bits": 2.552
+  },
+  {
+   "attempt": 17,
+   "seed": 20260934,
+   "failed_rounds": 0,
+   "carrier_tokens": 96,
+   "nacks": 1,
+   "mean_h_bits": 2.65
+  },
+  {
+   "attempt": 18,
+   "seed": 20260935,
+   "failed_rounds": 1,
+   "carrier_tokens": 120,
+   "nacks": 1,
+   "mean_h_bits": 2.458
+  },
+  {
+   "attempt": 19,
+   "seed": 20260936,
+   "failed_rounds": 0,
+   "carrier_tokens": 72,
+   "nacks": 0,
+   "mean_h_bits": 2.974
+  },
+  {
+   "attempt": 20,
+   "seed": 20260937,
+   "failed_rounds": 2,
+   "carrier_tokens": 105,
+   "nacks": 1,
+   "mean_h_bits": 2.357
+  },
+  {
+   "attempt": 21,
+   "seed": 20260938,
+   "failed_rounds": 2,
+   "carrier_tokens": 126,
+   "nacks": 2,
+   "mean_h_bits": 2.479
+  },
+  {
+   "attempt": 22,
+   "seed": 20260939,
+   "failed_rounds": 1,
+   "carrier_tokens": 80,
+   "nacks": 0,
+   "mean_h_bits": 2.88
+  },
+  {
+   "attempt": 23,
+   "seed": 20260940,
+   "failed_rounds": 2,
+   "carrier_tokens": 123,
+   "nacks": 1,
+   "mean_h_bits": 2.736
+  },
+  {
+   "attempt": 24,
+   "seed": 20260941,
+   "failed_rounds": 0,
+   "carrier_tokens": 85,
+   "nacks": 1,
+   "mean_h_bits": 2.721
+  },
+  {
+   "attempt": 25,
+   "seed": 20260942,
+   "failed_rounds": 0,
+   "carrier_tokens": 80,
+   "nacks": 1,
+   "mean_h_bits": 2.602
+  },
+  {
+   "attempt": 26,
+   "seed": 20260943,
+   "failed_rounds": 2,
+   "carrier_tokens": 138,
+   "nacks": 2,
+   "mean_h_bits": 2.698
+  },
+  {
+   "attempt": 27,
+   "seed": 20260944,
+   "failed_rounds": 3,
+   "carrier_tokens": 120,
+   "nacks": 3,
+   "mean_h_bits": 2.798
+  },
+  {
+   "attempt": 28,
+   "seed": 20260945,
+   "failed_rounds": 3,
+   "carrier_tokens": 117,
+   "nacks": 2,
+   "mean_h_bits": 2.874
+  },
+  {
+   "attempt": 29,
+   "seed": 20260946,
+   "failed_rounds": 1,
+   "carrier_tokens": 91,
+   "nacks": 0,
+   "mean_h_bits": 2.772
+  },
+  {
+   "attempt": 30,
+   "seed": 20260947,
+   "failed_rounds": 1,
+   "carrier_tokens": 71,
+   "nacks": 2,
+   "mean_h_bits": 2.663
+  },
+  {
+   "attempt": 31,
+   "seed": 20260948,
+   "failed_rounds": 1,
+   "carrier_tokens": 79,
+   "nacks": 0,
+   "mean_h_bits": 2.389
+  },
+  {
+   "attempt": 32,
+   "seed": 20260949,
+   "failed_rounds": 1,
+   "carrier_tokens": 107,
+   "nacks": 0,
+   "mean_h_bits": 2.505
+  },
+  {
+   "attempt": 33,
+   "seed": 20260950,
+   "failed_rounds": 3,
+   "carrier_tokens": 113,
+   "nacks": 0,
+   "mean_h_bits": 2.865
+  },
+  {
+   "attempt": 34,
+   "seed": 20260951,
+   "failed_rounds": 2,
+   "carrier_tokens": 89,
+   "nacks": 0,
+   "mean_h_bits": 2.704
+  },
+  {
+   "attempt": 35,
+   "seed": 20260952,
+   "failed_rounds": 1,
+   "carrier_tokens": 106,
+   "nacks": 1,
+   "mean_h_bits": 2.769
+  },
+  {
+   "attempt": 36,
+   "seed": 20260953,
+   "failed_rounds": 1,
+   "carrier_tokens": 99,
+   "nacks": 2,
+   "mean_h_bits": 3.025
+  },
+  {
+   "attempt": 37,
+   "seed": 20260954,
+   "failed_rounds": 1,
+   "carrier_tokens": 116,
+   "nacks": 0,
+   "mean_h_bits": 2.274
+  },
+  {
+   "attempt": 38,
+   "seed": 20260955,
+   "failed_rounds": 2,
+   "carrier_tokens": 98,
+   "nacks": 0,
+   "mean_h_bits": 2.479
+  },
+  {
+   "attempt": 39,
+   "seed": 20260956,
+   "failed_rounds": 1,
+   "carrier_tokens": 88,
+   "nacks": 1,
+   "mean_h_bits": 2.796
+  },
+  {
+   "attempt": 40,
+   "seed": 20260957,
+   "failed_rounds": 0,
+   "carrier_tokens": 81,
+   "nacks": 0,
+   "mean_h_bits": 2.594
+  },
+  {
+   "attempt": 41,
+   "seed": 20260958,
+   "failed_rounds": 0,
+   "carrier_tokens": 63,
+   "nacks": 0,
+   "mean_h_bits": 2.769
+  },
+  {
+   "attempt": 42,
+   "seed": 20260959,
+   "failed_rounds": 4,
+   "carrier_tokens": 117,
+   "nacks": 0,
+   "mean_h_bits": 2.556
+  },
+  {
+   "attempt": 43,
+   "seed": 20260960,
+   "failed_rounds": 2,
+   "carrier_tokens": 97,
+   "nacks": 1,
+   "mean_h_bits": 2.471
+  },
+  {
+   "attempt": 44,
+   "seed": 20260961,
+   "failed_rounds": 1,
+   "carrier_tokens": 115,
+   "nacks": 2,
+   "mean_h_bits": 2.377
+  },
+  {
+   "attempt": 45,
+   "seed": 20260962,
+   "failed_rounds": 1,
+   "carrier_tokens": 84,
+   "nacks": 0,
+   "mean_h_bits": 2.354
+  },
+  {
+   "attempt": 46,
+   "seed": 20260963,
+   "failed_rounds": 2,
+   "carrier_tokens": 132,
+   "nacks": 2,
+   "mean_h_bits": 2.197
+  },
+  {
+   "attempt": 47,
+   "seed": 20260964,
+   "failed_rounds": 2,
+   "carrier_tokens": 116,
+   "nacks": 1,
+   "mean_h_bits": 2.446
+  },
+  {
+   "attempt": 48,
+   "seed": 20260965,
+   "failed_rounds": 1,
+   "carrier_tokens": 89,
+   "nacks": 2,
+   "mean_h_bits": 2.302
+  },
+  {
+   "attempt": 49,
+   "seed": 20260966,
+   "failed_rounds": 2,
+   "carrier_tokens": 110,
+   "nacks": 3,
+   "mean_h_bits": 2.318
+  },
+  {
+   "attempt": 50,
+   "seed": 20260967,
+   "failed_rounds": 1,
+   "carrier_tokens": 113,
+   "nacks": 0,
+   "mean_h_bits": 2.187
+  },
+  {
+   "attempt": 51,
+   "seed": 20260968,
+   "failed_rounds": 0,
+   "carrier_tokens": 96,
+   "nacks": 1,
+   "mean_h_bits": 2.445
+  },
+  {
+   "attempt": 52,
+   "seed": 20260969,
+   "failed_rounds": 1,
+   "carrier_tokens": 122,
+   "nacks": 0,
+   "mean_h_bits": 2.266
+  },
+  {
+   "attempt": 53,
+   "seed": 20260970,
+   "failed_rounds": 3,
+   "carrier_tokens": 137,
+   "nacks": 2,
+   "mean_h_bits": 2.157
+  },
+  {
+   "attempt": 54,
+   "seed": 20260971,
+   "failed_rounds": 3,
+   "carrier_tokens": 98,
+   "nacks": 2,
+   "mean_h_bits": 2.752
+  },
+  {
+   "attempt": 55,
+   "seed": 20260972,
+   "failed_rounds": 2,
+   "carrier_tokens": 130,
+   "nacks": 1,
+   "mean_h_bits": 2.33
+  },
+  {
+   "attempt": 56,
+   "seed": 20260973,
+   "failed_rounds": 2,
+   "carrier_tokens": 131,
+   "nacks": 0,
+   "mean_h_bits": 2.321
+  },
+  {
+   "attempt": 57,
+   "seed": 20260974,
+   "failed_rounds": 0,
+   "carrier_tokens": 72,
+   "nacks": 1,
+   "mean_h_bits": 3.237
+  },
+  {
+   "attempt": 58,
+   "seed": 20260975,
+   "failed_rounds": 1,
+   "carrier_tokens": 104,
+   "nacks": 1,
+   "mean_h_bits": 2.427
+  },
+  {
+   "attempt": 59,
+   "seed": 20260976,
+   "failed_rounds": 1,
+   "carrier_tokens": 130,
+   "nacks": 1,
+   "mean_h_bits": 2.113
+  },
+  {
+   "attempt": 60,
+   "seed": 20260977,
+   "failed_rounds": 2,
+   "carrier_tokens": 94,
+   "nacks": 1,
+   "mean_h_bits": 2.598
+  },
+  {
+   "attempt": 61,
+   "seed": 20260978,
+   "failed_rounds": 1,
+   "carrier_tokens": 157,
+   "nacks": 2,
+   "mean_h_bits": 2.289
+  },
+  {
+   "attempt": 62,
+   "seed": 20260979,
+   "failed_rounds": 1,
+   "carrier_tokens": 101,
+   "nacks": 1,
+   "mean_h_bits": 2.275
+  },
+  {
+   "attempt": 63,
+   "seed": 20260980,
+   "failed_rounds": 0,
+   "carrier_tokens": 112,
+   "nacks": 2,
+   "mean_h_bits": 2.382
+  },
+  {
+   "attempt": 64,
+   "seed": 20260981,
+   "failed_rounds": 2,
+   "carrier_tokens": 103,
+   "nacks": 3,
+   "mean_h_bits": 2.471
+  },
+  {
+   "attempt": 65,
+   "seed": 20260982,
+   "failed_rounds": 0,
+   "carrier_tokens": 103,
+   "nacks": 1,
+   "mean_h_bits": 2.528
+  },
+  {
+   "attempt": 66,
+   "seed": 20260983,
+   "failed_rounds": 0,
+   "carrier_tokens": 85,
+   "nacks": 0,
+   "mean_h_bits": 2.482
+  },
+  {
+   "attempt": 67,
+   "seed": 20260984,
+   "failed_rounds": 1,
+   "carrier_tokens": 100,
+   "nacks": 3,
+   "mean_h_bits": 2.619
+  },
+  {
+   "attempt": 68,
+   "seed": 20260985,
+   "failed_rounds": 1,
+   "carrier_tokens": 96,
+   "nacks": 1,
+   "mean_h_bits": 3.003
+  },
+  {
+   "attempt": 69,
+   "seed": 20260986,
+   "failed_rounds": 0,
+   "carrier_tokens": 110,
+   "nacks": 2,
+   "mean_h_bits": 3.222
+  },
+  {
+   "attempt": 70,
+   "seed": 20260987,
+   "failed_rounds": 2,
+   "carrier_tokens": 107,
+   "nacks": 4,
+   "mean_h_bits": 2.156
+  },
+  {
+   "attempt": 71,
+   "seed": 20260988,
+   "failed_rounds": 2,
+   "carrier_tokens": 90,
+   "nacks": 2,
+   "mean_h_bits": 2.736
+  },
+  {
+   "attempt": 72,
+   "seed": 20260989,
+   "failed_rounds": 4,
+   "carrier_tokens": 108,
+   "nacks": 3,
+   "mean_h_bits": 2.639
+  },
+  {
+   "attempt": 73,
+   "seed": 20260990,
+   "failed_rounds": 0,
+   "carrier_tokens": 83,
+   "nacks": 0,
+   "mean_h_bits": 3.163
+  },
+  {
+   "attempt": 74,
+   "seed": 20260991,
+   "failed_rounds": 2,
+   "carrier_tokens": 88,
+   "nacks": 0,
+   "mean_h_bits": 3.071
+  },
+  {
+   "attempt": 75,
+   "seed": 20260992,
+   "failed_rounds": 1,
+   "carrier_tokens": 116,
+   "nacks": 3,
+   "mean_h_bits": 2.512
+  },
+  {
+   "attempt": 76,
+   "seed": 20260993,
+   "failed_rounds": 1,
+   "carrier_tokens": 122,
+   "nacks": 2,
+   "mean_h_bits": 2.241
+  },
+  {
+   "attempt": 77,
+   "seed": 20260994,
+   "failed_rounds": 1,
+   "carrier_tokens": 102,
+   "nacks": 1,
+   "mean_h_bits": 2.49
+  },
+  {
+   "attempt": 78,
+   "seed": 20260995,
+   "failed_rounds": 0,
+   "carrier_tokens": 108,
+   "nacks": 1,
+   "mean_h_bits": 3.223
+  },
+  {
+   "attempt": 79,
+   "seed": 20260996,
+   "failed_rounds": 2,
+   "carrier_tokens": 87,
+   "nacks": 1,
+   "mean_h_bits": 3.066
+  },
+  {
+   "attempt": 80,
+   "seed": 20260997,
+   "failed_rounds": 1,
+   "carrier_tokens": 110,
+   "nacks": 0,
+   "mean_h_bits": 2.264
+  },
+  {
+   "attempt": 81,
+   "seed": 20260998,
+   "failed_rounds": 1,
+   "carrier_tokens": 101,
+   "nacks": 0,
+   "mean_h_bits": 2.568
+  },
+  {
+   "attempt": 82,
+   "seed": 20260999,
+   "failed_rounds": 1,
+   "carrier_tokens": 62,
+   "nacks": 1,
+   "mean_h_bits": 3.178
+  },
+  {
+   "attempt": 83,
+   "seed": 20261000,
+   "failed_rounds": 1,
+   "carrier_tokens": 90,
+   "nacks": 2,
+   "mean_h_bits": 2.83
+  },
+  {
+   "attempt": 84,
+   "seed": 20261001,
+   "failed_rounds": 1,
+   "carrier_tokens": 84,
+   "nacks": 0,
+   "mean_h_bits": 2.611
+  },
+  {
+   "attempt": 85,
+   "seed": 20261002,
+   "failed_rounds": 0,
+   "carrier_tokens": 80,
+   "nacks": 0,
+   "mean_h_bits": 2.493
+  },
+  {
+   "attempt": 86,
+   "seed": 20261003,
+   "failed_rounds": 2,
+   "carrier_tokens": 85,
+   "nacks": 0,
+   "mean_h_bits": 2.684
+  },
+  {
+   "attempt": 87,
+   "seed": 20261004,
+   "failed_rounds": 2,
+   "carrier_tokens": 111,
+   "nacks": 1,
+   "mean_h_bits": 2.517
+  },
+  {
+   "attempt": 88,
+   "seed": 20261005,
+   "failed_rounds": 2,
+   "carrier_tokens": 88,
+   "nacks": 2,
+   "mean_h_bits": 2.953
+  },
+  {
+   "attempt": 89,
+   "seed": 20261006,
+   "failed_rounds": 2,
+   "carrier_tokens": 91,
+   "nacks": 1,
+   "mean_h_bits": 2.467
+  },
+  {
+   "attempt": 90,
+   "seed": 20261007,
+   "failed_rounds": 3,
+   "carrier_tokens": 124,
+   "nacks": 1,
+   "mean_h_bits": 2.86
+  },
+  {
+   "attempt": 91,
+   "seed": 20261008,
+   "failed_rounds": 2,
+   "carrier_tokens": 110,
+   "nacks": 2,
+   "mean_h_bits": 2.676
+  },
+  {
+   "attempt": 92,
+   "seed": 20261009,
+   "failed_rounds": 3,
+   "carrier_tokens": 129,
+   "nacks": 1,
+   "mean_h_bits": 2.712
+  },
+  {
+   "attempt": 93,
+   "seed": 20261010,
+   "failed_rounds": 0,
+   "carrier_tokens": 107,
+   "nacks": 1,
+   "mean_h_bits": 2.626
+  },
+  {
+   "attempt": 94,
+   "seed": 20261011,
+   "failed_rounds": 3,
+   "carrier_tokens": 110,
+   "nacks": 0,
+   "mean_h_bits": 2.489
+  },
+  {
+   "attempt": 95,
+   "seed": 20261012,
+   "failed_rounds": 0,
+   "carrier_tokens": 64,
+   "nacks": 0,
+   "mean_h_bits": 2.726
+  },
+  {
+   "attempt": 96,
+   "seed": 20261013,
+   "failed_rounds": 2,
+   "carrier_tokens": 128,
+   "nacks": 3,
+   "mean_h_bits": 2.192
+  },
+  {
+   "attempt": 97,
+   "seed": 20261014,
+   "failed_rounds": 1,
+   "carrier_tokens": 100,
+   "nacks": 1,
+   "mean_h_bits": 2.291
+  },
+  {
+   "attempt": 98,
+   "seed": 20261015,
+   "failed_rounds": 2,
+   "carrier_tokens": 103,
+   "nacks": 0,
+   "mean_h_bits": 2.507
+  },
+  {
+   "attempt": 99,
+   "seed": 20261016,
+   "failed_rounds": 3,
+   "carrier_tokens": 105,
+   "nacks": 1,
+   "mean_h_bits": 2.312
+  }
+ ]
+}
