@@ -396,15 +396,15 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <p class="tabcap"><b>BAM vs. baselines on the C4 news corpus.</b> Mean &plusmn; standard error over 1000 trials, carrying an 8-bit message. Each variable-length scheme is paired with its own <i>no-embedding</i> control generated at the same length, since perplexity is only comparable at matched length.</p>
     </div>
 
-    <p class="figure-note"><strong>Zamir's scheme reaches the same near-zero error as BAM, but pays for it in length and in distortion.</strong> It needs 73&ndash;88 tokens where BAM needs 46&ndash;50, and it moves perplexity away from its own control by roughly +1.3 on Llama and Qwen, against +0.18 and +0.03 for BAM. BAM's cost is compute instead: about 1.5&times; the seconds per token, where Zamir's overhead is negligible.</p>
+    <p class="figure-note"><strong>Zamir's scheme (We use default t=2) reaches the same near-zero error as BAM, but has a longer average token length.</strong> It needs 73&ndash;88 tokens where BAM needs 46&ndash;50. BAM's cost is compute instead: about 1.5&times; the seconds per token, where Zamir's overhead is negligible.</p>
 
     <div class="refs">
       <p class="eyebrow">references</p>
       <ol>
-        <li><b>ArcMark.</b> ArcMark: Multi-bit LLM Watermark via Optimal Transport. Gilani, Atefeh and Long, Carol Xuan and Vithana, Sajani and Kosut, Oliver and Sankar, Lalitha and Calmon, Flavio P<span class="venue">(baseline)</span></li>
-        <li><b>MPAC.</b> Advancing beyond identification: Multi-bit watermark for large language models.Yoo, KiYoon and Ahn, Wonhyuk and Kwak, Nojun <span class="venue">(baseline)</span></li>
-        <li><b>BiMark.</b> Bimark: Unbiased multilayer watermarking for large language models. Feng, Xiaoyan and Zhang, He and Zhang, Yanjun and Zhang, Leo Yu and Pan, Shirui <span class="venue">(baseline)</span></li>
-        <li><b>StealthInk.</b> Stealthink: A multi-bit and stealthy watermark for large language models. Jiang, Ya and Wu, Chuxiong and Boroujeny, Massieh Kordi and Mark, Brian and Zeng, Kai <span class="venue">(baseline)</span></li>
+        <li><b>ArcMark.</b> <a href="https://arxiv.org/abs/2602.07235">ArcMark: Multi-bit LLM Watermark via Optimal Transport</a>. Gilani, Atefeh and Long, Carol Xuan and Vithana, Sajani and Kosut, Oliver and Sankar, Lalitha and Calmon, Flavio P. <span class="venue">arXiv:2602.07235, 2026 (baseline)</span></li>
+        <li><b>MPAC.</b> <a href="https://arxiv.org/abs/2308.00221">Advancing beyond identification: Multi-bit watermark for large language models</a>. Yoo, KiYoon and Ahn, Wonhyuk and Kwak, Nojun. <span class="venue">NAACL 2024 (baseline)</span></li>
+        <li><b>BiMark.</b> <a href="https://arxiv.org/abs/2506.21602">BiMark: Unbiased multilayer watermarking for large language models</a>. Feng, Xiaoyan and Zhang, He and Zhang, Yanjun and Zhang, Leo Yu and Pan, Shirui. <span class="venue">ICML 2025 (baseline)</span></li>
+        <li><b>StealthInk.</b> <a href="https://arxiv.org/abs/2506.05502">StealthInk: A multi-bit and stealthy watermark for large language models</a>. Jiang, Ya and Wu, Chuxiong and Boroujeny, Massieh Kordi and Mark, Brian and Zeng, Kai. <span class="venue">ICML 2025 (baseline)</span></li>
         <li><b>Zamir.</b> <a href="https://scholar.google.com/citations?view_op=view_citation&amp;hl=en&amp;user=xiyhJrwAAAAJ&amp;sortby=pubdate&amp;citation_for_view=xiyhJrwAAAAJ:R3hNpaxXUhUC">Undetectable steganography for language models</a>. Zamir, Or. <span class="venue">Transactions on Machine Learning Research, 2024 (baseline)</span></li>
       </ol>
     </div>
