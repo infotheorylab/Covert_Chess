@@ -14,7 +14,7 @@ This repository contains two parts:
 | **Static site** | `demo/` | GitHub Pages | Project landing page and write-up |
 | **Live demo** | `backend/` | RunPod (GPU) | The playable, model-backed application |
 
-- Project site: <https://sidongg.github.io/Covert_Chess/>
+- Project site: <https://infotheorylab.github.io/Covert_Chess/>
 - Live demo: served from the RunPod pod (see **Deployment**)
 
 ---
