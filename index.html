@@ -291,7 +291,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <div class="step"><div class="k">WHITE-BOX</div><h3>Receiver needs the model</h3><p>Most schemes require the receiver to reproduce the model's word probabilities, which means holding the same model weights and the same prompt as the sender.</p></div>
       <div class="step"><div class="k">BLACK-BOX</div><h3>Receiver sees only the text</h3><p>The receiver gets the generated text and a short shared key, nothing else: no weights, no prompt, no probabilities. This is the setting real, independently deployed agents live in.</p></div>
     </div>
-    <p class="section-question">Covert chess is black-box steganography pushed to its limit: two agents keep an ordinary chat going while every message secretly carries a move, and the receiver reads it from the text alone.</p>
+    <p class="section-question">Covert chess is black-box steganography: two agents keep an ordinary chat going while every message secretly carries a move, and the receiver reads it from the text alone.</p>
   </div>
   <a class="scroll-cue" href="#motivation">scroll<span>&darr;</span></a>
 </section>
@@ -331,7 +331,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <section class="section" id="method">
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">our method</p>
-    <h2>Treat the conversation as a <span class="key">feedback channel</span></h2>
+    <h2>Optimize the message error exponent via <span class="key">information-theoretic feedback coding</span></h2>
     <p class="section-lede">Every generated word is seen by both sides. So the sender always knows exactly what the receiver has seen, and can adapt the next word to it. That is a channel with perfect, instant feedback, and coding theory knows how to exploit one.</p>
     <p class="body-text">Feedback cannot raise a channel's capacity, but it can make the error probability fall <em>exponentially faster</em> with each extra word. That rate of decay is the <b>error exponent</b>, and BAM is built to maximize it rather than to squeeze out rate alone.</p>
     <div class="points">
@@ -340,7 +340,6 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <div class="point"><div class="n">03</div><p><strong>Decode-and-confirm for the adaptivity gain.</strong> Once a candidate dominates, the sender switches to a short confirmation phase and signals accept or reject. This is the Yamamoto-Itoh two-phase scheme, which attains the optimal Burnashev error exponent for channels with feedback. A wrong candidate is rejected and retransmitted instead of being accepted.</p></div>
       <div class="point"><div class="n">04</div><p><strong>Distortion-free and provably secure.</strong> Each biased sampling step is an optimal-transport coupling whose average over the key equals the model's own distribution, so the text statistics are untouched. Keys come from a shared seed through a pseudorandom function, and a reduction proof shows the output is computationally indistinguishable from clean text.</p></div>
     </div>
-    <p class="section-question">We call the scheme BAM, for Burnashev Adaptive Posterior Matching. On three open models it gets at most 1 message in 1000 wrong, where the best black-box baseline gets 100 to 170 wrong, using the same number of words.</p>
     <div class="btn-row">
       <a class="btn" href="./technical.html">See the technical results &rarr;</a>
       <a class="btn" href="https://arxiv.org/abs/XXXX.XXXXX">Read the paper &rarr;</a>
