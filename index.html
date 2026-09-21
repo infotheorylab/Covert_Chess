@@ -396,7 +396,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <p class="tabcap"><b>BAM vs. baselines on the C4 news corpus.</b> Mean &plusmn; standard error over 1000 trials, carrying an 8-bit message. Each variable-length scheme is paired with its own <i>no-embedding</i> control generated at the same length, since perplexity is only comparable at matched length.</p>
     </div>
 
-    <p class="figure-note"><strong>Zamir's scheme (We use default t=2) reaches the same near-zero error as BAM, but has a longer average token length.</strong> It needs 73&ndash;88 tokens where BAM needs 46&ndash;50. BAM's cost is compute instead: about 1.5&times; the seconds per token, where Zamir's overhead is negligible.</p>
+    <p class="figure-note"><strong>Zamir's scheme (We use default t=2, max token 1000 and count truncation as error) reaches the same near-zero error as BAM, but has a longer average token length.</strong> It needs 73&ndash;88 tokens where BAM needs 46&ndash;50. BAM's cost is compute instead: about 1.5&times; the seconds per token, where Zamir's overhead is negligible.</p>
 
     <div class="refs">
       <p class="eyebrow">references</p>
