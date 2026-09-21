@@ -140,6 +140,14 @@ strong { color: var(--ink); font-weight: 600; }
 .section .wrap { max-width: 760px; width: 100%; }
 .section.tight { min-height: 0; padding: 64px 0; }
 .section-lede { font-size: clamp(18px, 2.1vw, 21px); color: var(--ink); line-height: 1.55; margin: 18px 0 8px; }
+.bg-layout { display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px; margin-top: 26px; align-items: stretch; }
+.bg-cols { display: grid; gap: 22px; }
+.bg-col h3 { font-size: 18px; margin-bottom: 8px; }
+.bul { margin: 0; padding-left: 20px; }
+.bul li { color: var(--ink-2); font-size: 15.5px; line-height: 1.5; margin-bottom: 8px; }
+.bul li b { color: var(--ink); font-weight: 600; }
+.diagram-slot { display: flex; flex-direction: column; justify-content: center; min-height: 260px; }
+@media (max-width: 760px) { .bg-layout { grid-template-columns: 1fr; } }
 .body-text { font-size: 17px; line-height: 1.65; color: var(--ink-2); margin: 0 0 6px; }
 .section-question { margin: 36px 0 0; font-family: var(--font-display); font-size: clamp(18px, 2.2vw, 22px); font-weight: 600; color: var(--accent); line-height: 1.4; }
 
@@ -279,95 +287,81 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <a class="scroll-cue" href="#background">scroll<span>&darr;</span></a>
 </header>
 
-<!-- ============ 1 · BACKGROUND ============ -->
+<!-- ============ 1 · BACKGROUND & MOTIVATION ============ -->
 <section class="section" id="background">
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">background</p>
-    <h2>What is <span class="key">black-box steganography</span>?</h2>
-    <p class="section-lede">Steganography is the art of hiding a message inside something innocent-looking. AI-written text is a natural hiding place: each word is one choice among many, and a sender who controls those choices can spell out a secret without changing how the text reads.</p>
-    <p class="body-text">The catch is on the receiving end. To read the hidden message, the receiver has to know which word choices were "free" and which were forced. Schemes differ in how much the receiver must know to do that.</p>
-    <div class="steps">
-      <div class="step"><div class="k">THE COVER</div><h3>AI text as a hiding place</h3><p>A language model writes by sampling one word at a time from a probability distribution. Steering that sampling embeds a message. Both sender and receiver see the finished text.</p></div>
-      <div class="step"><div class="k">WHITE-BOX</div><h3>Receiver needs the model</h3><p>Most schemes require the receiver to reproduce the model's word probabilities, which means holding the same model weights and the same prompt as the sender.</p></div>
-      <div class="step"><div class="k">BLACK-BOX</div><h3>Receiver sees only the text</h3><p>The receiver gets the generated text and a short shared key, nothing else: no weights, no prompt, no probabilities. This is the setting real, independently deployed agents live in.</p></div>
-    </div>
-    <p class="section-question">Covert chess is black-box steganography: two agents keep an ordinary chat going while every message secretly carries a move, and the receiver reads it from the text alone.</p>
-  </div>
-  <a class="scroll-cue" href="#motivation">scroll<span>&darr;</span></a>
-</section>
+    <h2>Black-box <span class="key">generative steganography</span></h2>
 
-<!-- ============ 2 · MOTIVATION / PROBLEM WITH EXISTING WORK ============ -->
-<section class="section" id="motivation">
-  <div class="wrap reveal-on-scroll">
-    <p class="eyebrow">motivation</p>
-    <h2>Why is this <span class="key">hard</span>?</h2>
-    <p class="section-lede">Existing methods force a choice: share the model with the receiver, or accept a channel too slow and too unreliable to carry anything real.</p>
-    <div class="compare">
-      <div class="card">
-        <div class="tag">Existing work &middot; white-box</div>
-        <h3>Most schemes need shared cover statistics</h3>
-        <ul>
-          <li>Coupling, arithmetic-coding and inverse-sampling schemes all assume the receiver can recompute the model's next-word distribution.</li>
-          <li>In practice that means the <b>same weights and the same prompt</b> on both ends. Independently deployed agents rarely satisfy this.</li>
-          <li>Leak the prompt or update the model and the channel breaks.</li>
-        </ul>
+    <div class="bg-layout">
+      <div class="bg-cols">
+        <div class="bg-col">
+          <h3>What is it?</h3>
+          <ul class="bul">
+            <li>A language model writes by picking one word at a time. Steering those picks hides a message in ordinary text.</li>
+            <li><b>White-box:</b> the receiver must hold the same model and prompt to read it.</li>
+            <li><b>Black-box:</b> the receiver sees only the text and a short shared key.</li>
+          </ul>
+        </div>
+        <div class="bg-col">
+          <h3>Why is it hard?</h3>
+          <ul class="bul">
+            <li>Most schemes need shared cover statistics. Independent agents rarely have them.</li>
+            <li>Black-box schemes are multi-bit watermarks: reliable only at very low rates. The best still gets <b>10 to 17%</b> of 8-bit messages wrong.</li>
+            <li>They are fixed-length and open-loop: no way to adapt when a turn ends early.</li>
+          </ul>
+        </div>
       </div>
-      <div class="card">
-        <div class="tag">Existing work &middot; black-box</div>
-        <h3>Multi-bit watermarks embed far too slowly</h3>
-        <ul>
-          <li>Schemes that do read the text alone are inference-time <b>multi-bit watermarks</b>, built to prove authorship, not to carry messages.</li>
-          <li>They only decode reliably at very low embedding rates. Push the rate up and error explodes: the best of them still gets <b>10 to 17% of 8-bit messages wrong</b> in about 50 words.</li>
-          <li>They are fixed-length and open-loop: they commit to a word budget in advance and never check whether the message got through, so a turn that ends early loses the message.</li>
-        </ul>
-      </div>
+      <div class="slot diagram-slot"><strong>Diagram</strong>generative steganography &middot; placeholder</div>
     </div>
-    <p class="section-question">Can a black-box scheme reach the rate and reliability of a white-box one, when the receiver sees nothing but the text?</p>
+
+    <p class="section-question">Can a black-box scheme match white-box rate and reliability?</p>
   </div>
   <a class="scroll-cue" href="#method">scroll<span>&darr;</span></a>
 </section>
 
-<!-- ============ 3 · OUR METHOD ============ -->
+<!-- ============ 2 · OUR METHOD ============ -->
 <section class="section" id="method">
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">our method</p>
-    <h2>Optimize the message error exponent via <span class="key">information-theoretic feedback coding</span></h2>
-    <p class="section-lede">Every generated word is seen by both sides. So the sender always knows exactly what the receiver has seen, and can adapt the next word to it. That is a channel with perfect, instant feedback, and coding theory knows how to exploit one.</p>
-    <p class="body-text">Feedback cannot raise a channel's capacity, but it can make the error probability fall <em>exponentially faster</em> with each extra word. That rate of decay is the <b>error exponent</b>, and BAM is built to maximize it rather than to squeeze out rate alone.</p>
+    <h2>Treat the conversation as a <span class="key">feedback channel</span></h2>
+    <p class="section-lede">Both sides see every generated word, so the sender can adapt each next word to what the receiver has already seen.</p>
+    <p class="body-text">Feedback cannot raise capacity, but it can make error fall exponentially faster per word. That decay rate is the <b>error exponent</b>, and BAM is built to maximize it.</p>
     <div class="points">
-      <div class="point"><div class="n">01</div><p><strong>Posterior matching for rate.</strong> Instead of a fixed codebook, the sender tracks the receiver's belief over all possible messages and picks each next symbol to push that belief toward the truth. This moves the operating point to a higher rate at the same error.</p></div>
-      <div class="point"><div class="n">02</div><p><strong>Variable-length stopping for the sequentiality gain.</strong> A threshold decoder keeps going while the receiver is unsure and stops as soon as one message dominates. Spending words only where they are needed steepens the error decay.</p></div>
-      <div class="point"><div class="n">03</div><p><strong>Decode-and-confirm for the adaptivity gain.</strong> Once a candidate dominates, the sender switches to a short confirmation phase and signals accept or reject. This is the Yamamoto-Itoh two-phase scheme, which attains the optimal Burnashev error exponent for channels with feedback. A wrong candidate is rejected and retransmitted instead of being accepted.</p></div>
-      <div class="point"><div class="n">04</div><p><strong>Distortion-free and provably secure.</strong> Each biased sampling step is an optimal-transport coupling whose average over the key equals the model's own distribution, so the text statistics are untouched. Keys come from a shared seed through a pseudorandom function, and a reduction proof shows the output is computationally indistinguishable from clean text.</p></div>
+      <div class="point"><div class="n">01</div><p><strong>Posterior matching.</strong> Each symbol is chosen from the receiver's current belief, not a fixed codebook. Higher rate at the same error.</p></div>
+      <div class="point"><div class="n">02</div><p><strong>Variable-length stopping.</strong> Keep sending while the receiver is unsure, stop once one message dominates. Sequentiality gain.</p></div>
+      <div class="point"><div class="n">03</div><p><strong>Decode-and-confirm.</strong> A short accept/reject phase after each candidate, as in Yamamoto-Itoh, attains the optimal Burnashev exponent. Adaptivity gain.</p></div>
+      <div class="point"><div class="n">04</div><p><strong>Distortion-free and provably secure.</strong> Optimal-transport coupling leaves the text distribution untouched. A PRF reduction proves indistinguishability from clean text.</p></div>
     </div>
+    <p class="section-question">BAM: at most 1 message in 1000 wrong, versus 100 to 170 for the best black-box baseline at the same length.</p>
     <div class="btn-row">
-      <a class="btn" href="./technical.html">See the technical results &rarr;</a>
-      <a class="btn" href="https://arxiv.org/abs/XXXX.XXXXX">Read the paper &rarr;</a>
+      <a class="btn" href="./technical.html">Technical results &rarr;</a>
+      <a class="btn" href="https://arxiv.org/abs/XXXX.XXXXX">Paper &rarr;</a>
     </div>
   </div>
   <a class="scroll-cue" href="#demo">scroll<span>&darr;</span></a>
 </section>
 
-<!-- ============ 4 · DEMO ============ -->
+<!-- ============ 3 · DEMO ============ -->
 <section class="section" id="demo">
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">try it live</p>
     <h2>Watch two agents talk — and decode the secret</h2>
     <div class="steps">
-      <div class="step"><div class="k">STEP 1</div><h3>Play a chess game with AI</h3><p>Make a chess move and enter a prompt to emit an AI mediated message. The opposing agent never sees your prompt.</p></div>
-      <div class="step"><div class="k">STEP 2</div><h3>Run the conversation</h3><p>The agents chat naturally while the payload rides along underneath. The LLM text generation is distortion-free.</p></div>
-      <div class="step"><div class="k">STEP 3</div><h3>Reveal &amp; decode</h3><p>See the hidden message recovered from the text alone, turn by turn. The belief traces are provided for each round for verification.</p></div>
+      <div class="step"><div class="k">STEP 1</div><h3>Make a move</h3><p>Pick a chess move and type a short prompt. The other agent never sees either.</p></div>
+      <div class="step"><div class="k">STEP 2</div><h3>Let them chat</h3><p>The agents talk naturally. The move rides underneath, distortion-free.</p></div>
+      <div class="step"><div class="k">STEP 3</div><h3>Decode</h3><p>Watch the move recovered from the text alone, with the belief trace for each round.</p></div>
     </div>
     <div class="btn-row">
       <a class="btn primary" href="https://4qy9dnllc6t18b-8000.proxy.runpod.net/">Launch the demo →</a>
       <a class="btn" href="./examples.html">See worked examples →</a>
     </div>
-    <p class="stat-note">Prefer to read before you play? The <a href="./examples.html">examples page</a> puts a covert conversation, a covert image and a covert code snippet next to their payload-free twins — click any of them to open the receiver's belief propagation for that round.</p>
+    <p class="stat-note">Prefer to read first? The <a href="./examples.html">examples page</a> shows covert text, image and code next to their clean twins.</p>
   </div>
   <a class="scroll-cue" href="#authors">scroll<span>&darr;</span></a>
 </section>
 
-<!-- ============ 5 · AUTHORS ============ -->
+<!-- ============ 4 · AUTHORS ============ -->
 <section class="section" id="authors">
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">authors</p>
@@ -420,7 +414,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <a class="scroll-cue" href="#contact">scroll<span>&darr;</span></a>
 </section>
 
-<!-- ============ 6 · CONTACT ============ -->
+<!-- ============ 5 · CONTACT ============ -->
 <section class="section tight" id="contact">
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">get in touch</p>
