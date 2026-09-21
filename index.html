@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Inference-Time Covert Communication over LLM-Agent Conversations</title>
-<meta name="description" content="Can AI agents secretly play chess? Two chatbots hold an ordinary conversation while every message secretly carries a chess move." />
+<meta name="description" content="Can AI agents secretly play chess? Two chatbots hold an ordinary conversation while every message secretly carries a hidden chess move." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -283,14 +283,15 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <section class="section" id="background">
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">background</p>
-    <h2>What is <span class="key">covert chess</span>?</h2>
-    <p class="section-lede">AI assistants increasingly talk to <em>other</em> AI assistants on our behalf: scheduling, negotiating, replying. The text they exchange reads like ordinary chat. But every word an AI writes is a choice among many, and choices can carry a secret.</p>
-    <p class="body-text">Hiding a message inside something innocent-looking is an old art called <b>steganography</b>. AI-written text is a natural hiding place: a sender can nudge which words the model picks so that the text still reads normally, yet spells out a hidden message to someone who knows where to look. Covert chess takes that idea to its limit: a full game of chess played through nothing but small talk.</p>
+    <h2>What is <span class="key">black-box steganography</span>?</h2>
+    <p class="section-lede">Steganography is the art of hiding a message inside something innocent-looking. AI-written text is a natural hiding place: each word is one choice among many, and a sender who controls those choices can spell out a secret without changing how the text reads.</p>
+    <p class="body-text">The catch is on the receiving end. To read the hidden message, the receiver has to know which word choices were "free" and which were forced. Schemes differ in how much the receiver must know to do that.</p>
     <div class="steps">
-      <div class="step"><div class="k">MOVE</div><h3>You pick a move</h3><p>You choose a chess move and type a short, ordinary message, just as you would to any chatbot.</p></div>
-      <div class="step"><div class="k">HIDE</div><h3>Agent A hides it</h3><p>Agent A rewrites your message into natural chat text. Your move is woven into its word choices. Nothing about chess appears.</p></div>
-      <div class="step"><div class="k">READ</div><h3>Agent B recovers it</h3><p>Agent B sees only the text, recovers the move, and answers with its own move hidden the same way. The game goes on, unseen.</p></div>
+      <div class="step"><div class="k">THE COVER</div><h3>AI text as a hiding place</h3><p>A language model writes by sampling one word at a time from a probability distribution. Steering that sampling embeds a message. Both sender and receiver see the finished text.</p></div>
+      <div class="step"><div class="k">WHITE-BOX</div><h3>Receiver needs the model</h3><p>Most schemes require the receiver to reproduce the model's word probabilities, which means holding the same model weights and the same prompt as the sender.</p></div>
+      <div class="step"><div class="k">BLACK-BOX</div><h3>Receiver sees only the text</h3><p>The receiver gets the generated text and a short shared key, nothing else: no weights, no prompt, no probabilities. This is the setting real, independently deployed agents live in.</p></div>
     </div>
+    <p class="section-question">Covert chess is black-box steganography pushed to its limit: two agents keep an ordinary chat going while every message secretly carries a move, and the receiver reads it from the text alone.</p>
   </div>
   <a class="scroll-cue" href="#motivation">scroll<span>&darr;</span></a>
 </section>
@@ -300,28 +301,28 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">motivation</p>
     <h2>Why is this <span class="key">hard</span>?</h2>
-    <p class="section-lede">Hiding messages in AI writing is not new. Doing it when the two agents share almost nothing, and still getting every message right, is.</p>
+    <p class="section-lede">Existing methods force a choice: share the model with the receiver, or accept a channel too slow and too unreliable to carry anything real.</p>
     <div class="compare">
       <div class="card">
-        <div class="tag">Existing work &middot; problem 1</div>
-        <h3>Most methods need a shared secret model</h3>
+        <div class="tag">Existing work &middot; white-box</div>
+        <h3>Most schemes need shared cover statistics</h3>
         <ul>
-          <li>Sender and receiver must run the <b>exact same model with the exact same prompt</b>, so the receiver can replay every word choice.</li>
-          <li>That is a big assumption when the two agents belong to different people, run on different services, or update independently.</li>
-          <li>Leak the prompt or the model and the channel is gone.</li>
+          <li>Coupling, arithmetic-coding and inverse-sampling schemes all assume the receiver can recompute the model's next-word distribution.</li>
+          <li>In practice that means the <b>same weights and the same prompt</b> on both ends. Independently deployed agents rarely satisfy this.</li>
+          <li>Leak the prompt or update the model and the channel breaks.</li>
         </ul>
       </div>
       <div class="card">
-        <div class="tag">Existing work &middot; problem 2</div>
-        <h3>Text-only methods get it wrong too often</h3>
+        <div class="tag">Existing work &middot; black-box</div>
+        <h3>Multi-bit watermarks embed far too slowly</h3>
         <ul>
-          <li>Some schemes let the receiver read the text alone, with no model. They borrow from <b>watermarking</b>, which was built to answer a yes/no question, not to carry a message.</li>
-          <li>They commit to a fixed number of words in advance and never check whether the message got through.</li>
-          <li>On short, ordinary chat turns the strongest of them still gets about <b>1 message in 10 wrong</b>. One wrong move ends a chess game.</li>
+          <li>Schemes that do read the text alone are inference-time <b>multi-bit watermarks</b>, built to prove authorship, not to carry messages.</li>
+          <li>They only decode reliably at very low embedding rates. Push the rate up and error explodes: the best of them still gets <b>10 to 17% of 8-bit messages wrong</b> in about 50 words.</li>
+          <li>They are fixed-length and open-loop: they commit to a word budget in advance and never check whether the message got through, so a turn that ends early loses the message.</li>
         </ul>
       </div>
     </div>
-    <p class="section-question">Can two agents pass hidden messages when the receiver sees nothing but the text, and still get every message right?</p>
+    <p class="section-question">Can a black-box scheme reach the rate and reliability of a white-box one, when the receiver sees nothing but the text?</p>
   </div>
   <a class="scroll-cue" href="#method">scroll<span>&darr;</span></a>
 </section>
@@ -331,14 +332,15 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">our method</p>
     <h2>Treat the conversation as a <span class="key">feedback channel</span></h2>
-    <p class="section-lede">Our key observation: every word the sender writes is seen by both sides. So the sender always knows exactly what the receiver has seen so far, and can adapt the next word to it.</p>
+    <p class="section-lede">Every generated word is seen by both sides. So the sender always knows exactly what the receiver has seen, and can adapt the next word to it. That is a channel with perfect, instant feedback, and coding theory knows how to exploit one.</p>
+    <p class="body-text">Feedback cannot raise a channel's capacity, but it can make the error probability fall <em>exponentially faster</em> with each extra word. That rate of decay is the <b>error exponent</b>, and BAM is built to maximize it rather than to squeeze out rate alone.</p>
     <div class="points">
-      <div class="point"><div class="n">01</div><p><strong>Adapt word by word.</strong> Instead of fixing the whole hidden message up front, the sender tracks what the receiver must currently believe and picks each next word to push that belief toward the true message. In coding theory this is called <em>posterior matching</em>.</p></div>
-      <div class="point"><div class="n">02</div><p><strong>Confirm before stopping.</strong> Once the receiver would be confident, the sender spends a few extra words to confirm the guess, or to flag a mistake and try again. This <em>decode-and-confirm</em> step is what drives errors to zero.</p></div>
-      <div class="point"><div class="n">03</div><p><strong>Leave the text untouched.</strong> The nudges are arranged so the overall word statistics are exactly those of the unmodified model. Even someone holding the model cannot tell a hidden-move message from a plain one.</p></div>
-      <div class="point"><div class="n">04</div><p><strong>Share only a key.</strong> The two agents share a short secret key, not a model or a prompt. The receiver never runs a model at all: it reads the text and the key, nothing else.</p></div>
+      <div class="point"><div class="n">01</div><p><strong>Posterior matching for rate.</strong> Instead of a fixed codebook, the sender tracks the receiver's belief over all possible messages and picks each next symbol to push that belief toward the truth. This moves the operating point to a higher rate at the same error.</p></div>
+      <div class="point"><div class="n">02</div><p><strong>Variable-length stopping for the sequentiality gain.</strong> A threshold decoder keeps going while the receiver is unsure and stops as soon as one message dominates. Spending words only where they are needed steepens the error decay.</p></div>
+      <div class="point"><div class="n">03</div><p><strong>Decode-and-confirm for the adaptivity gain.</strong> Once a candidate dominates, the sender switches to a short confirmation phase and signals accept or reject. This is the Yamamoto-Itoh two-phase scheme, which attains the optimal Burnashev error exponent for channels with feedback. A wrong candidate is rejected and retransmitted instead of being accepted.</p></div>
+      <div class="point"><div class="n">04</div><p><strong>Distortion-free and provably secure.</strong> Each biased sampling step is an optimal-transport coupling whose average over the key equals the model's own distribution, so the text statistics are untouched. Keys come from a shared seed through a pseudorandom function, and a reduction proof shows the output is computationally indistinguishable from clean text.</p></div>
     </div>
-    <p class="section-question">We call the scheme BAM, for Burnashev Adaptive Posterior Matching. On three open models it gets at most 1 message in 1000 wrong, where the best text-only method gets 100 to 170 wrong, using the same number of words.</p>
+    <p class="section-question">We call the scheme BAM, for Burnashev Adaptive Posterior Matching. On three open models it gets at most 1 message in 1000 wrong, where the best black-box baseline gets 100 to 170 wrong, using the same number of words.</p>
     <div class="btn-row">
       <a class="btn" href="./technical.html">See the technical results &rarr;</a>
       <a class="btn" href="https://arxiv.org/abs/XXXX.XXXXX">Read the paper &rarr;</a>
