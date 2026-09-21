@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Technical results — Inference-Time Covert Communication over LLM-Agent Conversations</title>
+<meta name="description" content="Abstract, headline figure and full results table for BAM (Burnashev Adaptive Posterior Matching), a feedback-coding scheme for black-box LLM steganography." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<style>
+:root {
+  --bg:         #EEE7D6;   /* warm paper */
+  --surface:    #F7F2E7;
+  --surface-2:  #F2ECDD;
+  --ink:        #17284D;   /* deep blue */
+  --ink-2:      #47516B;
+  --muted:      #8A836C;
+  --line:       #DED4BE;
+  --line-2:     #CFC3A6;
+  --accent:     #2A4BD0;   /* signal blue */
+  --accent-2:   #4E6BE0;
+  --accent-soft:rgba(42,75,208,0.10);
+  --accent-brd: rgba(42,75,208,0.32);
+  --confirm:    #2E7D57;
+  --alert:      #B4472F;
+  --amber:      #A9791F;
+
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-body:    "Inter", system-ui, sans-serif;
+  --font-mono:    "Space Mono", ui-monospace, monospace;
+
+  --wrap: 1060px;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { animation: none !important; transition: none !important; } }
+
+.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.14; letter-spacing: -0.02em; margin: 0; color: var(--ink); }
+h2 { font-size: clamp(27px, 3.8vw, 38px); }
+h3 { font-size: 20px; letter-spacing: -0.01em; }
+p { margin: 0 0 18px; color: var(--ink-2); }
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+em { color: var(--ink); font-style: italic; }
+strong { color: var(--ink); font-weight: 600; }
+.key { color: var(--accent); font-weight: 600; }
+
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+
+
+/* ---------- nav (same as examples.html) ---------- */
+.nav { position: sticky; top: 0; z-index: 50; background: rgba(238,231,214,.9); backdrop-filter: saturate(140%) blur(12px); border-bottom: 1px solid var(--line); }
+.nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
+.nav .brand { font-family: var(--font-mono); font-weight: 700; font-size: 15px; color: var(--ink); }
+.nav .brand span { color: var(--accent); }
+.nav .links { display: flex; gap: 10px; }
+.nav .links a { color: var(--ink); font-size: 14px; font-weight: 500; padding: 7px 14px; border: 1px solid var(--line-2); border-radius: 8px; }
+.nav .links a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
+.nav .links a.primary { background: var(--accent); color: #F4EFE2; border-color: var(--accent); }
+.nav .links a.primary:hover { background: var(--accent-2); color: #F4EFE2; }
+
+/* ---------- page head ---------- */
+.page-head { padding: 64px 0 28px; }
+.page-head .wrap { max-width: 760px; }
+.page-head h1 { font-size: clamp(30px, 4.4vw, 46px); letter-spacing: -0.03em; }
+.page-head .lede { font-size: clamp(18px, 2.1vw, 21px); color: var(--ink); line-height: 1.55; margin: 18px 0 0; }
+.page-head .lede b { font-weight: 700; }
+
+/* ---------- body ---------- */
+.section { padding: 28px 0 88px; }
+.section .wrap { max-width: 760px; }
+.abstract-body { font-size: 17.5px; line-height: 1.7; color: var(--ink-2); }
+.abstract-body b { color: var(--ink); font-weight: 700; }
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-body); font-size: 15px; font-weight: 500; padding: 11px 20px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); transition: transform .12s ease, border-color .12s ease, background .12s ease; }
+.btn:hover { text-decoration: none; border-color: var(--accent); transform: translateY(-1px); }
+.btn.primary { background: var(--accent); color: #F4EFE2; border-color: var(--accent); font-weight: 600; }
+.btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+
+/* technical-result page: the abstract sits in its own box */
+.abstract-box { margin-top: 28px; border: 1px solid var(--accent-brd); border-radius: var(--radius); background: linear-gradient(180deg, var(--accent-soft), transparent); padding: 22px 24px 8px; }
+.abstract-box .clabel { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
+.lede { font-size: clamp(19px, 2.3vw, 23px); color: var(--ink); line-height: 1.5; max-width: 760px; font-weight: 500; }
+.lede b, .lede .key { font-weight: 700; }
+.abstract-body { font-size: 17.5px; line-height: 1.7; color: var(--ink-2); }
+.abstract-body b { color: var(--ink); font-weight: 700; }
+.body-col { max-width: none; }
+.body-col p { font-size: 17.5px; }
+.reveal-on-scroll { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
+.reveal-on-scroll.in { opacity: 1; transform: none; }
+
+/* result figure */
+.figure { margin-top: 34px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 22px 24px 18px; width: min(1080px, 94vw); max-width: none; margin-left: 50%; transform: translateX(-50%); }
+.figure img { width: 100%; height: auto; display: block; border-radius: 6px; }
+.figcap { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--ink-2); margin: 14px 2px 0; letter-spacing: 0; }
+.figcap b { color: var(--ink); font-weight: 700; }
+.figure-note { margin-top: 22px; font-size: 16px; color: var(--ink-2); max-width: 820px; line-height: 1.6; }
+.figure-note strong { color: var(--ink); font-weight: 600; }
+
+/* results table — same wide gutter-breaking trick as .figure */
+.table-wrap { margin-top: 34px; width: min(860px, 94vw); max-width: none; margin-left: 50%; transform: translateX(-50%); }
+.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.res-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-2); }
+.res-table th, .res-table td { padding: 7px 16px; text-align: right; white-space: nowrap; }
+.res-table th:first-child, .res-table td:first-child { text-align: left; }
+.res-table thead th { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 700; background: var(--surface-2); border-bottom: 1px solid var(--line-2); }
+.res-table tbody td { border-bottom: 1px solid var(--line); }
+.res-table tr.grp th { text-align: left; font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: 0; text-transform: none; background: var(--surface-2); border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line); padding: 9px 16px; }
+/* first row of each matched-length block — extra breathing room so the dashed
+   rule reads as a block break rather than doubling the previous row border */
+.res-table tr.blk td { border-top: 1px dashed var(--line-2); padding-top: 14px; }
+/* the no-embedding control each block is measured against */
+.res-table tr.ctrl td { color: var(--muted); }
+.res-table tr.ctrl td:first-child { font-style: italic; }
+.res-table tr.ours td { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
+.res-table tr.ours td:first-child { color: var(--accent); }
+.res-table .rn { color: var(--muted); font-weight: 400; }
+.tabcap { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--ink-2); margin: 14px 2px 0; letter-spacing: 0; }
+.tabcap b { color: var(--ink); font-weight: 700; }
+@media (max-width: 620px) { .res-table th, .res-table td { padding: 6px 10px; font-size: 11.5px; } }
+
+/* references */
+.refs { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 22px; max-width: 880px; }
+.refs .eyebrow { margin-bottom: 14px; }
+.refs ol { margin: 0; padding-left: 22px; }
+.refs li { font-size: 14px; color: var(--ink-2); line-height: 1.55; margin-bottom: 10px; }
+.refs li b { color: var(--ink); font-weight: 600; }
+.refs li .venue { font-style: italic; color: var(--muted); }
+
+
+footer { padding: 40px 0 64px; border-top: 1px solid var(--line); }
+footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: 13.5px; font-family: var(--font-mono); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <a class="brand" href="./index.html">covert<span>::</span>chess</a>
+    <div class="links">
+      <a href="./index.html">&larr; Overview</a>
+      <a href="./examples.html">Examples</a>
+      <a class="primary" href="https://4qy9dnllc6t18b-8000.proxy.runpod.net/">Live demo</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-head">
+  <div class="wrap">
+    <p class="eyebrow">technical results</p>
+    <h1>Feedback coding for black-box LLM steganography</h1>
+    <p class="lede">Feedback coding embeds hidden payloads in agentic dialogue at high rate and low error: <b>reliable, distortion-free, provably secure</b>, and requiring <b>no shared model or prompt</b>.</p>
+  </div>
+</header>
+
+<section class="section">
+  <div class="wrap">
+    <div class="abstract-box">
+      <div class="clabel">Abstract</div>
+      <p class="abstract-body">As large language models (LLMs) are increasingly used to automate digital interactions, users can leverage LLM-generated text as cover for covert communication within seemingly benign conversations. Existing LLM steganography, however, is predominantly white-box, requiring the sender and receiver to share the cover statistics, typically through access to the model weights and prompt. Black-box schemes remove this requirement by allowing the receiver to operate solely on the generated text, but current approaches rely on fixed-length, open-loop watermarking techniques that suffer from high decoding error rates under variable-length token generation. We recast black-box LLM steganography as a sequential communication problem with causal, noiseless feedback: every generated token is observed by both parties and can guide subsequent embedding. Based on this perspective, we introduce <b>B</b>urnashev <b>A</b>daptive Posterior <b>M</b>atching (BAM), a feedback-coding scheme that combines posterior matching with a decode-and-confirm phase. The design is inspired by classical information-theoretic feedback-coding principles, while its security is established through a cryptographic reduction proof. Across three open-weight language models, we demonstrate that BAM attains <b>0&ndash;0.1% empirical message error on an 8-bit payload in around 50 tokens, across 1000 trials, versus 10&ndash;17% for the strongest black-box baseline at comparable length</b>. Building on the proposed steganography algorithm, we demonstrate the feasibility of an end-to-end communication protocol that achieves high communication rates across multiple conversational settings.</p>
+    </div>
+
+    <figure class="figure">
+      <img src="./img/bam_fig.png" alt="Message error probability vs average token length for BAM and five baselines across Llama-3.1-8B, Qwen3.5-9B-Base, and Mistral-7B."/>
+      <figcaption class="figcap"><b>Message error probability vs. average token length.</b> BAM (red) against four inference-time black-box steganography baselines — ArcMark [1], MPAC [2], BiMark [3], StealthInk [4] — across three models, C4 news dataset. Lower is better; the x-axis is the average number of tokens used to carry an 8-bit message.</figcaption>
+    </figure>
+
+    <p class="figure-note">At a matched embedding budget, <strong>BAM drives message-error probability roughly an order of magnitude below every baseline</strong>, and it keeps falling toward zero as a few more tokens become available — while fixed-budget watermarking schemes plateau at high error on short, low-entropy conversational turns. The gain is consistent across Llama-3.1-8B, Qwen3.5-9B-Base, and Mistral-7B.</p>
+
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table class="res-table">
+          <thead>
+            <tr>
+              <th scope="col">Scheme</th>
+              <th scope="col">Avg len</th>
+              <th scope="col">Msg err &darr;</th>
+              <th scope="col">PPL &darr;</th>
+              <th scope="col">Sec/token &darr;</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr class="grp"><th colspan="5" scope="colgroup">Llama-3.1-8B</th></tr>
+            <tr class="ctrl"><td>No embedding</td><td>50.0</td><td>&mdash;</td><td>7.66 &plusmn; 0.11</td><td>0.0214</td></tr>
+            <tr><td>MPAC <span class="rn">[2]</span></td><td>50.0</td><td>0.797 &plusmn; 0.013</td><td>8.54 &plusmn; 0.11</td><td>0.0223</td></tr>
+            <tr><td>BiMark <span class="rn">[3]</span></td><td>50.0</td><td>0.569 &plusmn; 0.016</td><td>7.68 &plusmn; 0.11</td><td>0.0352</td></tr>
+            <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.637 &plusmn; 0.015</td><td>7.66 &plusmn; 0.11</td><td>0.0231</td></tr>
+            <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.106 &plusmn; 0.010</td><td>7.52 &plusmn; 0.11</td><td>0.0291</td></tr>
+            <tr class="ctrl blk"><td>No embedding</td><td>74.8 &plusmn; 2.1</td><td>&mdash;</td><td>7.47 &plusmn; 0.10</td><td>0.0220</td></tr>
+            <tr><td>Zamir <span class="rn">[5]</span></td><td>74.8 &plusmn; 2.1</td><td>0.003 &plusmn; 0.002</td><td>8.79 &plusmn; 0.12</td><td>0.0220</td></tr>
+            <tr class="ctrl blk"><td>No embedding</td><td>47.1 &plusmn; 1.5</td><td>&mdash;</td><td>7.71 &plusmn; 0.12</td><td>0.0224</td></tr>
+            <tr class="ours"><td>BAM (L = 2<sup>15</sup>)</td><td>47.1 &plusmn; 1.5</td><td>0.001 &plusmn; 0.001</td><td>7.89 &plusmn; 0.12</td><td>0.0378</td></tr>
+
+            <tr class="grp"><th colspan="5" scope="colgroup">Qwen-3.5-9B-Base</th></tr>
+            <tr class="ctrl"><td>No embedding</td><td>50.0</td><td>&mdash;</td><td>7.83 &plusmn; 0.10</td><td>0.0420</td></tr>
+            <tr><td>MPAC <span class="rn">[2]</span></td><td>50.0</td><td>0.840 &plusmn; 0.012</td><td>9.03 &plusmn; 0.12</td><td>0.0420</td></tr>
+            <tr><td>BiMark <span class="rn">[3]</span></td><td>50.0</td><td>0.567 &plusmn; 0.016</td><td>8.23 &plusmn; 0.12</td><td>0.0558</td></tr>
+            <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.659 &plusmn; 0.015</td><td>8.04 &plusmn; 0.11</td><td>0.0456</td></tr>
+            <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.105 &plusmn; 0.010</td><td>7.76 &plusmn; 0.11</td><td>0.0510</td></tr>
+            <tr class="ctrl blk"><td>No embedding</td><td>72.9 &plusmn; 1.5</td><td>&mdash;</td><td>7.80 &plusmn; 0.11</td><td>0.0424</td></tr>
+            <tr><td>Zamir <span class="rn">[5]</span></td><td>72.9 &plusmn; 1.5</td><td>0.000 &plusmn; 0.000</td><td>9.12 &plusmn; 0.12</td><td>0.0425</td></tr>
+            <tr class="ctrl blk"><td>No embedding</td><td>45.8 &plusmn; 1.3</td><td>&mdash;</td><td>8.21 &plusmn; 0.13</td><td>0.0436</td></tr>
+            <tr class="ours"><td>BAM (L = 2<sup>15</sup>)</td><td>45.8 &plusmn; 1.3</td><td>0.001 &plusmn; 0.001</td><td>8.24 &plusmn; 0.12</td><td>0.0541</td></tr>
+
+            <tr class="grp"><th colspan="5" scope="colgroup">Mistral-7B-v0.3</th></tr>
+            <tr class="ctrl"><td>No embedding</td><td>50.0</td><td>&mdash;</td><td>6.25 &plusmn; 0.09</td><td>0.0212</td></tr>
+            <tr><td>MPAC <span class="rn">[2]</span></td><td>50.0</td><td>0.872 &plusmn; 0.012</td><td>6.73 &plusmn; 0.09</td><td>0.0216</td></tr>
+            <tr><td>BiMark <span class="rn">[3]</span></td><td>50.0</td><td>0.674 &plusmn; 0.015</td><td>6.26 &plusmn; 0.08</td><td>0.0342</td></tr>
+            <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.702 &plusmn; 0.014</td><td>6.16 &plusmn; 0.08</td><td>0.0217</td></tr>
+            <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.168 &plusmn; 0.012</td><td>6.13 &plusmn; 0.09</td><td>0.0278</td></tr>
+            <tr class="ctrl blk"><td>No embedding</td><td>87.8 &plusmn; 1.9</td><td>&mdash;</td><td>5.97 &plusmn; 0.07</td><td>0.0211</td></tr>
+            <tr><td>Zamir <span class="rn">[5]</span></td><td>87.8 &plusmn; 1.9</td><td>0.001 &plusmn; 0.001</td><td>6.72 &plusmn; 0.08</td><td>0.0212</td></tr>
+            <tr class="ctrl blk"><td>No embedding</td><td>49.7 &plusmn; 1.2</td><td>&mdash;</td><td>6.22 &plusmn; 0.10</td><td>0.0222</td></tr>
+            <tr class="ours"><td>BAM (L = 2<sup>11</sup>)</td><td>49.7 &plusmn; 1.2</td><td>0.000 &plusmn; 0.000</td><td>6.51 &plusmn; 0.09</td><td>0.0326</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="tabcap"><b>BAM vs. baselines on the C4 news corpus.</b> Mean &plusmn; standard error over 1000 trials, carrying an 8-bit message. Each variable-length scheme is paired with its own <i>no-embedding</i> control generated at the same length, since perplexity is only comparable at matched length.</p>
+    </div>
+
+    <p class="figure-note"><strong>Zamir's scheme (We use default t=2, max token 1000 and count truncation as error) reaches the same near-zero error as BAM, but has a longer average token length.</strong> It needs 73&ndash;88 tokens where BAM needs 46&ndash;50. BAM's cost is compute instead: about 1.5&times; the seconds per token, where Zamir's overhead is negligible.</p>
+
+    <div class="refs">
+      <p class="eyebrow">references</p>
+      <ol>
+        <li><b>ArcMark.</b> <a href="https://arxiv.org/abs/2602.07235">ArcMark: Multi-bit LLM Watermark via Optimal Transport</a>. Gilani, Atefeh and Long, Carol Xuan and Vithana, Sajani and Kosut, Oliver and Sankar, Lalitha and Calmon, Flavio P. <span class="venue">arXiv:2602.07235, 2026 (baseline)</span></li>
+        <li><b>MPAC.</b> <a href="https://arxiv.org/abs/2308.00221">Advancing beyond identification: Multi-bit watermark for large language models</a>. Yoo, KiYoon and Ahn, Wonhyuk and Kwak, Nojun. <span class="venue">NAACL 2024 (baseline)</span></li>
+        <li><b>BiMark.</b> <a href="https://arxiv.org/abs/2506.21602">BiMark: Unbiased multilayer watermarking for large language models</a>. Feng, Xiaoyan and Zhang, He and Zhang, Yanjun and Zhang, Leo Yu and Pan, Shirui. <span class="venue">ICML 2025 (baseline)</span></li>
+        <li><b>StealthInk.</b> <a href="https://arxiv.org/abs/2506.05502">StealthInk: A multi-bit and stealthy watermark for large language models</a>. Jiang, Ya and Wu, Chuxiong and Boroujeny, Massieh Kordi and Mark, Brian and Zeng, Kai. <span class="venue">ICML 2025 (baseline)</span></li>
+        <li><b>Zamir.</b> <a href="https://scholar.google.com/citations?view_op=view_citation&amp;hl=en&amp;user=xiyhJrwAAAAJ&amp;sortby=pubdate&amp;citation_for_view=xiyhJrwAAAAJ:R3hNpaxXUhUC">Undetectable steganography for language models</a>. Zamir, Or. <span class="venue">Transactions on Machine Learning Research, 2024 (baseline)</span></li>
+      </ol>
+    </div>
+    <div class="btn-row">
+      <a class="btn primary" href="https://arxiv.org/abs/XXXX.XXXXX">Read the paper on arXiv &rarr;</a>
+      <a class="btn" href="./examples.html">Worked examples</a>
+      <a class="btn" href="./index.html">Back to overview</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>&copy; <span id="yr"></span> Information Theory Lab &mdash; Harvard</span>
+    <span>paper on <a href="https://arxiv.org/abs/XXXX.XXXXX">arXiv</a></span>
+  </div>
+</footer>
+
+<script>document.getElementById('yr').textContent = new Date().getFullYear();</script>
+</body>
+</html>

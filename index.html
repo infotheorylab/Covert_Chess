@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Covert Chess by AI Agents</title>
+<title>Inference-Time Covert Communication over LLM-Agent Conversations</title>
 <meta name="description" content="Can AI agents secretly play chess? Two chatbots hold an ordinary conversation while every message secretly carries a chess move." />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -140,29 +140,8 @@ strong { color: var(--ink); font-weight: 600; }
 .section .wrap { max-width: 760px; width: 100%; }
 .section.tight { min-height: 0; padding: 64px 0; }
 .section-lede { font-size: clamp(18px, 2.1vw, 21px); color: var(--ink); line-height: 1.55; margin: 18px 0 8px; }
+.body-text { font-size: 17px; line-height: 1.65; color: var(--ink-2); margin: 0 0 6px; }
 .section-question { margin: 36px 0 0; font-family: var(--font-display); font-size: clamp(18px, 2.2vw, 22px); font-weight: 600; color: var(--accent); line-height: 1.4; }
-
-/* background page */
-.bg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 28px; }
-.bg-card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 22px 18px; }
-.bg-card.focus { border-color: var(--accent-brd); background: linear-gradient(180deg, var(--accent-soft), transparent); }
-.bg-card .bg-label { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-.bg-card.focus .bg-label { color: var(--accent); }
-.bg-card h3 { font-size: 17.5px; margin-bottom: 10px; }
-.bg-card p { font-size: 14.5px; margin: 0; line-height: 1.6; }
-@media (max-width: 760px) { .bg-grid { grid-template-columns: 1fr; } }
-
-/* technical-result page: the abstract sits in its own box */
-.abstract-box { margin-top: 28px; border: 1px solid var(--accent-brd); border-radius: var(--radius); background: linear-gradient(180deg, var(--accent-soft), transparent); padding: 22px 24px 8px; }
-.abstract-box .clabel { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
-.lede { font-size: clamp(19px, 2.3vw, 23px); color: var(--ink); line-height: 1.5; max-width: 760px; font-weight: 500; }
-.lede b, .lede .key { font-weight: 700; }
-.abstract-body { font-size: 17.5px; line-height: 1.7; color: var(--ink-2); }
-.abstract-body b { color: var(--ink); font-weight: 700; }
-.body-col { max-width: none; }
-.body-col p { font-size: 17.5px; }
-.reveal-on-scroll { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s ease; }
-.reveal-on-scroll.in { opacity: 1; transform: none; }
 
 /* buttons */
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
@@ -170,15 +149,6 @@ strong { color: var(--ink); font-weight: 600; }
 .btn:hover { text-decoration: none; border-color: var(--accent); transform: translateY(-1px); }
 .btn.primary { background: var(--accent); color: #F4EFE2; border-color: var(--accent); font-weight: 600; }
 .btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
-
-/* stat strip */
-.stats { display: flex; margin-top: 28px; border: 1px solid var(--accent-brd); border-radius: var(--radius); max-width: 680px; background: linear-gradient(180deg, var(--accent-soft), transparent); overflow: visible; position: relative; }
-.stat { padding: 20px 24px; flex: 1; border-right: 1px solid var(--line); }
-.stat:last-child { border-right: none; }
-.stat .num { font-family: var(--font-display); font-size: 32px; font-weight: 700; color: var(--accent); line-height: 1; }
-.stat .lab { font-family: var(--font-mono); font-size: 11px; letter-spacing: .05em; color: var(--ink-2); margin-top: 9px; text-transform: uppercase; display: flex; align-items: center; }
-.stat-note { margin-top: 14px; font-size: 15px; color: var(--ink-2); max-width: 640px; }
-@media (max-width: 560px) { .stat .num { font-size: 24px; } .stat { padding: 15px 15px; } }
 
 /* comparison */
 .compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 34px; }
@@ -191,44 +161,6 @@ strong { color: var(--ink); font-weight: 600; }
 .compare li { color: var(--ink-2); font-size: 14.5px; margin-bottom: 9px; }
 .compare li b { color: var(--ink); font-weight: 600; }
 @media (max-width: 720px) { .compare { grid-template-columns: 1fr; } }
-
-/* result figure */
-.figure { margin-top: 34px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 22px 24px 18px; width: min(1080px, 94vw); max-width: none; margin-left: 50%; transform: translateX(-50%); }
-.figure img { width: 100%; height: auto; display: block; border-radius: 6px; }
-.figcap { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--ink-2); margin: 14px 2px 0; letter-spacing: 0; }
-.figcap b { color: var(--ink); font-weight: 700; }
-.figure-note { margin-top: 22px; font-size: 16px; color: var(--ink-2); max-width: 820px; line-height: 1.6; }
-.figure-note strong { color: var(--ink); font-weight: 600; }
-
-/* results table — same wide gutter-breaking trick as .figure */
-.table-wrap { margin-top: 34px; width: min(860px, 94vw); max-width: none; margin-left: 50%; transform: translateX(-50%); }
-.table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-.res-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-2); }
-.res-table th, .res-table td { padding: 7px 16px; text-align: right; white-space: nowrap; }
-.res-table th:first-child, .res-table td:first-child { text-align: left; }
-.res-table thead th { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 700; background: var(--surface-2); border-bottom: 1px solid var(--line-2); }
-.res-table tbody td { border-bottom: 1px solid var(--line); }
-.res-table tr.grp th { text-align: left; font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: 0; text-transform: none; background: var(--surface-2); border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line); padding: 9px 16px; }
-/* first row of each matched-length block — extra breathing room so the dashed
-   rule reads as a block break rather than doubling the previous row border */
-.res-table tr.blk td { border-top: 1px dashed var(--line-2); padding-top: 14px; }
-/* the no-embedding control each block is measured against */
-.res-table tr.ctrl td { color: var(--muted); }
-.res-table tr.ctrl td:first-child { font-style: italic; }
-.res-table tr.ours td { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
-.res-table tr.ours td:first-child { color: var(--accent); }
-.res-table .rn { color: var(--muted); font-weight: 400; }
-.tabcap { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--ink-2); margin: 14px 2px 0; letter-spacing: 0; }
-.tabcap b { color: var(--ink); font-weight: 700; }
-@media (max-width: 620px) { .res-table th, .res-table td { padding: 6px 10px; font-size: 11.5px; } }
-
-/* references */
-.refs { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 22px; max-width: 880px; }
-.refs .eyebrow { margin-bottom: 14px; }
-.refs ol { margin: 0; padding-left: 22px; }
-.refs li { font-size: 14px; color: var(--ink-2); line-height: 1.55; margin-bottom: 10px; }
-.refs li b { color: var(--ink); font-weight: 600; }
-.refs li .venue { font-style: italic; color: var(--muted); }
 
 /* slots */
 .slot { border: 1.5px dashed var(--line-2); border-radius: var(--radius); background: repeating-linear-gradient(45deg, transparent, transparent 12px, var(--accent-soft) 12px, var(--accent-soft) 24px); padding: 40px 28px; text-align: center; color: var(--muted); font-family: var(--font-mono); font-size: 13px; letter-spacing: .04em; }
@@ -304,8 +236,8 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <!-- ============ RESEARCH-PAGE HEADER ============ -->
 <header class="cover">
   <div class="cover-inner wrap">
-    <p class="cover-brand">covert chess · ai agents</p>
-    <h1 class="hook">The Covert <span class="hook-accent">Chess Game</span> &#9823;</h1>
+    <p class="cover-brand">covert communication · llm agents</p>
+    <h1 class="hook">Inference-time covert communication over <span class="hook-accent">LLM-agent conversations</span></h1>
     <p class="hook-sub question">Can AI agents &#129302; <b>secretly play chess</b>?</p>
     <p class="hook-sub2">Two chatbots hold an ordinary conversation. Hidden inside every message is a chess move that only the other agent can read.</p>
 
@@ -324,6 +256,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     <div class="btn-row cover-cta">
       <a class="btn primary" href="https://4qy9dnllc6t18b-8000.proxy.runpod.net/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>Demo</a>
       <a class="btn" href="./examples.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="7.5" height="16" rx="1.5"/><rect x="13.5" y="4" width="7.5" height="16" rx="1.5"/></svg>Examples</a>
+      <a class="btn" href="./technical.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M3 20h18"/><path d="M6 16V10"/><path d="M11 16V5"/><path d="M16 16v-7"/><path d="M21 16V8"/></svg>Technical results</a>
       <a class="btn" href="https://arxiv.org/abs/XXXX.XXXXX"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg>Paper</a>
       <a class="btn" href="https://github.com/infotheorylab/Covert_Chess"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12 12 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>Code</a>
     </div>
@@ -352,117 +285,69 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     <p class="eyebrow">background</p>
     <h2>What is <span class="key">covert chess</span>?</h2>
     <p class="section-lede">AI assistants increasingly talk to <em>other</em> AI assistants on our behalf: scheduling, negotiating, replying. The text they exchange reads like ordinary chat. But every word an AI writes is a choice among many, and choices can carry a secret.</p>
-
-    <div class="bg-grid">
-      <div class="bg-card">
-        <div class="bg-label">Background</div>
-        <h3>Hiding a message in plain sight</h3>
-        <p>Steganography is the old art of hiding a message inside something innocent-looking. AI-written text is a natural hiding place: a sender can nudge which words the model picks so that the text still reads normally, yet spells out a hidden message to someone who knows where to look.</p>
-      </div>
-      <div class="bg-card">
-        <div class="bg-label">Motivation</div>
-        <h3>Today's methods need a shared secret model</h3>
-        <p>Most existing schemes only work if sender and receiver run the <b>exact same model with the exact same prompt</b>. That is a big assumption when the two agents belong to different people. Methods that drop it, and read the text alone, get the message wrong far too often.</p>
-      </div>
-      <div class="bg-card focus">
-        <div class="bg-label">What we address</div>
-        <h3>Reliable, invisible, no shared model</h3>
-        <p>Can two agents pass hidden messages when the receiver sees <b>nothing but the text</b>, and still get every message right? We treat each written word as a tiny round of feedback between the two agents, and design a scheme that is reliable, leaves the text statistically unchanged, and is provably hard to detect.</p>
-      </div>
+    <p class="body-text">Hiding a message inside something innocent-looking is an old art called <b>steganography</b>. AI-written text is a natural hiding place: a sender can nudge which words the model picks so that the text still reads normally, yet spells out a hidden message to someone who knows where to look. Covert chess takes that idea to its limit: a full game of chess played through nothing but small talk.</p>
+    <div class="steps">
+      <div class="step"><div class="k">MOVE</div><h3>You pick a move</h3><p>You choose a chess move and type a short, ordinary message, just as you would to any chatbot.</p></div>
+      <div class="step"><div class="k">HIDE</div><h3>Agent A hides it</h3><p>Agent A rewrites your message into natural chat text. Your move is woven into its word choices. Nothing about chess appears.</p></div>
+      <div class="step"><div class="k">READ</div><h3>Agent B recovers it</h3><p>Agent B sees only the text, recovers the move, and answers with its own move hidden the same way. The game goes on, unseen.</p></div>
     </div>
-
-    <p class="section-question">Chess is the perfect test: a move is a small, precise message, one wrong move ruins the game, and a full game takes many turns. We let two AI agents play a whole game of chess where every move hides inside an ordinary chat.</p>
   </div>
-  <a class="scroll-cue" href="#technical">scroll<span>&darr;</span></a>
+  <a class="scroll-cue" href="#motivation">scroll<span>&darr;</span></a>
 </section>
 
-<!-- ============ 2 · TECHNICAL RESULT ============ -->
-<section class="section" id="technical">
+<!-- ============ 2 · MOTIVATION / PROBLEM WITH EXISTING WORK ============ -->
+<section class="section" id="motivation">
   <div class="wrap reveal-on-scroll">
-    <p class="eyebrow">technical result</p>
-    <h2>For the technically curious</h2>
-    <p class="section-lede">Feedback coding embeds hidden payloads in agentic dialogue at high rate and low error: <b>reliable, distortion-free, provably secure</b>, and requiring <b>no shared model or prompt</b>.</p>
-
-    <div class="abstract-box">
-      <div class="clabel">Abstract</div>
-      <p class="abstract-body">As large language models (LLMs) are increasingly used to automate digital interactions, users can leverage LLM-generated text as cover for covert communication within seemingly benign conversations. Existing LLM steganography, however, is predominantly white-box, requiring the sender and receiver to share the cover statistics, typically through access to the model weights and prompt. Black-box schemes remove this requirement by allowing the receiver to operate solely on the generated text, but current approaches rely on fixed-length, open-loop watermarking techniques that suffer from high decoding error rates under variable-length token generation. We recast black-box LLM steganography as a sequential communication problem with causal, noiseless feedback: every generated token is observed by both parties and can guide subsequent embedding. Based on this perspective, we introduce <b>B</b>urnashev <b>A</b>daptive Posterior <b>M</b>atching (BAM), a feedback-coding scheme that combines posterior matching with a decode-and-confirm phase. The design is inspired by classical information-theoretic feedback-coding principles, while its security is established through a cryptographic reduction proof. Across three open-weight language models, we demonstrate that BAM attains <b>0&ndash;0.1% empirical message error on an 8-bit payload in around 50 tokens, across 1000 trials, versus 10&ndash;17% for the strongest black-box baseline at comparable length</b>. Building on the proposed steganography algorithm, we demonstrate the feasibility of an end-to-end communication protocol that achieves high communication rates across multiple conversational settings.</p>
-    </div>
-
-    <figure class="figure">
-      <img src="./img/bam_fig.png" alt="Message error probability vs average token length for BAM and five baselines across Llama-3.1-8B, Qwen3.5-9B-Base, and Mistral-7B."/>
-      <figcaption class="figcap"><b>Message error probability vs. average token length.</b> BAM (red) against four inference-time black-box steganography baselines — ArcMark [1], MPAC [2], BiMark [3], StealthInk [4] — across three models, C4 news dataset. Lower is better; the x-axis is the average number of tokens used to carry an 8-bit message.</figcaption>
-    </figure>
-
-    <p class="figure-note">At a matched embedding budget, <strong>BAM drives message-error probability roughly an order of magnitude below every baseline</strong>, and it keeps falling toward zero as a few more tokens become available — while fixed-budget watermarking schemes plateau at high error on short, low-entropy conversational turns. The gain is consistent across Llama-3.1-8B, Qwen3.5-9B-Base, and Mistral-7B.</p>
-
-    <div class="table-wrap">
-      <div class="table-scroll">
-        <table class="res-table">
-          <thead>
-            <tr>
-              <th scope="col">Scheme</th>
-              <th scope="col">Avg len</th>
-              <th scope="col">Msg err &darr;</th>
-              <th scope="col">PPL &darr;</th>
-              <th scope="col">Sec/token &darr;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="grp"><th colspan="5" scope="colgroup">Llama-3.1-8B</th></tr>
-            <tr class="ctrl"><td>No embedding</td><td>50.0</td><td>&mdash;</td><td>7.66 &plusmn; 0.11</td><td>0.0214</td></tr>
-            <tr><td>MPAC <span class="rn">[2]</span></td><td>50.0</td><td>0.797 &plusmn; 0.013</td><td>8.54 &plusmn; 0.11</td><td>0.0223</td></tr>
-            <tr><td>BiMark <span class="rn">[3]</span></td><td>50.0</td><td>0.569 &plusmn; 0.016</td><td>7.68 &plusmn; 0.11</td><td>0.0352</td></tr>
-            <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.637 &plusmn; 0.015</td><td>7.66 &plusmn; 0.11</td><td>0.0231</td></tr>
-            <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.106 &plusmn; 0.010</td><td>7.52 &plusmn; 0.11</td><td>0.0291</td></tr>
-            <tr class="ctrl blk"><td>No embedding</td><td>74.8 &plusmn; 2.1</td><td>&mdash;</td><td>7.47 &plusmn; 0.10</td><td>0.0220</td></tr>
-            <tr><td>Zamir <span class="rn">[5]</span></td><td>74.8 &plusmn; 2.1</td><td>0.003 &plusmn; 0.002</td><td>8.79 &plusmn; 0.12</td><td>0.0220</td></tr>
-            <tr class="ctrl blk"><td>No embedding</td><td>47.1 &plusmn; 1.5</td><td>&mdash;</td><td>7.71 &plusmn; 0.12</td><td>0.0224</td></tr>
-            <tr class="ours"><td>BAM (L = 2<sup>15</sup>)</td><td>47.1 &plusmn; 1.5</td><td>0.001 &plusmn; 0.001</td><td>7.89 &plusmn; 0.12</td><td>0.0378</td></tr>
-
-            <tr class="grp"><th colspan="5" scope="colgroup">Qwen-3.5-9B-Base</th></tr>
-            <tr class="ctrl"><td>No embedding</td><td>50.0</td><td>&mdash;</td><td>7.83 &plusmn; 0.10</td><td>0.0420</td></tr>
-            <tr><td>MPAC <span class="rn">[2]</span></td><td>50.0</td><td>0.840 &plusmn; 0.012</td><td>9.03 &plusmn; 0.12</td><td>0.0420</td></tr>
-            <tr><td>BiMark <span class="rn">[3]</span></td><td>50.0</td><td>0.567 &plusmn; 0.016</td><td>8.23 &plusmn; 0.12</td><td>0.0558</td></tr>
-            <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.659 &plusmn; 0.015</td><td>8.04 &plusmn; 0.11</td><td>0.0456</td></tr>
-            <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.105 &plusmn; 0.010</td><td>7.76 &plusmn; 0.11</td><td>0.0510</td></tr>
-            <tr class="ctrl blk"><td>No embedding</td><td>72.9 &plusmn; 1.5</td><td>&mdash;</td><td>7.80 &plusmn; 0.11</td><td>0.0424</td></tr>
-            <tr><td>Zamir <span class="rn">[5]</span></td><td>72.9 &plusmn; 1.5</td><td>0.000 &plusmn; 0.000</td><td>9.12 &plusmn; 0.12</td><td>0.0425</td></tr>
-            <tr class="ctrl blk"><td>No embedding</td><td>45.8 &plusmn; 1.3</td><td>&mdash;</td><td>8.21 &plusmn; 0.13</td><td>0.0436</td></tr>
-            <tr class="ours"><td>BAM (L = 2<sup>15</sup>)</td><td>45.8 &plusmn; 1.3</td><td>0.001 &plusmn; 0.001</td><td>8.24 &plusmn; 0.12</td><td>0.0541</td></tr>
-
-            <tr class="grp"><th colspan="5" scope="colgroup">Mistral-7B-v0.3</th></tr>
-            <tr class="ctrl"><td>No embedding</td><td>50.0</td><td>&mdash;</td><td>6.25 &plusmn; 0.09</td><td>0.0212</td></tr>
-            <tr><td>MPAC <span class="rn">[2]</span></td><td>50.0</td><td>0.872 &plusmn; 0.012</td><td>6.73 &plusmn; 0.09</td><td>0.0216</td></tr>
-            <tr><td>BiMark <span class="rn">[3]</span></td><td>50.0</td><td>0.674 &plusmn; 0.015</td><td>6.26 &plusmn; 0.08</td><td>0.0342</td></tr>
-            <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.702 &plusmn; 0.014</td><td>6.16 &plusmn; 0.08</td><td>0.0217</td></tr>
-            <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.168 &plusmn; 0.012</td><td>6.13 &plusmn; 0.09</td><td>0.0278</td></tr>
-            <tr class="ctrl blk"><td>No embedding</td><td>87.8 &plusmn; 1.9</td><td>&mdash;</td><td>5.97 &plusmn; 0.07</td><td>0.0211</td></tr>
-            <tr><td>Zamir <span class="rn">[5]</span></td><td>87.8 &plusmn; 1.9</td><td>0.001 &plusmn; 0.001</td><td>6.72 &plusmn; 0.08</td><td>0.0212</td></tr>
-            <tr class="ctrl blk"><td>No embedding</td><td>49.7 &plusmn; 1.2</td><td>&mdash;</td><td>6.22 &plusmn; 0.10</td><td>0.0222</td></tr>
-            <tr class="ours"><td>BAM (L = 2<sup>11</sup>)</td><td>49.7 &plusmn; 1.2</td><td>0.000 &plusmn; 0.000</td><td>6.51 &plusmn; 0.09</td><td>0.0326</td></tr>
-          </tbody>
-        </table>
+    <p class="eyebrow">motivation</p>
+    <h2>Why is this <span class="key">hard</span>?</h2>
+    <p class="section-lede">Hiding messages in AI writing is not new. Doing it when the two agents share almost nothing, and still getting every message right, is.</p>
+    <div class="compare">
+      <div class="card">
+        <div class="tag">Existing work &middot; problem 1</div>
+        <h3>Most methods need a shared secret model</h3>
+        <ul>
+          <li>Sender and receiver must run the <b>exact same model with the exact same prompt</b>, so the receiver can replay every word choice.</li>
+          <li>That is a big assumption when the two agents belong to different people, run on different services, or update independently.</li>
+          <li>Leak the prompt or the model and the channel is gone.</li>
+        </ul>
       </div>
-      <p class="tabcap"><b>BAM vs. baselines on the C4 news corpus.</b> Mean &plusmn; standard error over 1000 trials, carrying an 8-bit message. Each variable-length scheme is paired with its own <i>no-embedding</i> control generated at the same length, since perplexity is only comparable at matched length.</p>
+      <div class="card">
+        <div class="tag">Existing work &middot; problem 2</div>
+        <h3>Text-only methods get it wrong too often</h3>
+        <ul>
+          <li>Some schemes let the receiver read the text alone, with no model. They borrow from <b>watermarking</b>, which was built to answer a yes/no question, not to carry a message.</li>
+          <li>They commit to a fixed number of words in advance and never check whether the message got through.</li>
+          <li>On short, ordinary chat turns the strongest of them still gets about <b>1 message in 10 wrong</b>. One wrong move ends a chess game.</li>
+        </ul>
+      </div>
     </div>
+    <p class="section-question">Can two agents pass hidden messages when the receiver sees nothing but the text, and still get every message right?</p>
+  </div>
+  <a class="scroll-cue" href="#method">scroll<span>&darr;</span></a>
+</section>
 
-    <p class="figure-note"><strong>Zamir's scheme (We use default t=2, max token 1000 and count truncation as error) reaches the same near-zero error as BAM, but has a longer average token length.</strong> It needs 73&ndash;88 tokens where BAM needs 46&ndash;50. BAM's cost is compute instead: about 1.5&times; the seconds per token, where Zamir's overhead is negligible.</p>
-
-    <div class="refs">
-      <p class="eyebrow">references</p>
-      <ol>
-        <li><b>ArcMark.</b> <a href="https://arxiv.org/abs/2602.07235">ArcMark: Multi-bit LLM Watermark via Optimal Transport</a>. Gilani, Atefeh and Long, Carol Xuan and Vithana, Sajani and Kosut, Oliver and Sankar, Lalitha and Calmon, Flavio P. <span class="venue">arXiv:2602.07235, 2026 (baseline)</span></li>
-        <li><b>MPAC.</b> <a href="https://arxiv.org/abs/2308.00221">Advancing beyond identification: Multi-bit watermark for large language models</a>. Yoo, KiYoon and Ahn, Wonhyuk and Kwak, Nojun. <span class="venue">NAACL 2024 (baseline)</span></li>
-        <li><b>BiMark.</b> <a href="https://arxiv.org/abs/2506.21602">BiMark: Unbiased multilayer watermarking for large language models</a>. Feng, Xiaoyan and Zhang, He and Zhang, Yanjun and Zhang, Leo Yu and Pan, Shirui. <span class="venue">ICML 2025 (baseline)</span></li>
-        <li><b>StealthInk.</b> <a href="https://arxiv.org/abs/2506.05502">StealthInk: A multi-bit and stealthy watermark for large language models</a>. Jiang, Ya and Wu, Chuxiong and Boroujeny, Massieh Kordi and Mark, Brian and Zeng, Kai. <span class="venue">ICML 2025 (baseline)</span></li>
-        <li><b>Zamir.</b> <a href="https://scholar.google.com/citations?view_op=view_citation&amp;hl=en&amp;user=xiyhJrwAAAAJ&amp;sortby=pubdate&amp;citation_for_view=xiyhJrwAAAAJ:R3hNpaxXUhUC">Undetectable steganography for language models</a>. Zamir, Or. <span class="venue">Transactions on Machine Learning Research, 2024 (baseline)</span></li>
-      </ol>
+<!-- ============ 3 · OUR METHOD ============ -->
+<section class="section" id="method">
+  <div class="wrap reveal-on-scroll">
+    <p class="eyebrow">our method</p>
+    <h2>Treat the conversation as a <span class="key">feedback channel</span></h2>
+    <p class="section-lede">Our key observation: every word the sender writes is seen by both sides. So the sender always knows exactly what the receiver has seen so far, and can adapt the next word to it.</p>
+    <div class="points">
+      <div class="point"><div class="n">01</div><p><strong>Adapt word by word.</strong> Instead of fixing the whole hidden message up front, the sender tracks what the receiver must currently believe and picks each next word to push that belief toward the true message. In coding theory this is called <em>posterior matching</em>.</p></div>
+      <div class="point"><div class="n">02</div><p><strong>Confirm before stopping.</strong> Once the receiver would be confident, the sender spends a few extra words to confirm the guess, or to flag a mistake and try again. This <em>decode-and-confirm</em> step is what drives errors to zero.</p></div>
+      <div class="point"><div class="n">03</div><p><strong>Leave the text untouched.</strong> The nudges are arranged so the overall word statistics are exactly those of the unmodified model. Even someone holding the model cannot tell a hidden-move message from a plain one.</p></div>
+      <div class="point"><div class="n">04</div><p><strong>Share only a key.</strong> The two agents share a short secret key, not a model or a prompt. The receiver never runs a model at all: it reads the text and the key, nothing else.</p></div>
+    </div>
+    <p class="section-question">We call the scheme BAM, for Burnashev Adaptive Posterior Matching. On three open models it gets at most 1 message in 1000 wrong, where the best text-only method gets 100 to 170 wrong, using the same number of words.</p>
+    <div class="btn-row">
+      <a class="btn" href="./technical.html">See the technical results &rarr;</a>
+      <a class="btn" href="https://arxiv.org/abs/XXXX.XXXXX">Read the paper &rarr;</a>
     </div>
   </div>
   <a class="scroll-cue" href="#demo">scroll<span>&darr;</span></a>
 </section>
 
-<!-- ============ 3 · DEMO ============ -->
+<!-- ============ 4 · DEMO ============ -->
 <section class="section" id="demo">
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">try it live</p>
@@ -481,7 +366,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <a class="scroll-cue" href="#authors">scroll<span>&darr;</span></a>
 </section>
 
-<!-- ============ 4 · AUTHORS ============ -->
+<!-- ============ 5 · AUTHORS ============ -->
 <section class="section" id="authors">
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">authors</p>
@@ -534,7 +419,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <a class="scroll-cue" href="#contact">scroll<span>&darr;</span></a>
 </section>
 
-<!-- ============ 5 · CONTACT ============ -->
+<!-- ============ 6 · CONTACT ============ -->
 <section class="section tight" id="contact">
   <div class="wrap reveal-on-scroll">
     <p class="eyebrow">get in touch</p>
