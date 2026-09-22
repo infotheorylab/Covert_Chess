@@ -83,7 +83,7 @@ export PYTHONPATH=/Covert_Chess/backend/arcmark:$PYTHONPATH
 # screen was started from a shell that predates the edit above.
 export HF_HOME=/workspace/hf-cache
 export HUGGINGFACE_HUB_CACHE=/workspace/hf-cache/hub
-uvicorn server:app --host 0.0.0.0 --port 8000 --workers 1
+nohup uvicorn server:app --host 0.0.0.0 --port 8000 --workers 1 > server.log 2>&1 &
 # Press Ctrl+A then D to detach — server keeps running
 # To reattach: screen -r bam
 
