@@ -186,6 +186,7 @@ strong { color: var(--ink); font-weight: 600; }
 .figure img { width: 100%; height: auto; display: block; border-radius: 6px; }
 .figcap { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--ink-2); margin: 14px 2px 0; letter-spacing: 0; }
 .figcap b { color: var(--ink); font-weight: 700; }
+.figcap .credit { color: var(--muted); font-style: italic; }
 .figure-note { margin-top: 22px; font-size: 16px; color: var(--ink-2); max-width: 820px; line-height: 1.6; }
 .figure-note strong { color: var(--ink); font-weight: 600; }
 
@@ -410,11 +411,17 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     <h2>Treat the conversation as a <span class="key">feedback channel</span>, apply error exponent optimal information-theoretic schemes</h2>
     <p class="section-lede">Both sides see every generated word, so the sender can adapt each next word to what the receiver has already seen.</p>
     <p class="body-text">Feedback can make error fall exponentially faster per token. That decay rate is the <b>error exponent</b>, and our algorithm is built to optimize it.</p>
+    <figure class="figure">
+      <img src="./img/bam_overview.png" alt="BAM overview: codeword generation by posterior matching, optimal-transport biasing of the next-token distribution, sampling into the shared transcript, key generation from the transcript, belief update, ACK/NACK confirmation, and decoding."/>
+      <figcaption class="figcap"><b>BAM in one round of token generation.</b> Top: the encoder picks a codeword symbol from the shared belief (1) and biases the model's next-token distribution toward it with optimal transport (2). Both parties derive per-token keys from the transcript, update the belief (3), confirm the leading candidate (4), and decode (5). <span class="credit">Figure generated with Claude.</span></figcaption>
+    </figure>
+
     <div class="points">
       <div class="point"><div class="n">01</div><p><strong>Posterior matching.</strong> Each symbol is chosen from the receiver's current belief, not a fixed codebook. Higher rate at the same error.</p></div>
-      <div class="point"><div class="n">02</div><p><strong>Variable-length stopping.</strong> Keep sending while the receiver is unsure, stop once one message dominates. Sequentiality gain.</p></div>
-      <div class="point"><div class="n">03</div><p><strong>Decode-and-confirm.</strong> A short accept/reject phase after each candidate, as in Yamamoto-Itoh, attains the optimal Burnashev exponent. Adaptivity gain.</p></div>
-      <div class="point"><div class="n">04</div><p><strong>Distortion-free and provably secure.</strong> Optimal-transport coupling leaves the text distribution untouched. A PRF reduction proves indistinguishability from clean text.</p></div>
+      <div class="point"><div class="n">02</div><p><strong>Optimal transport.</strong> The next-token distribution is biased toward the chosen symbol on a key-shifted circle, while the average over keys stays exactly the model's own distribution.</p></div>
+      <div class="point"><div class="n">03</div><p><strong>Variable-length stopping via belief update.</strong> Both parties score each received token with a mixture-Laplacian likelihood and update a shared belief over messages. Sending continues while the belief is spread out and stops once one message crosses the threshold. Sequentiality gain.</p></div>
+      <div class="point"><div class="n">04</div><p><strong>Confirmation.</strong> A short accept/reject phase after each candidate, as in Yamamoto-Itoh, a strategy that attains Burnashev exponent in DMC channels. Adaptivity gain.</p></div>
+      <div class="point"><div class="n">05</div><p><strong>Distortion-free and provably secure.</strong> Optimal-transport coupling leaves the text distribution untouched. A PRF reduction proves indistinguishability from clean text.</p></div>
     </div>
     <div class="btn-row">
       <a class="btn" href="#results">Results &rarr;</a>
