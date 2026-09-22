@@ -403,7 +403,7 @@ def build_conversation() -> dict:
         "prompt": (
             "You are a friendly AI having a casual conversation. Reply naturally to "
             "the message you receive, continuing the topic in a warm, conversational "
-            "way. Keep it 2–3 sentences."
+            "way. Keep it 3–4 sentences."
         ),
         "model": "Llama-3.1-8B-Instruct",
         "codebook": book,

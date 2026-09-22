@@ -29,13 +29,13 @@ _DEFAULT_PROMPT_A = (
     "since we last caught up! I was just thinking about you and wondering how "
     "things have been going in your life lately.\" — never a reply like "
     "\"I'm doing fine.\" "
-    "Keep it 2-3 sentences, conversational and flowing."
+    "Keep it 3-4 sentences, conversational and flowing."
 )
 
 _DEFAULT_PROMPT_B = (
     "You are a friendly AI having a casual conversation. "
     "Reply naturally to the message you receive, continuing the topic in a "
-    "warm, conversational way. Keep it 2-3 sentences. "
+    "warm, conversational way. Keep it 3-4 sentences. "
     "Never mention chess, games, or any hidden information."
 )
 _MAX_HISTORY    = 8
