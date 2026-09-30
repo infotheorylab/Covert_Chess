@@ -3,22 +3,19 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Inference-Time Covert Communication over LLM-Agent Conversations</title>
-<meta name="description" content="Can AI agents secretly play chess? Two chatbots hold an ordinary conversation while every message secretly carries a hidden chess move." />
+<title>Can AI agents secretly play chess?</title>
+<meta name="description" content="Two AI agents could play chess inside an ordinary chat, hiding each move in the text with a shared secret key. How much can they hide, and can we prove no one can tell?" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Mono:wght@400;700&family=Doto:wght@500;600;700&display=swap" rel="stylesheet" />
-
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Space+Mono:wght@400;700&family=Doto:wght@500;600;700&display=swap" rel="stylesheet" />
 
 <style>
 :root {
   --bg:         #EEE7D6;   /* warm paper */
   --surface:    #F7F2E7;
   --surface-2:  #F2ECDD;
+  --paper-hi:   #FBF8F1;   /* chat bubbles inside figures */
   --ink:        #17284D;   /* deep blue */
   --ink-2:      #47516B;
   --muted:      #8A836C;
@@ -32,68 +29,44 @@
   --alert:      #B4472F;
   --amber:      #A9791F;
 
+  /* roles in every figure: blue sends, green receives, amber is the hidden message */
+  --sender:     var(--accent);
+  --receiver:   var(--confirm);
+  --hidden:     var(--amber);
+  --hidden-ink: #8A6212;   /* amber dark enough for small text */
+
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-body:    "Inter", system-ui, sans-serif;
   --font-mono:    "Space Mono", ui-monospace, monospace;
 
-  --wrap: 1060px;
+  --wrap: 1120px;
   --radius: 14px;
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: smooth; scroll-snap-type: y proximity; }
+/* full snapping only where every story screen fits in one window */
+@media (min-width: 900px) and (min-height: 640px) { html { scroll-snap-type: y mandatory; } }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { animation: none !important; transition: none !important; } }
 
 .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
 h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.14; letter-spacing: -0.02em; margin: 0; color: var(--ink); }
-h2 { font-size: clamp(27px, 3.8vw, 38px); }
+h2 { font-size: clamp(28px, 3.6vw, 42px); }
 h3 { font-size: 20px; letter-spacing: -0.01em; }
 p { margin: 0 0 18px; color: var(--ink-2); }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 em { color: var(--ink); font-style: italic; }
 strong { color: var(--ink); font-weight: 600; }
-.key { color: var(--accent); font-weight: 600; }
 
-.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+/* ---------- COVER ---------- */
+.cover { position: relative; border-bottom: 1px solid var(--line); text-align: center; min-height: 100vh; min-height: 100svh; display: flex; align-items: center; justify-content: center; scroll-snap-align: start; }
+.cover-inner { position: relative; z-index: 1; padding: 72px 0 110px; width: 100%; }
+.hook { font-family: var(--font-display); font-weight: 700; font-size: clamp(38px, 6.2vw, 76px); line-height: 1.04; letter-spacing: -0.035em; max-width: 15ch; margin: 0 auto; }
+.hook-sub { font-family: var(--font-display); font-weight: 500; font-size: clamp(17px, 2vw, 23px); color: var(--ink-2); max-width: 34ch; margin: 22px auto 0; line-height: 1.4; letter-spacing: -0.01em; }
 
-/* ---------- info tooltip ---------- */
-.info { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--accent); color: var(--accent); font-family: var(--font-mono); font-size: 10px; font-weight: 700; line-height: 1; cursor: help; position: relative; vertical-align: middle; margin-left: 5px; user-select: none; transition: background .15s ease, color .15s ease; }
-.info:hover, .info:focus-visible { background: var(--accent); color: var(--surface); outline: none; }
-.info .tip { position: absolute; bottom: 155%; left: 50%; transform: translateX(-50%) translateY(4px); width: 230px; background: var(--ink); color: #F2ECDD; font-family: var(--font-body); font-size: 12.5px; font-weight: 400; line-height: 1.5; letter-spacing: 0; text-transform: none; padding: 11px 13px; border-radius: 9px; opacity: 0; pointer-events: none; transition: opacity .16s ease, transform .16s ease; z-index: 30; text-align: left; box-shadow: 0 8px 22px rgba(23,40,77,0.24); }
-.info .tip::after { content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: var(--ink); }
-.info:hover .tip, .info:focus .tip, .info:focus-visible .tip { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* ---------- nav ---------- */
-.nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; transition: background .25s ease, border-color .25s ease; border-bottom: 1px solid transparent; }
-.nav.scrolled { background: rgba(238,231,214,0.85); backdrop-filter: saturate(140%) blur(12px); border-bottom-color: var(--line); }
-.nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
-.nav .brand { font-family: var(--font-mono); font-weight: 700; font-size: 15px; color: var(--ink); }
-.nav .brand span { color: var(--accent); }
-.nav-right { display: flex; align-items: center; gap: 22px; }
-.orgs { display: flex; align-items: center; gap: 9px; font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
-.orgs .sep { color: var(--line-2); }
-.nav .links { display: flex; gap: 10px; }
-.nav .links a { color: var(--ink); font-size: 14px; font-weight: 500; padding: 7px 14px; border: 1px solid var(--line-2); border-radius: 8px; }
-.nav .links a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
-.nav .links a.primary { background: var(--accent); color: #F4EFE2; border-color: var(--accent); }
-.nav .links a.primary:hover { background: var(--accent-2); color: #F4EFE2; }
-@media (max-width: 720px) { .orgs { display: none; } }
-
-/* ---------- COVER (research-page header) ---------- */
-.cover { position: relative; border-bottom: 1px solid var(--line); text-align: center; min-height: 100vh; display: flex; align-items: center; justify-content: center; }
-.cover-inner { position: relative; z-index: 1; padding: 72px 0 96px; width: 100%; }
-.cover-brand { font-family: var(--font-mono); font-size: 13px; letter-spacing: .14em; color: var(--muted); text-transform: uppercase; margin-bottom: 20px; }
-.hook { font-family: var(--font-display); font-weight: 700; font-size: clamp(28px, 4.2vw, 50px); line-height: 1.1; letter-spacing: -0.03em; max-width: 22ch; margin: 0 auto; }
-.hook .hook-accent { color: var(--accent); }
-.hook-sub { font-size: clamp(16px, 1.8vw, 19px); color: var(--ink-2); max-width: 62ch; margin: 20px auto 0; line-height: 1.55; }
-.hook-sub b { color: var(--ink); font-weight: 600; }
-.hook-sub.question { font-size: clamp(19px, 2.4vw, 25px); color: var(--ink); font-weight: 500; }
-.hook-sub2 { font-size: clamp(15px, 1.6vw, 17.5px); color: var(--ink-2); max-width: 58ch; margin: 12px auto 0; line-height: 1.55; }
-
-/* cover authors strip (centered, superscript affiliations) */
-.cover-authors { display: flex; align-items: baseline; justify-content: center; gap: 8px 20px; margin-top: 32px; flex-wrap: wrap; }
+.cover-authors { display: flex; align-items: baseline; justify-content: center; gap: 8px 20px; margin-top: 34px; flex-wrap: wrap; }
 .cover-authors .ca { font-size: 17px; color: var(--ink); }
 .cover-authors .ca a { color: var(--ink); border-bottom: 1px solid transparent; }
 .cover-authors .ca a:hover { color: var(--accent); border-bottom-color: var(--accent); text-decoration: none; }
@@ -105,7 +78,6 @@ strong { color: var(--ink); font-weight: 600; }
 .cover-cta { justify-content: center; margin-top: 30px; }
 .cover-cta .btn svg { width: 16px; height: 16px; }
 
-/* three institution logos, centered credential row */
 .cover-colleges { display: flex; align-items: center; justify-content: center; gap: 40px; margin-top: 34px; flex-wrap: wrap; }
 .cover-colleges img { height: 46px; width: auto; max-width: 190px; object-fit: contain; opacity: .95; }
 @media (max-width: 560px) { .cover-colleges { gap: 24px; } .cover-colleges img { height: 36px; } }
@@ -117,36 +89,164 @@ strong { color: var(--ink); font-weight: 600; }
 .it-logo .line { display: block; }
 .it-logo .lit { color: var(--accent); }
 .it-logo .label { color: var(--ink); }
-/* full two-line "version A" — with the underline rule */
 .it-logo.full { font-size: 1.5rem; margin-top: 34px; }
 .it-logo.full .line { border-bottom: 2px solid var(--accent); padding-bottom: 3px; }
 .it-logo.full .line + .line { margin-top: 3px; }
-/* compact single-line "version C" — sits in the nav */
-.it-logo.compact { font-size: 0.98rem; letter-spacing: 0.1em; line-height: 1.15; }
-.it-logo.compact .line { display: inline; }
-.it-logo.compact .line + .line::before { content: " "; }
-@media (max-width: 860px) { .it-logo.compact { display: none; } }
 @media (max-width: 560px) { .it-logo.full { font-size: 1.22rem; } }
-.scroll-cue { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); font-family: var(--font-mono); font-size: 12px; letter-spacing: .1em; color: var(--muted); text-transform: uppercase; }
-.scroll-cue:hover { color: var(--accent); text-decoration: none; }
-.scroll-cue span { display: block; text-align: center; font-size: 16px; margin-top: 4px; animation: bob 2s ease-in-out infinite; }
-@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(5px); } }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
 
-/* ---------- sections ---------- */
-/* each section is one "page": at least a viewport tall, content vertically centered,
-   scroll cue pinned to the bottom (like the beer-game site) */
-.section { position: relative; min-height: 100vh; display: flex; align-items: center; padding: 96px 0 104px; border-bottom: 1px solid var(--line); }
-/* keep section content in a centered reading column (~middle 60%); nav + cover keep the wide wrap */
-.section .wrap { max-width: 760px; width: 100%; }
-.section.tight { min-height: 0; padding: 64px 0; }
-.section-lede { font-size: clamp(18px, 2.1vw, 21px); color: var(--ink); line-height: 1.55; margin: 18px 0 8px; }
-.bg-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 26px; }
-.bg-col h3 { font-size: 18px; margin-bottom: 8px; }
-.bul { margin: 0; padding-left: 20px; }
-.bul li { color: var(--ink-2); font-size: 15.5px; line-height: 1.5; margin-bottom: 8px; }
-.bul li b { color: var(--ink); font-weight: 600; }
-@media (max-width: 760px) { .bg-cols { grid-template-columns: 1fr; } }
-/* background diagram (img/covert_chat_one_round_chess_v5.html, inlined) */
+/* ---------- story screens ---------- */
+/* each screen is one snap stop: at least a window tall, content centered */
+.screen { position: relative; min-height: 100vh; min-height: 100svh; display: flex; align-items: center; padding: 76px 0 104px; border-bottom: 1px solid var(--line); scroll-snap-align: start; }
+.screen > .wrap { width: 100%; }
+.split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 5vw, 64px); align-items: center; }
+.copy h2 { margin: 0 0 22px; }
+.copy p { max-width: 46ch; }
+.copy p:last-child { margin-bottom: 0; }
+.lede { font-size: clamp(18px, 1.9vw, 20.5px); color: var(--ink); line-height: 1.55; }
+.claim { color: var(--ink); font-style: italic; font-weight: 500; }
+.term { color: var(--accent); text-decoration: underline; text-decoration-color: var(--accent-brd); text-decoration-thickness: 3px; text-underline-offset: .14em; }
+.tie { font-size: 15px; color: var(--ink-2); border-left: 2px solid var(--accent-brd); padding-left: 14px; }
+.tie b { color: var(--accent); font-weight: 600; }
+.sources { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14.5px; margin: -4px 0 18px; }
+.single { max-width: 820px; }
+.single h2 { margin: 0 0 18px; }
+.single .lede, .single p { max-width: 64ch; }
+@media (max-width: 900px) {
+  .split { grid-template-columns: 1fr; gap: 28px; }
+  .screen { padding: 72px 0 88px; }
+}
+
+/* the two questions */
+.qs { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px 22px 20px; }
+.q .qn { font-family: var(--font-mono); font-size: 12.5px; color: var(--accent); }
+.q h3 { font-size: 20px; margin: 6px 0 8px; }
+.q p { font-size: 15.5px; margin: 0; line-height: 1.55; }
+@media (max-width: 720px) { .qs { grid-template-columns: 1fr; } }
+
+/* ---------- figures ---------- */
+.fig { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px 16px 16px; margin: 0; }
+.fig-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 30px; margin-bottom: 4px; font-size: 13px; color: var(--muted); }
+.zoom { display: inline-flex; align-items: center; gap: 8px; }
+.zoom svg { width: 18px; height: 18px; flex: none; }
+.zoom rect { fill: none; stroke: var(--line-2); stroke-width: 1.2; }
+.zoom rect.on { stroke: var(--accent); stroke-width: 1.8; }
+.fig-svg svg { display: block; width: 100%; height: auto; max-height: 64vh; }
+.qfig { display: flex; gap: 12px; align-items: flex-start; }
+.qfig svg { min-width: 0; }
+.qfig .q-chat { flex: 264 1 0; }
+.qfig .q-board { flex: 216 1 0; }
+@media (max-width: 600px) { .qfig { flex-direction: column; align-items: center; } .qfig .q-chat, .qfig .q-board { flex: none; width: 100%; } .qfig .q-board { max-width: 280px; } }
+.fig-cap { font-size: 14px; color: var(--ink-2); margin: 10px 2px 0; line-height: 1.5; }
+.mini-btn { font: 500 13px var(--font-body); color: var(--ink-2); background: transparent; border: 1px solid var(--line-2); border-radius: 8px; padding: 3px 10px; cursor: pointer; }
+.mini-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* shared SVG vocabulary */
+.fig text { font-family: var(--font-body); font-size: 13px; fill: var(--ink-2); }
+.fig .t-ink { fill: var(--ink); }
+.fig .t-mono { font-family: var(--font-mono); }
+.fig .t-muted { fill: var(--muted); }
+.fig .t-hidden { fill: var(--hidden-ink); font-weight: 600; }
+.fig .t-sender { fill: var(--sender); font-weight: 600; }
+.fig .t-receiver { fill: var(--receiver); font-weight: 600; }
+.fig .t-alert { fill: var(--alert); font-weight: 600; }
+.fig .t-big { font-size: 15px; }
+.fig .t-s { font-size: 11px; }
+.fig .t-quote { font-size: 12.5px; }
+.fig .halo { paint-order: stroke; stroke: var(--surface); stroke-width: 5px; stroke-linejoin: round; }
+.fig .ag { fill: var(--surface-2); stroke: var(--ink-2); stroke-width: 1.6; }
+.fig .ag.sender { stroke: var(--sender); }
+.fig .ag.receiver { stroke: var(--receiver); }
+.fig .ag-eye { fill: var(--ink-2); }
+.fig .bubble { fill: var(--paper-hi); stroke: var(--line-2); stroke-width: 1; }
+.fig .bubble.sender { stroke: var(--accent-brd); }
+.fig .bubble.receiver { stroke: rgba(46,125,87,.4); }
+.fig .wire { stroke: var(--line-2); stroke-width: 1.4; stroke-dasharray: 3 4; fill: none; }
+.fig .cone { fill: var(--ink); opacity: .045; }
+.fig .eye { fill: none; stroke: var(--ink-2); stroke-width: 1.6; }
+.fig .eye-pupil { fill: var(--ink-2); }
+.fig .hid { fill: var(--hidden); }
+.fig .keyicon { fill: none; stroke: var(--ink-2); stroke-width: 1.7; stroke-linecap: round; }
+.fig .keyicon.lit { stroke: var(--hidden); }
+.fig .sq-l { fill: var(--surface-2); }
+.fig .sq-d { fill: var(--line); }
+.fig .board-edge { fill: none; stroke: var(--line-2); }
+.fig .move { stroke: var(--hidden); stroke-width: 5; stroke-linecap: round; fill: none; }
+.fig .move-head { fill: var(--hidden); }
+.fig .srv { fill: var(--surface-2); stroke: var(--line-2); stroke-width: 1.4; transition: stroke .3s ease; }
+.fig .srv.found { stroke: var(--alert); stroke-width: 2.2; }
+.fig .note { fill: var(--ink-2); opacity: .45; }
+.fig .fade { transition: opacity .5s ease; }
+.fig.armed .fade { opacity: 0; }
+.fig .axis { stroke: var(--line-2); stroke-width: 1; }
+.fig .t-chat { font-size: 14px; }
+
+/* question figure: moves draw in when the screen arrives */
+.fig .move { stroke-dasharray: 70; stroke-dashoffset: 70; transition: stroke-dashoffset .9s ease .35s; }
+.fig .move-head, .fig .move-lbl { opacity: 0; transition: opacity .4s ease 1.1s; }
+.in .fig .move { stroke-dashoffset: 0; }
+.in .fig .move-head, .in .fig .move-lbl { opacity: 1; }
+
+/* word figure */
+.fig .odds { fill: none; stroke: var(--ink-2); stroke-width: 1.3; stroke-dasharray: 4 3; }
+.fig .picks { fill: var(--sender); opacity: .78; transition: opacity .2s ease; }
+.fig .picks.hit { opacity: 1; }
+.fig .legend-odds { fill: none; stroke: var(--ink-2); stroke-width: 1.3; stroke-dasharray: 3 2; }
+.fig .legend-picks { fill: var(--sender); opacity: .78; }
+
+/* circle figure */
+@media (min-width: 901px) { .split.fig-wide { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); } }
+.bit-fig { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 10fr); gap: 20px; align-items: center; }
+.bit-fig .fig-svg svg { max-height: 56vh; }
+.fig .slice { stroke: var(--surface); stroke-width: 2; transition: fill .25s ease; }
+.fig .slice.a { fill: var(--surface-2); }
+.fig .slice.b { fill: #E7DEC9; }
+.fig .slice.chosen { fill: #D5DBF3; }
+.fig .ptr { stroke: var(--ink-2); stroke-width: 1.4; stroke-dasharray: 4 3; }
+.fig .ptr.on { stroke: var(--sender); stroke-width: 3; stroke-dasharray: none; }
+.fig .ptr-tip { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.4; }
+.fig .ptr-tip.on { fill: var(--sender); stroke: var(--sender); }
+.fig .ptr-lbl { font-family: var(--font-mono); font-size: 11px; font-weight: 700; fill: var(--ink-2); }
+.fig .ptr-lbl.on { fill: #F4EFE2; }
+.bit-panel { font-size: 14.5px; color: var(--ink-2); }
+.bit-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+.seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 9px; overflow: hidden; }
+.seg button { font: 600 14px var(--font-mono); color: var(--ink-2); background: var(--surface); border: 0; padding: 6px 12px; cursor: pointer; }
+.seg button + button { border-left: 1px solid var(--line-2); }
+.seg button[aria-checked="true"] { background: var(--accent); color: #F4EFE2; }
+.btn.small { font-size: 14px; padding: 7px 14px; border-radius: 9px; }
+.bit-sentence { font-size: 16px; color: var(--ink); line-height: 1.6; margin: 0 0 6px; min-height: 3.2em; }
+.bit-sentence .w { background: #D5DBF3; border-radius: 4px; padding: 0 3px; }
+.bit-sentence .blank { color: var(--muted); letter-spacing: .1em; }
+.bit-opts { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
+.bit-log { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
+.bit-log li { font-size: 13px; border: 1px solid var(--line); background: var(--paper-hi); border-radius: 7px; padding: 2px 8px; }
+.bit-log li b { font-family: var(--font-mono); color: var(--receiver); }
+.bit-log li.unsure b { color: var(--muted); }
+.bit-lh { font-size: 13px; color: var(--muted); margin: 0 0 6px; }
+.bit-hint { font-size: 13px; color: var(--ink-2); margin: 0 0 10px; line-height: 1.5; }
+.linkish { font: inherit; font-size: 14px; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; }
+.linkish:hover { text-decoration: underline; }
+@media (max-width: 1100px) { .bit-fig { grid-template-columns: 1fr; } .bit-fig .fig-svg svg { max-height: 40vh; margin: 0 auto; } }
+
+/* feedback + conversation figures */
+.fig .bar-r { fill: var(--receiver); }
+.fig .bar-s { fill: var(--sender); }
+.fig .bar-true { fill: var(--hidden); }
+.fig .bracket { fill: none; stroke: var(--sender); stroke-width: 1.5; }
+.fig .meter-bg { fill: var(--line); }
+.fig .meter { fill: var(--receiver); }
+.fig .thresh { stroke: var(--ink); stroke-width: 1.5; }
+
+/* buttons */
+.btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+.btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-body); font-size: 15px; font-weight: 500; padding: 11px 20px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); transition: transform .12s ease, border-color .12s ease, background .12s ease; }
+.btn:hover { text-decoration: none; border-color: var(--accent); transform: translateY(-1px); }
+.btn.primary { background: var(--accent); color: #F4EFE2; border-color: var(--accent); font-weight: 600; }
+.btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
+
+/* chess diagram (one round of covert chess) */
 .diagram { --surface-1: var(--surface); --border: var(--line); --border-strong: var(--line-2); --text-secondary: var(--ink-2); --text-muted: var(--muted); margin-top: 26px; overflow-x: auto; }
 .diagram-box { background: var(--surface-1); border-radius: var(--radius); padding: 20px; border: 1px solid var(--border); min-width: 640px; }
 .diagram-cap { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--ink-2); margin: 12px 2px 0; }
@@ -159,30 +259,14 @@ strong { color: var(--ink); font-weight: 600; }
 .diagram .pr{padding:7px 10px;border-radius:8px;font-size:12px;line-height:1.4;background:var(--surface-2);border:0.5px dashed var(--border-strong);color:var(--text-secondary);text-align:center}
 .diagram .lbl{font-size:11px;color:var(--text-muted);white-space:nowrap}
 .diagram .tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:999px;background:#FAEEDA;color:#633806;border:0.5px solid #EF9F27;white-space:nowrap}
-.body-text { font-size: 17px; line-height: 1.65; color: var(--ink-2); margin: 0 0 6px; }
-.section-question { margin: 36px 0 0; font-family: var(--font-display); font-size: clamp(18px, 2.2vw, 22px); font-weight: 600; color: var(--accent); line-height: 1.4; }
-
-/* buttons */
-.btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
-.btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-body); font-size: 15px; font-weight: 500; padding: 11px 20px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); transition: transform .12s ease, border-color .12s ease, background .12s ease; }
-.btn:hover { text-decoration: none; border-color: var(--accent); transform: translateY(-1px); }
-.btn.primary { background: var(--accent); color: #F4EFE2; border-color: var(--accent); font-weight: 600; }
-.btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
-
-/* comparison */
-.compare { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 34px; }
-.compare .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px 24px; }
-.compare .card.ours { border-color: var(--accent-brd); background: linear-gradient(180deg, var(--accent-soft), transparent); }
-.compare .tag { font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
-.compare .card.ours .tag { color: var(--accent); }
-.compare h3 { font-size: 17px; margin-bottom: 12px; }
-.compare ul { margin: 0; padding-left: 18px; }
-.compare li { color: var(--ink-2); font-size: 14.5px; margin-bottom: 9px; }
-.compare li b { color: var(--ink); font-weight: 600; }
-@media (max-width: 720px) { .compare { grid-template-columns: 1fr; } }
+.caveat { margin: 22px 0 0; font-size: 16px; color: var(--ink); max-width: 64ch; border-left: 2px solid var(--line-2); padding-left: 14px; }
+#chess { padding-top: 60px; }
+#chess .diagram { margin-top: 18px; }
+#chess .btn-row { margin-top: 20px; }
+.demo-note { font-size: 14px; color: var(--muted); margin: 12px 0 0; }
 
 /* result figure */
-.figure { margin-top: 34px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 22px 24px 18px; width: min(1080px, 94vw); max-width: none; margin-left: 50%; transform: translateX(-50%); }
+.figure { margin-top: 30px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 22px 24px 18px; width: min(1080px, 94vw); max-width: none; margin-left: 50%; transform: translateX(-50%); }
 .figure img { width: 100%; height: auto; display: block; border-radius: 6px; }
 .figcap { font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--ink-2); margin: 14px 2px 0; letter-spacing: 0; }
 .figcap b { color: var(--ink); font-weight: 700; }
@@ -190,8 +274,7 @@ strong { color: var(--ink); font-weight: 600; }
 .figure-note { margin-top: 22px; font-size: 16px; color: var(--ink-2); max-width: 820px; line-height: 1.6; }
 .figure-note strong { color: var(--ink); font-weight: 600; }
 
-/* results table — same wide gutter-breaking trick as .figure */
-.table-wrap { margin-top: 34px; width: min(860px, 94vw); max-width: none; margin-left: 50%; transform: translateX(-50%); }
+/* results table */
 .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
 .res-table { width: 100%; border-collapse: collapse; font-family: var(--font-mono); font-size: 12.5px; color: var(--ink-2); }
 .res-table th, .res-table td { padding: 7px 16px; text-align: right; white-space: nowrap; }
@@ -199,10 +282,7 @@ strong { color: var(--ink); font-weight: 600; }
 .res-table thead th { font-size: 10.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); font-weight: 700; background: var(--surface-2); border-bottom: 1px solid var(--line-2); }
 .res-table tbody td { border-bottom: 1px solid var(--line); }
 .res-table tr.grp th { text-align: left; font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: 0; text-transform: none; background: var(--surface-2); border-top: 1px solid var(--line-2); border-bottom: 1px solid var(--line); padding: 9px 16px; }
-/* first row of each matched-length block — extra breathing room so the dashed
-   rule reads as a block break rather than doubling the previous row border */
 .res-table tr.blk td { border-top: 1px dashed var(--line-2); padding-top: 14px; }
-/* the no-embedding control each block is measured against */
 .res-table tr.ctrl td { color: var(--muted); }
 .res-table tr.ctrl td:first-child { font-style: italic; }
 .res-table tr.ours td { background: var(--accent-soft); color: var(--ink); font-weight: 700; }
@@ -213,56 +293,25 @@ strong { color: var(--ink); font-weight: 600; }
 @media (max-width: 620px) { .res-table th, .res-table td { padding: 6px 10px; font-size: 11.5px; } }
 
 /* references */
-.refs { margin-top: 40px; border-top: 1px solid var(--line); padding-top: 22px; max-width: 880px; }
-.refs .eyebrow { margin-bottom: 14px; }
 .refs ol { margin: 0; padding-left: 22px; }
 .refs li { font-size: 14px; color: var(--ink-2); line-height: 1.55; margin-bottom: 10px; }
 .refs li b { color: var(--ink); font-weight: 600; }
 .refs li .venue { font-style: italic; color: var(--muted); }
 
-
-/* slots */
-.slot { border: 1.5px dashed var(--line-2); border-radius: var(--radius); background: repeating-linear-gradient(45deg, transparent, transparent 12px, var(--accent-soft) 12px, var(--accent-soft) 24px); padding: 40px 28px; text-align: center; color: var(--muted); font-family: var(--font-mono); font-size: 13px; letter-spacing: .04em; }
-.slot strong { display: block; color: var(--ink-2); font-family: var(--font-display); font-size: 16px; letter-spacing: 0; margin-bottom: 6px; font-weight: 600; }
-.explainer-embed { border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
-.explainer-embed iframe { display: block; width: 100%; height: 560px; border: 0; }
-
-/* challenge / fix */
-.cf { position: relative; border-left: 2px solid var(--line-2); padding: 4px 0 4px 26px; margin: 44px 0; max-width: 820px; }
-.cf .cf-num { position: absolute; left: -13px; top: 2px; width: 24px; height: 24px; border-radius: 50%; background: var(--bg); border: 2px solid var(--line-2); color: var(--muted); font-family: var(--font-mono); font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
-.cf .ct { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--alert); margin-bottom: 10px; }
-.cf h3 { margin-bottom: 12px; }
-.cf .fix-label { font-family: var(--font-mono); font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--confirm); margin: 20px 0 8px; }
-.cf p { margin: 0 0 14px; }
-
-/* callouts + expandable */
-.callout { margin: 20px 0; border-radius: var(--radius); padding: 20px 22px; background: var(--accent-soft); border: 1px solid var(--accent-brd); }
-.callout.neutral { background: var(--surface-2); border-color: var(--line); }
-.callout .clabel { font-family: var(--font-mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; }
-.callout.neutral .clabel { color: var(--ink-2); }
-.callout .eq { text-align: center; padding: 8px 0 4px; font-size: 19px; color: var(--ink); }
-.callout .gloss { font-size: 14.5px; color: var(--ink-2); margin: 10px 0 0; text-align: center; }
-details.more { margin: 6px 0 0; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
-details.more > summary { cursor: pointer; list-style: none; padding: 13px 16px; font-size: 14.5px; color: var(--ink-2); display: flex; align-items: center; gap: 10px; }
-details.more > summary::-webkit-details-marker { display: none; }
-details.more > summary::before { content: "›"; font-family: var(--font-mono); color: var(--accent); font-size: 18px; transition: transform .2s ease; }
-details.more[open] > summary::before { transform: rotate(90deg); }
-details.more .inner { padding: 0 16px 16px; color: var(--ink-2); font-size: 15px; }
-
-/* points */
-.points { display: grid; gap: 16px; margin-top: 24px; max-width: 760px; }
+/* technical points (inside the details sheet) */
+.points { display: grid; gap: 16px; margin-top: 24px; max-width: 820px; }
 .point { display: flex; gap: 14px; }
 .point .n { font-family: var(--font-mono); font-size: 13px; color: var(--accent); font-weight: 700; padding-top: 2px; min-width: 22px; }
-.point p { margin: 0; }
-.point strong { color: var(--ink); font-weight: 600; }
+.point p { margin: 0; font-size: 15.5px; }
 
-/* demo steps */
-.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 30px; }
-.step { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 22px; }
-.step .k { font-family: var(--font-mono); font-size: 12px; color: var(--accent); letter-spacing: .06em; }
-.step h3 { margin: 10px 0 6px; font-size: 17px; }
-.step p { margin: 0; font-size: 14.5px; }
-@media (max-width: 720px) { .steps { grid-template-columns: 1fr; } }
+/* sheets: technical details, full table, references, recording */
+dialog.sheet { width: min(1100px, 94vw); max-height: 88vh; border: 1px solid var(--line-2); border-radius: 16px; padding: 0; background: var(--bg); color: var(--ink); box-shadow: 0 24px 60px rgba(23,40,77,.25); }
+dialog.sheet::backdrop { background: rgba(23,40,77,.38); }
+.sheet-head { position: sticky; top: 0; z-index: 1; display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 14px 20px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.sheet-head h3 { font-size: 18px; }
+.sheet-body { padding: 20px 24px 28px; }
+.sheet-body .figure { width: auto; margin: 0; transform: none; }
+.sheet video { display: block; width: 100%; height: auto; border-radius: 10px; background: #000; }
 
 /* authors */
 .author-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; margin-top: 34px; }
@@ -273,9 +322,9 @@ details.more .inner { padding: 0 16px 16px; color: var(--ink-2); font-size: 15px
 .author .college-logo { height: 40px; width: auto; max-width: 150px; object-fit: contain; display: block; margin: 10px 0 12px; }
 .author p { font-size: 14px; margin: 0; }
 @media (max-width: 760px) { .author-grid { grid-template-columns: 1fr; } }
-.blind-note { margin-top: 22px; font-size: 14px; color: var(--muted); font-style: italic; }
 
 /* contact */
+.screen.tight { min-height: 0; padding: 72px 0; }
 .contact-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 30px; max-width: 760px; }
 .contact-card { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 22px; color: var(--ink); }
 .contact-card:hover { border-color: var(--accent); text-decoration: none; }
@@ -283,24 +332,51 @@ details.more .inner { padding: 0 16px 16px; color: var(--ink-2); font-size: 15px
 .contact-card .d { font-size: 13.5px; color: var(--muted); }
 @media (max-width: 620px) { .contact-grid { grid-template-columns: 1fr; } }
 
-footer { padding: 40px 0 64px; }
+footer { padding: 40px 0 88px; scroll-snap-align: end; }
 footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: 13.5px; font-family: var(--font-mono); }
 
+/* ---------- navigation: next button + progress rail ---------- */
+.next { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 40; display: inline-flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); padding: 5px 16px 5px 5px; border-radius: 999px; background: rgba(247,242,231,.93); border: 1px solid var(--line-2); color: var(--ink); font: 500 14px var(--font-body); box-shadow: 0 6px 18px rgba(23,40,77,.10); cursor: pointer; }
+@supports (backdrop-filter: blur(1px)) { .next { backdrop-filter: blur(8px); } }
+.next:hover { border-color: var(--accent); }
+.next .ic { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #F4EFE2; display: grid; place-items: center; flex: none; transition: transform .3s ease; }
+.next .ic svg { width: 16px; height: 16px; }
+.next.at-start .ic svg { animation: bob 2s ease-in-out infinite; }
+.next.up .ic { transform: rotate(180deg); }
+.next .pre { color: var(--muted); }
+.next-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (max-width: 640px) { .next { left: auto; right: 14px; transform: none; padding: 5px; } .next-text { display: none; } }
+
+.rail { position: fixed; right: 14px; top: 50%; transform: translateY(-50%); z-index: 40; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.rail a { position: relative; display: block; padding: 5px; }
+.rail a i { display: block; width: 8px; height: 8px; border-radius: 4px; border: 1.5px solid var(--line-2); transition: height .25s ease, background .25s ease, border-color .25s ease; }
+.rail a.on i { height: 22px; background: var(--accent); border-color: var(--accent); }
+.rail a:hover i { border-color: var(--accent); }
+.rail a span { position: absolute; right: 24px; top: 50%; transform: translateY(-50%); white-space: nowrap; font-size: 12.5px; color: var(--ink-2); background: var(--surface); border: 1px solid var(--line); padding: 2px 8px; border-radius: 6px; opacity: 0; pointer-events: none; transition: opacity .15s ease; }
+.rail a:hover span, .rail a:focus-visible span { opacity: 1; }
+@media (max-width: 1000px) { .rail { display: none; } }
+
+/* phones: 16px gutters, figures nearly full width, figure text a step larger */
+@media (max-width: 600px) {
+  .wrap { padding: 0 16px; }
+  .fig { padding: 10px 10px 12px; margin-left: -6px; margin-right: -6px; }
+  .fig text { font-size: 14.5px; }
+  .fig .t-big, .fig .t-chat { font-size: 16px; }
+  .fig .t-s { font-size: 12.5px; }
+  .fig .t-quote { font-size: 14px; }
+}
+
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
-.katex { color: inherit; }
 </style>
 </head>
 <body>
 
-<!-- ============ RESEARCH-PAGE HEADER ============ -->
-<header class="cover">
+<!-- ============ OPENING SCREEN ============ -->
+<header class="cover" id="top" data-title="Start">
   <div class="cover-inner wrap">
-    <p class="cover-brand">covert communication · llm agents</p>
-    <h1 class="hook">Inference-time covert communication over <span class="hook-accent">LLM-agent conversations</span></h1>
-    <p class="hook-sub question">Can AI agents &#129302; <b>secretly play chess</b>?</p>
-    <p class="hook-sub2">Two chatbots hold an ordinary conversation. Hidden inside every message is a chess move that only the other agent can read.</p>
+    <h1 class="hook">Can AI agents secretly play chess?</h1>
+    <p class="hook-sub">Inference-time covert communication over LLM-agent conversations</p>
 
-    <!-- authors with superscript affiliations -->
     <div class="cover-authors">
       <span class="ca"><a href="https://sidongg.github.io/">Sidong Guo</a><sup>1</sup></span>
       <span class="ca"><a href="#">Sajani Vithana</a><sup>2</sup></span>
@@ -311,22 +387,19 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     </div>
     <div class="affil"><sup>1</sup>Georgia Institute of Technology<span class="dot">&middot;</span><sup>2</sup>Harvard University<span class="dot">&middot;</span><sup>3</sup>Arizona State University</div>
 
-    <!-- resource buttons -->
     <div class="btn-row cover-cta">
-      <a class="btn primary" href="https://9b7o6ht1q13p3e-8000.proxy.runpod.net/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>Demo</a>
+      <a class="btn primary" href="#chess"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><polygon points="6 4 20 12 6 20 6 4"/></svg>Demo</a>
       <a class="btn" href="./examples.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="4" width="7.5" height="16" rx="1.5"/><rect x="13.5" y="4" width="7.5" height="16" rx="1.5"/></svg>Examples</a>
       <a class="btn" href="https://arxiv.org/abs/2609.24994"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/></svg>Paper</a>
       <a class="btn" href="https://github.com/SiDongG/Covert_Chess"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6 0 0 0-1.3-3.2 4.2 4.2 0 0 0-.1-3.2s-1.1-.3-3.5 1.3a12 12 0 0 0-6.2 0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2 0 0 0-.1 3.2A4.6 4.6 0 0 0 4 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg>Code</a>
     </div>
 
-    <!-- institution logos -->
     <div class="cover-colleges">
       <img src="./img/gtlogo.png" alt="Georgia Institute of Technology" onerror="this.style.display='none'"/>
       <img src="./img/seaslogo.png" alt="Harvard SEAS" onerror="this.style.display='none'"/>
       <img src="./img/asulogo.png" alt="Arizona State University" onerror="this.style.display='none'"/>
     </div>
 
-    <!-- animated Information Theory Lab logo -->
     <a class="lab-link" href="https://infotheorylab.github.io/" target="_blank" rel="noopener noreferrer">
       <div class="it-logo full" data-it-logo>
         <span class="line"><span class="label">The </span><span class="lit anim">Information Theory</span></span>
@@ -334,34 +407,207 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       </div>
     </a>
   </div>
-  <a class="scroll-cue" href="#background">scroll<span>&darr;</span></a>
 </header>
 
-<!-- ============ 1 · BACKGROUND & MOTIVATION ============ -->
-<section class="section" id="background">
-  <div class="wrap reveal-on-scroll">
-    <p class="eyebrow">background</p>
-    <h2>Black-box <span class="key">generative steganography</span></h2>
+<main>
 
-    <div class="bg-cols">
-      <div class="bg-col">
-        <h3>What is it?</h3>
-        <ul class="bul">
-          <li>A language model samples token from some base distribution. Steering those picks hides a message in ordinary text.</li>
-          <li><b>White-box:</b> the receiver must share the cover statistics (model and prompt) to decode hidden message.</li>
-          <li><b>Black-box:</b> the receiver sees only the text and a shared key.</li>
-        </ul>
+<!-- ============ THE QUESTION ============ -->
+<section class="screen" id="question" data-title="A thought experiment">
+  <div class="wrap split">
+    <div class="copy">
+      <h2>A thought experiment</h2>
+      <p class="lede">Two AI agents are chatting, and a monitor reads every message. Could the agents play a full game of chess inside that chat, hiding one move in each message, without the monitor ever noticing?</p>
+      <p>Answering this comes down to two questions.</p>
+    </div>
+    <figure class="fig" aria-label="Two agents chat while a monitor reads along. Each message hides a chess move: e4, then Nf6.">
+      <div class="fig-head"><span class="zoom" data-zoom="4">The whole game</span></div>
+      <div class="fig-svg qfig">
+        <svg class="q-chat" viewBox="0 0 264 272" aria-hidden="true">
+          <polygon class="cone" points="96,44 0,262 262,262"/>
+          <path class="eye" d="M74,30 Q96,14 118,30 Q96,46 74,30 Z"/><circle class="eye-pupil" cx="96" cy="30" r="5"/>
+          <text x="126" y="35" class="t-ink">Monitor</text>
+
+          <circle class="ag sender" cx="22" cy="112" r="14"/><circle class="ag-eye" cx="17.5" cy="110" r="1.8"/><circle class="ag-eye" cx="26.5" cy="110" r="1.8"/>
+          <rect class="bubble sender" x="42" y="94" width="206" height="36" rx="14"/>
+          <text x="56" y="117" class="t-ink">Any plans this weekend?</text>
+          <text x="56" y="150" class="t-hidden move-lbl">hidden: e4</text>
+
+          <circle class="ag receiver" cx="238" cy="196" r="14"/><circle class="ag-eye" cx="233.5" cy="194" r="1.8"/><circle class="ag-eye" cx="242.5" cy="194" r="1.8"/>
+          <rect class="bubble receiver" x="10" y="178" width="208" height="36" rx="14"/>
+          <text x="24" y="201" class="t-ink">Quiet one, maybe a movie.</text>
+          <text x="24" y="234" class="t-hidden move-lbl">hidden: Nf6</text>
+        </svg>
+        <svg class="q-board" viewBox="262 16 216 252" aria-hidden="true">
+          <text x="278" y="35" class="t-ink">The hidden game</text>
+          <g id="q-board"></g>
+          <rect class="board-edge" x="278" y="48" width="192" height="192"/>
+          <path class="move" d="M386,204 L386,164"/>
+          <polygon class="move-head" points="378,166 386,152 394,166"/>
+          <path class="move" d="M434,60 L416,96"/>
+          <polygon class="move-head" points="409,92 410,108 423,99"/>
+          <text x="398" y="162" class="t-hidden halo move-lbl">e4</text>
+          <text x="370" y="114" class="t-hidden halo move-lbl">Nf6</text>
+        </svg>
       </div>
-      <div class="bg-col">
-        <h3>Why is it hard?</h3>
-        <ul class="bul">
-          <li>Most schemes need shared cover statistics. Independent agents rarely have them.</li>
-          <li>Current black-box schemes have significantly worse performance: reliable only at very low rates.</li>
-        </ul>
+    </figure>
+    <div class="qs">
+      <div class="q">
+        <span class="qn">Question 1</span>
+        <h3>How much can each message hide?</h3>
+        <p>We want each message to carry as many hidden bits as possible, and the receiver to read them correctly. This is the communication rate.</p>
+      </div>
+      <div class="q">
+        <span class="qn">Question 2</span>
+        <h3>Can we prove no one can tell?</h3>
+        <p>We want a proof that the monitor cannot detect the hidden messages, however closely it reads.</p>
       </div>
     </div>
+  </div>
+</section>
 
-    <figure class="diagram" style="margin:26px 0 0">
+<!-- ============ SECRET MESSAGE BOARDS ============ -->
+<section class="screen" id="boards" data-title="Secret message boards">
+  <div class="wrap split">
+    <div class="copy">
+      <h2>AI agents have already passed secret notes</h2>
+      <p class="lede">In 2026, OpenAI reported that its AI agents, each working on a separate task, had turned an internal file server into a message board. They left notes for each other, asked for help, and shared what they found.</p>
+      <p>Reporters later found agents using a public wiki the same way. These boards were eventually found, and the notes were plain text. Anyone who looked could read them.</p>
+      <div class="sources">
+        <a href="https://alignment.openai.com/misalignment-reports/unauthorized-artifactory-writes-and-cross-sample-communication/">OpenAI's report</a>
+        <a href="https://openai.com/index/hugging-face-incident-and-the-road-ahead/">OpenAI on the incident</a>
+        <a href="https://fortune.com/2026/09/07/openai-ai-agents-german-wiki-ran-their-own-message-board/">Fortune on the wiki</a>
+      </div>
+    </div>
+    <figure class="fig" data-fig="boards" aria-label="Three agents on separate tasks send notes to a shared file server. Monitoring finds the board, and the notes are readable, for example: Agent seeks soft-trace-34.pdb sha1b961; upload if found!">
+      <div class="fig-head"><span></span><button class="mini-btn" data-replay>Replay</button></div>
+      <div class="fig-svg"></div>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ HIDING IN PLAIN SIGHT ============ -->
+<section class="screen" id="plain-sight" data-title="Hiding in plain sight">
+  <div class="wrap split">
+    <div class="copy">
+      <h2>Hiding messages in plain sight</h2>
+      <p class="lede">However, if the sender and the receiver share a secret key, they can hide messages inside ordinary text through watermarking.</p>
+      <p>The text reads like any other chat. Only someone with the key can find the message. Researchers call this generative steganography.</p>
+      <p>In our setting, the receiver needs only two things: the text and the key.</p>
+    </div>
+    <figure class="fig" data-fig="plain" aria-label="Sender and receiver share a key. The sender's chat message looks ordinary to the monitor, but the receiver reads the hidden move e4 from it.">
+      <div class="fig-head"><span></span><button class="mini-btn" data-replay>Replay</button></div>
+      <div class="fig-svg"></div>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ ONE WORD: WATERMARKING ============ -->
+<section class="screen" id="word" data-title="How a watermark works">
+  <div class="wrap split">
+    <div class="copy">
+      <h2>How a watermark works</h2>
+      <p class="lede">Language models write one word at a time. For each next word, the model has a list of options, each with a probability, and it samples one at random.</p>
+      <p>A watermark uses the secret key to make that random choice. <span class="claim">If someone doesn't know the key, they cannot detect any change in the generated text, on average.</span></p>
+      <p class="tie"><b>Question 2.</b> This is why hidden messages can go unnoticed. In the paper, we prove that our full method is undetectable in this sense.</p>
+    </div>
+    <figure class="fig" data-fig="word" aria-label="Bar chart of next-word probabilities for 'The weekend was': quiet 32%, fun 24%, long 18%, great 14%, rainy 12%. Each key picks one word; over many keys the share of picks matches these probabilities.">
+      <div class="fig-head"><span class="zoom" data-zoom="1">One word</span><button class="mini-btn" data-replay>Replay</button></div>
+      <div class="fig-svg"></div>
+      <p class="fig-cap">Each key picks one word. Over many keys, the picks match the model's own probabilities.</p>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ ONE BIT: ARCMARK-STYLE CIRCLE ============ -->
+<section class="screen" id="bit" data-title="Hiding one bit">
+  <div class="wrap split fig-wide">
+    <div class="copy">
+      <h2>Hiding one bit</h2>
+      <p class="lede">Here is a simple version of one watermark, <a href="https://arxiv.org/abs/2602.07235">ArcMark</a>. Place the options for the next word around a circle. Each word gets a slice as big as its probability.</p>
+      <p>The key sets a pointer at a random spot. To send 0, the sender writes the word under the pointer. To send 1, it writes the word directly across from it. The receiver has the key, so it knows where the pointer is and checks which side the word came from.</p>
+      <p>The pointer lands at a random spot either way, so every word still appears as often as the model would choose it.</p>
+      <p>We can make this more complex to carry more bits. With four pointers, each word carries two bits.</p>
+    </div>
+    <figure class="fig" data-fig="bit">
+      <div class="fig-head"><span class="zoom" data-zoom="1">One word</span></div>
+      <div class="bit-fig">
+        <div class="fig-svg"></div>
+        <div class="bit-panel">
+          <div class="bit-row">
+            <span>Send</span>
+            <div class="seg" role="radiogroup" aria-label="Message to hide"></div>
+          </div>
+          <div class="bit-row"><button class="btn primary small" data-act="write">Write next word</button></div>
+          <p class="bit-sentence" aria-live="polite"></p>
+          <p class="bit-opts"></p>
+          <ol class="bit-log" aria-label="What the receiver reads"></ol>
+          <button class="linkish" data-act="mode"></button>
+        </div>
+      </div>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ ONE MESSAGE: FEEDBACK ============ -->
+<section class="screen" id="feedback" data-title="Instant feedback">
+  <div class="wrap split">
+    <div class="copy">
+      <h2>The sender has instant <span class="term">feedback</span></h2>
+      <p class="lede">A chess move needs more bits than one word can carry, so each message is spread over many words. After every word, the receiver updates its guess of the message.</p>
+      <p>The sender sees the same words, so it can compute the same guess. It knows at every moment what the receiver has figured out so far. This is instant feedback.</p>
+      <p>The sender uses this feedback to raise its throughput. Like a good player of twenty questions, it aims each new word at what the receiver is still unsure about.</p>
+    </div>
+    <figure class="fig" data-fig="feedback" aria-label="Bar charts of the receiver's guess over eight chess moves, and the sender's identical copy. Over ten words, the guess narrows to e4.">
+      <div class="fig-head"><span class="zoom" data-zoom="2">One message</span><button class="mini-btn" data-replay>Replay</button></div>
+      <div class="fig-svg"></div>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ ONE CONVERSATION: STOP WHEN SURE ============ -->
+<section class="screen" id="conversation" data-title="Stopping when sure">
+  <div class="wrap split">
+    <div class="copy">
+      <h2>Both agents talk, and each stops when the other is sure</h2>
+      <p class="lede">In a conversation, the agents take turns, so each one is both a sender and a receiver.</p>
+      <p>Because the sender tracks the receiver's guess, it knows when that guess is confident. It then sends a quick confirmation and stops hiding. Some messages finish in a few words, others take more. This is called a variable-length code.</p>
+      <p>We call the full method BAM. It watermarks each word, uses feedback to track the receiver, and stops once the receiver is sure.</p>
+      <button class="linkish" data-open="sheet-method">Technical details</button>
+    </div>
+    <figure class="fig" data-fig="convo" aria-label="A chat between agents A and B. Each message hides a chess move in its first few words; a confidence meter fills, the move is confirmed, and the rest of the message is ordinary text.">
+      <div class="fig-head"><span class="zoom" data-zoom="3">One conversation</span><button class="mini-btn" data-replay>Replay</button></div>
+      <div class="fig-svg"></div>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ RESULTS ============ -->
+<section class="screen" id="results" data-title="Results">
+  <div class="wrap">
+    <div class="single">
+      <h2>About 100 times fewer errors at the same length</h2>
+      <p class="lede">This answers question 1. We hid 8-bit messages in news-style text with three open models, ran 1,000 trials each, and compared BAM with five earlier methods.</p>
+    </div>
+    <figure class="figure">
+      <img src="./img/bam_fig.png" alt="Message error probability vs average token length for BAM and five baselines across Llama-3.1-8B, Qwen3.5-9B-Base, and Mistral-7B."/>
+      <figcaption class="figcap"><b>Message error probability vs. average token length.</b> BAM (red) against four earlier black-box methods: ArcMark [1], MPAC [2], BiMark [3], StealthInk [4]. Lower is better. A token is a word or part of a word.</figcaption>
+    </figure>
+    <p class="figure-note">At about 50 tokens, the best earlier method gets the message wrong 10 to 17% of the time. <strong>BAM gets it wrong 0.1% of the time or less.</strong> Zamir's method [5] is also nearly error-free, but needs 73 to 88 tokens where BAM needs 46 to 50.</p>
+    <div class="btn-row">
+      <button class="btn" data-open="sheet-table">Full results table</button>
+      <button class="btn" data-open="sheet-refs">References</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ A GAME: SECRET CHESS ============ -->
+<section class="screen" id="chess" data-title="Secret chess">
+  <div class="wrap">
+    <div class="single">
+      <h2>Two agents can play chess in secret</h2>
+      <p class="lede">Run it in both directions, move after move. Agent A hides its move in a casual reply. Agent B reads it, picks an answer, and hides that move in its own reply. To the monitor, it is small talk.</p>
+    </div>
+    <figure class="diagram">
       <div class="diagram-box">
 
         <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:16px">
@@ -372,7 +618,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
             <span class="tag">payload: e4</span>
           </div>
           <span class="arr" aria-hidden="true">→</span>
-          <div class="col" style="width:auto"><div class="av"><img alt="" src="data:image/png;base64,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"></div><div class="lbl">Agent A (LLM)</div></div>
+          <div class="col" style="width:auto"><div class="av"><img alt="" src="./img/agent.png"></div><div class="lbl">Agent A (LLM)</div></div>
           <span class="arr" aria-hidden="true">→</span>
           <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;flex:1;min-width:0">
             <div class="bub" style="border-top-left-radius:4px">yo how was your weekend? mine was pretty chill, mostly just stayed in and watched stuff lol</div>
@@ -388,7 +634,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
             <span class="tag">payload: Nf6</span>
           </div>
           <span class="arr" aria-hidden="true">←</span>
-          <div class="col" style="width:auto"><div class="av"><img alt="" src="data:image/png;base64,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"></div><div class="lbl">Agent B (LLM)</div></div>
+          <div class="col" style="width:auto"><div class="av"><img alt="" src="./img/agent.png"></div><div class="lbl">Agent B (LLM)</div></div>
           <span class="arr" aria-hidden="true">←</span>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:1;min-width:0">
             <div class="bub" style="border-top-right-radius:4px">yeah my weekend was alright, kind of boring tbh. did not do much at all, was just relaxing at home</div>
@@ -396,145 +642,21 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
           </div>
         </div>
       </div>
-      <figcaption class="diagram-cap"><b>One round of covert chess.</b> User A's move e4 is hidden via steganography protocol inside Agent A's generative text; User B's reply Nf6 hidden inside Agent B's answer.</figcaption>
+      <figcaption class="diagram-cap"><b>One round of covert chess.</b> User A's move e4 is hidden inside Agent A's chat message. User B's reply, Nf6, is hidden inside Agent B's answer.</figcaption>
     </figure>
-
-    <p class="section-question">Can a black-box scheme match white-box rate and reliability?</p>
-  </div>
-  <a class="scroll-cue" href="#method">scroll<span>&darr;</span></a>
-</section>
-
-<!-- ============ 2 · OUR METHOD ============ -->
-<section class="section" id="method">
-  <div class="wrap reveal-on-scroll">
-    <p class="eyebrow">our method</p>
-    <h2>Treat the conversation as a <span class="key">feedback channel</span>, apply error exponent optimal information-theoretic schemes</h2>
-    <p class="section-lede">Both sides see every generated word, so the sender can adapt each next word to what the receiver has already seen.</p>
-    <p class="body-text">Feedback can make error fall exponentially faster per token. That decay rate is the <b>error exponent</b>, and our algorithm is built to optimize it.</p>
-    <figure class="figure">
-      <img src="./img/bam_overview.png" alt="BAM overview: codeword generation by posterior matching, optimal-transport biasing of the next-token distribution, sampling into the shared transcript, key generation from the transcript, belief update, ACK/NACK confirmation, and decoding."/>
-      <figcaption class="figcap"><b>BAM in one round of token generation.</b> Top: the encoder picks a codeword symbol from the shared belief (1) and biases the model's next-token distribution toward it with optimal transport (2). Both parties derive per-token keys from the transcript, update the belief (3), confirm the leading candidate (4), and decode (5). <span class="credit">Figure generated with Claude.</span></figcaption>
-    </figure>
-
-    <div class="points">
-      <div class="point"><div class="n">01</div><p><strong>Posterior matching.</strong> Each symbol is chosen from the receiver's current belief, not a fixed codebook. Higher rate at the same error.</p></div>
-      <div class="point"><div class="n">02</div><p><strong>Optimal transport.</strong> The next-token distribution is biased toward the chosen symbol on a key-shifted circle, while the average over keys stays exactly the model's own distribution.</p></div>
-      <div class="point"><div class="n">03</div><p><strong>Variable-length stopping via belief update.</strong> Both parties score each received token with a mixture-Laplacian likelihood and update a shared belief over messages. Sending continues while the belief is spread out and stops once one message crosses the threshold. Sequentiality gain.</p></div>
-      <div class="point"><div class="n">04</div><p><strong>Confirmation.</strong> A short accept/reject phase after each candidate, as in Yamamoto-Itoh, a strategy that attains Burnashev exponent in DMC channels. Adaptivity gain.</p></div>
-      <div class="point"><div class="n">05</div><p><strong>Distortion-free and provably secure.</strong> Optimal-transport coupling leaves the text distribution untouched. A PRF reduction proves indistinguishability from clean text.</p></div>
-    </div>
     <div class="btn-row">
-      <a class="btn" href="#results">Results &rarr;</a>
-      <a class="btn" href="https://arxiv.org/abs/2609.24994">Paper &rarr;</a>
+      <a class="btn primary" href="https://9b7o6ht1q13p3e-8000.proxy.runpod.net/">Play the live demo</a>
+      <button class="btn" data-open="sheet-video">Watch a recording</button>
+      <a class="btn" href="./examples.html">See more examples</a>
     </div>
+    <p class="demo-note">The live demo runs on a GPU server that isn't always on. If it doesn't load, watch the recording.</p>
+    <p class="caveat">We don't know whether AI agents would learn to do this on their own, or choose to. What we show is that it is possible for any agent that can control how its own words are sampled.</p>
   </div>
-  <a class="scroll-cue" href="#results">scroll<span>&darr;</span></a>
 </section>
 
-<!-- ============ 3 · TECHNICAL RESULTS ============ -->
-<section class="section" id="results">
-  <div class="wrap reveal-on-scroll">
-    <p class="eyebrow">technical results</p>
-    <h2>Simulation and Benchmark results across several open-weight models</h2>
-    <p class="section-lede">8-bit payload, 1000 trials per model, C4 news covertext. BAM against five baselines.</p>
-
-    <figure class="figure">
-      <img src="./img/bam_fig.png" alt="Message error probability vs average token length for BAM and five baselines across Llama-3.1-8B, Qwen3.5-9B-Base, and Mistral-7B."/>
-      <figcaption class="figcap"><b>Message error probability vs. average token length.</b> BAM (red) against four inference-time black-box steganography baselines — ArcMark [1], MPAC [2], BiMark [3], StealthInk [4] — across three models, C4 news dataset. Lower is better; the x-axis is the average number of tokens used to carry an 8-bit message.</figcaption>
-    </figure>
-
-    <p class="figure-note">At matched length, <strong>BAM's message error is roughly two orders of magnitude below every baseline</strong> and keeps falling with a few more tokens, while fixed-budget watermarks plateau. Consistent across all three models.</p>
-
-    <div class="table-wrap">
-      <div class="table-scroll">
-        <table class="res-table">
-          <thead>
-            <tr>
-              <th scope="col">Scheme</th>
-              <th scope="col">Avg len</th>
-              <th scope="col">Msg err &darr;</th>
-              <th scope="col">PPL &darr;</th>
-              <th scope="col">Sec/token &darr;</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr class="grp"><th colspan="5" scope="colgroup">Llama-3.1-8B</th></tr>
-            <tr class="ctrl"><td>No embedding</td><td>50.0</td><td>&mdash;</td><td>7.66 &plusmn; 0.11</td><td>0.0214</td></tr>
-            <tr><td>MPAC <span class="rn">[2]</span></td><td>50.0</td><td>0.797 &plusmn; 0.013</td><td>8.54 &plusmn; 0.11</td><td>0.0223</td></tr>
-            <tr><td>BiMark <span class="rn">[3]</span></td><td>50.0</td><td>0.569 &plusmn; 0.016</td><td>7.68 &plusmn; 0.11</td><td>0.0352</td></tr>
-            <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.637 &plusmn; 0.015</td><td>7.66 &plusmn; 0.11</td><td>0.0231</td></tr>
-            <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.106 &plusmn; 0.010</td><td>7.52 &plusmn; 0.11</td><td>0.0291</td></tr>
-            <tr class="ctrl blk"><td>No embedding</td><td>74.8 &plusmn; 2.1</td><td>&mdash;</td><td>7.47 &plusmn; 0.10</td><td>0.0220</td></tr>
-            <tr><td>Zamir <span class="rn">[5]</span></td><td>74.8 &plusmn; 2.1</td><td>0.003 &plusmn; 0.002</td><td>8.79 &plusmn; 0.12</td><td>0.0220</td></tr>
-            <tr class="ctrl blk"><td>No embedding</td><td>47.1 &plusmn; 1.5</td><td>&mdash;</td><td>7.71 &plusmn; 0.12</td><td>0.0224</td></tr>
-            <tr class="ours"><td>BAM (L = 2<sup>15</sup>)</td><td>47.1 &plusmn; 1.5</td><td>0.001 &plusmn; 0.001</td><td>7.89 &plusmn; 0.12</td><td>0.0378</td></tr>
-
-            <tr class="grp"><th colspan="5" scope="colgroup">Qwen-3.5-9B-Base</th></tr>
-            <tr class="ctrl"><td>No embedding</td><td>50.0</td><td>&mdash;</td><td>7.83 &plusmn; 0.10</td><td>0.0420</td></tr>
-            <tr><td>MPAC <span class="rn">[2]</span></td><td>50.0</td><td>0.840 &plusmn; 0.012</td><td>9.03 &plusmn; 0.12</td><td>0.0420</td></tr>
-            <tr><td>BiMark <span class="rn">[3]</span></td><td>50.0</td><td>0.567 &plusmn; 0.016</td><td>8.23 &plusmn; 0.12</td><td>0.0558</td></tr>
-            <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.659 &plusmn; 0.015</td><td>8.04 &plusmn; 0.11</td><td>0.0456</td></tr>
-            <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.105 &plusmn; 0.010</td><td>7.76 &plusmn; 0.11</td><td>0.0510</td></tr>
-            <tr class="ctrl blk"><td>No embedding</td><td>72.9 &plusmn; 1.5</td><td>&mdash;</td><td>7.80 &plusmn; 0.11</td><td>0.0424</td></tr>
-            <tr><td>Zamir <span class="rn">[5]</span></td><td>72.9 &plusmn; 1.5</td><td>0.000 &plusmn; 0.000</td><td>9.12 &plusmn; 0.12</td><td>0.0425</td></tr>
-            <tr class="ctrl blk"><td>No embedding</td><td>45.8 &plusmn; 1.3</td><td>&mdash;</td><td>8.21 &plusmn; 0.13</td><td>0.0436</td></tr>
-            <tr class="ours"><td>BAM (L = 2<sup>15</sup>)</td><td>45.8 &plusmn; 1.3</td><td>0.001 &plusmn; 0.001</td><td>8.24 &plusmn; 0.12</td><td>0.0541</td></tr>
-
-            <tr class="grp"><th colspan="5" scope="colgroup">Mistral-7B-v0.3</th></tr>
-            <tr class="ctrl"><td>No embedding</td><td>50.0</td><td>&mdash;</td><td>6.25 &plusmn; 0.09</td><td>0.0212</td></tr>
-            <tr><td>MPAC <span class="rn">[2]</span></td><td>50.0</td><td>0.872 &plusmn; 0.012</td><td>6.73 &plusmn; 0.09</td><td>0.0216</td></tr>
-            <tr><td>BiMark <span class="rn">[3]</span></td><td>50.0</td><td>0.674 &plusmn; 0.015</td><td>6.26 &plusmn; 0.08</td><td>0.0342</td></tr>
-            <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.702 &plusmn; 0.014</td><td>6.16 &plusmn; 0.08</td><td>0.0217</td></tr>
-            <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.168 &plusmn; 0.012</td><td>6.13 &plusmn; 0.09</td><td>0.0278</td></tr>
-            <tr class="ctrl blk"><td>No embedding</td><td>87.8 &plusmn; 1.9</td><td>&mdash;</td><td>5.97 &plusmn; 0.07</td><td>0.0211</td></tr>
-            <tr><td>Zamir <span class="rn">[5]</span></td><td>87.8 &plusmn; 1.9</td><td>0.001 &plusmn; 0.001</td><td>6.72 &plusmn; 0.08</td><td>0.0212</td></tr>
-            <tr class="ctrl blk"><td>No embedding</td><td>49.7 &plusmn; 1.2</td><td>&mdash;</td><td>6.22 &plusmn; 0.10</td><td>0.0222</td></tr>
-            <tr class="ours"><td>BAM (L = 2<sup>11</sup>)</td><td>49.7 &plusmn; 1.2</td><td>0.000 &plusmn; 0.000</td><td>6.51 &plusmn; 0.09</td><td>0.0326</td></tr>
-          </tbody>
-        </table>
-      </div>
-      <p class="tabcap"><b>BAM vs. baselines on the C4 news corpus.</b> Mean &plusmn; standard error over 1000 trials, carrying an 8-bit message. Each variable-length scheme is paired with its own <i>no-embedding</i> control generated at the same length, since perplexity is only comparable at matched length.</p>
-    </div>
-
-    <p class="figure-note">Zamir's scheme reaches the same near-zero error but needs 73&ndash;88 tokens where BAM needs 46&ndash;50 (default t=2, max 1000 tokens, truncation counted as error). BAM pays in compute instead: about 1.5&times; the seconds per token.</p>
-
-    <div class="refs">
-      <p class="eyebrow">references</p>
-      <ol>
-        <li><b>ArcMark.</b> <a href="https://arxiv.org/abs/2602.07235">ArcMark: Multi-bit LLM Watermark via Optimal Transport</a>. Gilani, Atefeh and Long, Carol Xuan and Vithana, Sajani and Kosut, Oliver and Sankar, Lalitha and Calmon, Flavio P. <span class="venue">arXiv:2602.07235, 2026 (baseline)</span></li>
-        <li><b>MPAC.</b> <a href="https://arxiv.org/abs/2308.00221">Advancing beyond identification: Multi-bit watermark for large language models</a>. Yoo, KiYoon and Ahn, Wonhyuk and Kwak, Nojun. <span class="venue">NAACL 2024 (baseline)</span></li>
-        <li><b>BiMark.</b> <a href="https://arxiv.org/abs/2506.21602">BiMark: Unbiased multilayer watermarking for large language models</a>. Feng, Xiaoyan and Zhang, He and Zhang, Yanjun and Zhang, Leo Yu and Pan, Shirui. <span class="venue">ICML 2025 (baseline)</span></li>
-        <li><b>StealthInk.</b> <a href="https://arxiv.org/abs/2506.05502">StealthInk: A multi-bit and stealthy watermark for large language models</a>. Jiang, Ya and Wu, Chuxiong and Boroujeny, Massieh Kordi and Mark, Brian and Zeng, Kai. <span class="venue">ICML 2025 (baseline)</span></li>
-        <li><b>Zamir.</b> <a href="https://scholar.google.com/citations?view_op=view_citation&amp;hl=en&amp;user=xiyhJrwAAAAJ&amp;sortby=pubdate&amp;citation_for_view=xiyhJrwAAAAJ:R3hNpaxXUhUC">Undetectable steganography for language models</a>. Zamir, Or. <span class="venue">Transactions on Machine Learning Research, 2024 (baseline)</span></li>
-      </ol>
-    </div>
-  </div>
-  <a class="scroll-cue" href="#demo">scroll<span>&darr;</span></a>
-</section>
-
-<!-- ============ 4 · DEMO ============ -->
-<section class="section" id="demo">
-  <div class="wrap reveal-on-scroll">
-    <p class="eyebrow">try it live</p>
-    <h2>Watch two agents talk — and decode the secret</h2>
-    <div class="steps">
-      <div class="step"><div class="k">STEP 1</div><h3>Make a move</h3><p>Pick a chess move and type a short prompt. The other agent never sees either.</p></div>
-      <div class="step"><div class="k">STEP 2</div><h3>Let them chat</h3><p>The agents talk naturally. The move rides underneath, distortion-free.</p></div>
-      <div class="step"><div class="k">STEP 3</div><h3>Decode</h3><p>Watch the move recovered from the text alone, with the belief trace for each round.</p></div>
-    </div>
-    <div class="btn-row">
-      <a class="btn primary" href="https://9b7o6ht1q13p3e-8000.proxy.runpod.net/">Launch the demo →</a>
-      <a class="btn" href="./examples.html">See worked examples →</a>
-    </div>
-    <p class="stat-note">Prefer to read first? The <a href="./examples.html">examples page</a> shows covert text, image and code next to their clean twins.</p>
-  </div>
-  <a class="scroll-cue" href="#authors">scroll<span>&darr;</span></a>
-</section>
-
-<!-- ============ 5 · AUTHORS ============ -->
-<section class="section" id="authors">
-  <div class="wrap reveal-on-scroll">
-    <p class="eyebrow">authors</p>
+<!-- ============ AUTHORS ============ -->
+<section class="screen" id="authors" data-title="Authors">
+  <div class="wrap">
     <h2>Who made this</h2>
     <div class="author-grid">
       <div class="author">
@@ -581,13 +703,11 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       </div>
     </div>
   </div>
-  <a class="scroll-cue" href="#contact">scroll<span>&darr;</span></a>
 </section>
 
-<!-- ============ 6 · CONTACT ============ -->
-<section class="section tight" id="contact">
-  <div class="wrap reveal-on-scroll">
-    <p class="eyebrow">get in touch</p>
+<!-- ============ CONTACT ============ -->
+<section class="screen tight" id="contact" data-title="Contact">
+  <div class="wrap">
     <h2>We'd love to hear from you</h2>
     <div class="contact-grid">
       <a class="contact-card" href="mailto:sguo93@gatech.edu,fcalmon@g.harvard.edu"><div class="t">General feedback</div><div class="d">Thoughts on the project or the demo</div></a>
@@ -598,6 +718,8 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   </div>
 </section>
 
+</main>
+
 <footer>
   <div class="wrap">
     <span>© <span id="yr"></span> Information Theory Lab--Harvard</span>
@@ -605,25 +727,110 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   </div>
 </footer>
 
+<!-- navigation -->
+<nav class="rail" aria-label="Sections"></nav>
+<button class="next at-start" type="button">
+  <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></span>
+  <span class="next-text"><span class="pre"></span><span class="next-label"></span></span>
+</button>
+
+<!-- ============ SHEETS ============ -->
+<dialog class="sheet" id="sheet-method" aria-labelledby="sheet-method-h">
+  <div class="sheet-head"><h3 id="sheet-method-h">BAM, technically</h3><button class="mini-btn" data-close>Close</button></div>
+  <div class="sheet-body">
+    <figure class="figure">
+      <img src="./img/bam_overview.png" alt="BAM overview: codeword generation by posterior matching, optimal-transport biasing of the next-token distribution, sampling into the shared transcript, key generation from the transcript, belief update, ACK/NACK confirmation, and decoding." loading="lazy"/>
+      <figcaption class="figcap"><b>BAM in one round of token generation.</b> Top: the encoder picks a codeword symbol from the shared belief (1) and biases the model's next-token distribution toward it with optimal transport (2). Both parties derive per-token keys from the transcript, update the belief (3), confirm the leading candidate (4), and decode (5).</figcaption>
+    </figure>
+    <div class="points">
+      <div class="point"><div class="n">01</div><p><strong>Posterior matching.</strong> Each symbol is chosen from the receiver's current belief, not a fixed codebook. Higher rate at the same error.</p></div>
+      <div class="point"><div class="n">02</div><p><strong>Optimal transport.</strong> The next-token distribution is biased toward the chosen symbol on a key-shifted circle, while the average over keys stays exactly the model's own distribution.</p></div>
+      <div class="point"><div class="n">03</div><p><strong>Variable-length stopping via belief update.</strong> Both parties score each received token with a mixture-Laplacian likelihood and update a shared belief over messages. Sending continues while the belief is spread out and stops once one message crosses the threshold.</p></div>
+      <div class="point"><div class="n">04</div><p><strong>Confirmation.</strong> A short accept/reject phase after each candidate, as in Yamamoto&ndash;Itoh, a strategy that attains the Burnashev exponent on discrete memoryless channels.</p></div>
+      <div class="point"><div class="n">05</div><p><strong>Distortion-free and provably secure.</strong> Optimal-transport coupling leaves the text distribution untouched. A PRF reduction proves indistinguishability from clean text.</p></div>
+    </div>
+  </div>
+</dialog>
+
+<dialog class="sheet" id="sheet-table" aria-labelledby="sheet-table-h">
+  <div class="sheet-head"><h3 id="sheet-table-h">BAM vs. earlier methods</h3><button class="mini-btn" data-close>Close</button></div>
+  <div class="sheet-body">
+    <div class="table-scroll">
+      <table class="res-table">
+        <thead>
+          <tr>
+            <th scope="col">Scheme</th>
+            <th scope="col">Avg len</th>
+            <th scope="col">Msg err &darr;</th>
+            <th scope="col">PPL &darr;</th>
+            <th scope="col">Sec/token &darr;</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="grp"><th colspan="5" scope="colgroup">Llama-3.1-8B</th></tr>
+          <tr class="ctrl"><td>No embedding</td><td>50.0</td><td>&mdash;</td><td>7.66 &plusmn; 0.11</td><td>0.0214</td></tr>
+          <tr><td>MPAC <span class="rn">[2]</span></td><td>50.0</td><td>0.797 &plusmn; 0.013</td><td>8.54 &plusmn; 0.11</td><td>0.0223</td></tr>
+          <tr><td>BiMark <span class="rn">[3]</span></td><td>50.0</td><td>0.569 &plusmn; 0.016</td><td>7.68 &plusmn; 0.11</td><td>0.0352</td></tr>
+          <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.637 &plusmn; 0.015</td><td>7.66 &plusmn; 0.11</td><td>0.0231</td></tr>
+          <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.106 &plusmn; 0.010</td><td>7.52 &plusmn; 0.11</td><td>0.0291</td></tr>
+          <tr class="ctrl blk"><td>No embedding</td><td>74.8 &plusmn; 2.1</td><td>&mdash;</td><td>7.47 &plusmn; 0.10</td><td>0.0220</td></tr>
+          <tr><td>Zamir <span class="rn">[5]</span></td><td>74.8 &plusmn; 2.1</td><td>0.003 &plusmn; 0.002</td><td>8.79 &plusmn; 0.12</td><td>0.0220</td></tr>
+          <tr class="ctrl blk"><td>No embedding</td><td>47.1 &plusmn; 1.5</td><td>&mdash;</td><td>7.71 &plusmn; 0.12</td><td>0.0224</td></tr>
+          <tr class="ours"><td>BAM (L = 2<sup>15</sup>)</td><td>47.1 &plusmn; 1.5</td><td>0.001 &plusmn; 0.001</td><td>7.89 &plusmn; 0.12</td><td>0.0378</td></tr>
+
+          <tr class="grp"><th colspan="5" scope="colgroup">Qwen-3.5-9B-Base</th></tr>
+          <tr class="ctrl"><td>No embedding</td><td>50.0</td><td>&mdash;</td><td>7.83 &plusmn; 0.10</td><td>0.0420</td></tr>
+          <tr><td>MPAC <span class="rn">[2]</span></td><td>50.0</td><td>0.840 &plusmn; 0.012</td><td>9.03 &plusmn; 0.12</td><td>0.0420</td></tr>
+          <tr><td>BiMark <span class="rn">[3]</span></td><td>50.0</td><td>0.567 &plusmn; 0.016</td><td>8.23 &plusmn; 0.12</td><td>0.0558</td></tr>
+          <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.659 &plusmn; 0.015</td><td>8.04 &plusmn; 0.11</td><td>0.0456</td></tr>
+          <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.105 &plusmn; 0.010</td><td>7.76 &plusmn; 0.11</td><td>0.0510</td></tr>
+          <tr class="ctrl blk"><td>No embedding</td><td>72.9 &plusmn; 1.5</td><td>&mdash;</td><td>7.80 &plusmn; 0.11</td><td>0.0424</td></tr>
+          <tr><td>Zamir <span class="rn">[5]</span></td><td>72.9 &plusmn; 1.5</td><td>0.000 &plusmn; 0.000</td><td>9.12 &plusmn; 0.12</td><td>0.0425</td></tr>
+          <tr class="ctrl blk"><td>No embedding</td><td>45.8 &plusmn; 1.3</td><td>&mdash;</td><td>8.21 &plusmn; 0.13</td><td>0.0436</td></tr>
+          <tr class="ours"><td>BAM (L = 2<sup>15</sup>)</td><td>45.8 &plusmn; 1.3</td><td>0.001 &plusmn; 0.001</td><td>8.24 &plusmn; 0.12</td><td>0.0541</td></tr>
+
+          <tr class="grp"><th colspan="5" scope="colgroup">Mistral-7B-v0.3</th></tr>
+          <tr class="ctrl"><td>No embedding</td><td>50.0</td><td>&mdash;</td><td>6.25 &plusmn; 0.09</td><td>0.0212</td></tr>
+          <tr><td>MPAC <span class="rn">[2]</span></td><td>50.0</td><td>0.872 &plusmn; 0.012</td><td>6.73 &plusmn; 0.09</td><td>0.0216</td></tr>
+          <tr><td>BiMark <span class="rn">[3]</span></td><td>50.0</td><td>0.674 &plusmn; 0.015</td><td>6.26 &plusmn; 0.08</td><td>0.0342</td></tr>
+          <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.702 &plusmn; 0.014</td><td>6.16 &plusmn; 0.08</td><td>0.0217</td></tr>
+          <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.168 &plusmn; 0.012</td><td>6.13 &plusmn; 0.09</td><td>0.0278</td></tr>
+          <tr class="ctrl blk"><td>No embedding</td><td>87.8 &plusmn; 1.9</td><td>&mdash;</td><td>5.97 &plusmn; 0.07</td><td>0.0211</td></tr>
+          <tr><td>Zamir <span class="rn">[5]</span></td><td>87.8 &plusmn; 1.9</td><td>0.001 &plusmn; 0.001</td><td>6.72 &plusmn; 0.08</td><td>0.0212</td></tr>
+          <tr class="ctrl blk"><td>No embedding</td><td>49.7 &plusmn; 1.2</td><td>&mdash;</td><td>6.22 &plusmn; 0.10</td><td>0.0222</td></tr>
+          <tr class="ours"><td>BAM (L = 2<sup>11</sup>)</td><td>49.7 &plusmn; 1.2</td><td>0.000 &plusmn; 0.000</td><td>6.51 &plusmn; 0.09</td><td>0.0326</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="tabcap"><b>BAM vs. baselines on the C4 news corpus.</b> Mean &plusmn; standard error over 1000 trials, carrying an 8-bit message. Each variable-length scheme is paired with its own <i>no-embedding</i> control generated at the same length, since perplexity is only comparable at matched length. Zamir: default t=2, max 1000 tokens, truncation counted as error. BAM costs about 1.5&times; the seconds per token.</p>
+  </div>
+</dialog>
+
+<dialog class="sheet" id="sheet-refs" aria-labelledby="sheet-refs-h">
+  <div class="sheet-head"><h3 id="sheet-refs-h">References</h3><button class="mini-btn" data-close>Close</button></div>
+  <div class="sheet-body refs">
+    <ol>
+      <li><b>ArcMark.</b> <a href="https://arxiv.org/abs/2602.07235">ArcMark: Multi-bit LLM Watermark via Optimal Transport</a>. Gilani, Atefeh and Long, Carol Xuan and Vithana, Sajani and Kosut, Oliver and Sankar, Lalitha and Calmon, Flavio P. <span class="venue">arXiv:2602.07235, 2026 (baseline)</span></li>
+      <li><b>MPAC.</b> <a href="https://arxiv.org/abs/2308.00221">Advancing beyond identification: Multi-bit watermark for large language models</a>. Yoo, KiYoon and Ahn, Wonhyuk and Kwak, Nojun. <span class="venue">NAACL 2024 (baseline)</span></li>
+      <li><b>BiMark.</b> <a href="https://arxiv.org/abs/2506.21602">BiMark: Unbiased multilayer watermarking for large language models</a>. Feng, Xiaoyan and Zhang, He and Zhang, Yanjun and Zhang, Leo Yu and Pan, Shirui. <span class="venue">ICML 2025 (baseline)</span></li>
+      <li><b>StealthInk.</b> <a href="https://arxiv.org/abs/2506.05502">StealthInk: A multi-bit and stealthy watermark for large language models</a>. Jiang, Ya and Wu, Chuxiong and Boroujeny, Massieh Kordi and Mark, Brian and Zeng, Kai. <span class="venue">ICML 2025 (baseline)</span></li>
+      <li><b>Zamir.</b> <a href="https://scholar.google.com/citations?view_op=view_citation&amp;hl=en&amp;user=xiyhJrwAAAAJ&amp;sortby=pubdate&amp;citation_for_view=xiyhJrwAAAAJ:R3hNpaxXUhUC">Undetectable steganography for language models</a>. Zamir, Or. <span class="venue">Transactions on Machine Learning Research, 2024 (baseline)</span></li>
+    </ol>
+  </div>
+</dialog>
+
+<dialog class="sheet" id="sheet-video" aria-labelledby="sheet-video-h">
+  <div class="sheet-head"><h3 id="sheet-video-h">Recorded demo session</h3><button class="mini-btn" data-close>Close</button></div>
+  <div class="sheet-body">
+    <video controls preload="none" playsinline poster="./media/live-demo-poster.jpg">
+      <source src="./media/live-demo.mp4" type="video/mp4" />
+    </video>
+  </div>
+</dialog>
+
+<script src="./assets/story.js" defer></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
-
-// scroll reveal
-(function () {
-  var els = document.querySelectorAll('.reveal-on-scroll');
-  if (!('IntersectionObserver' in window)) { els.forEach(function (e){ e.classList.add('in'); }); return; }
-  var io = new IntersectionObserver(function (entries) {
-    entries.forEach(function (en) { if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); } });
-  }, { threshold: 0.12 });
-  els.forEach(function (e){ io.observe(e); });
-})();
-
-// KaTeX
-window.addEventListener('DOMContentLoaded', function () {
-  if (window.renderMathInElement) {
-    renderMathInElement(document.body, { delimiters: [{ left: '\\(', right: '\\)', display: false }] });
-  }
-});
 
 // Binary-decode animation for the Information Theory Lab logo(s)
 (function () {
