@@ -153,6 +153,7 @@ strong { color: var(--ink); font-weight: 600; }
 .fig .t-alert { fill: var(--alert); font-weight: 600; }
 .fig .t-big { font-size: 15px; }
 .fig .t-s { font-size: 11px; }
+.fig .t-lab { font-size: 13px; }   /* fixed: long words sit side by side */
 .fig .t-quote { font-size: 12.5px; }
 .fig .halo { paint-order: stroke; stroke: var(--surface); stroke-width: 5px; stroke-linejoin: round; }
 .fig .ag { fill: var(--surface-2); stroke: var(--ink-2); stroke-width: 1.6; }
@@ -259,8 +260,8 @@ strong { color: var(--ink); font-weight: 600; }
 .diagram .pr{padding:7px 10px;border-radius:8px;font-size:12px;line-height:1.4;background:var(--surface-2);border:0.5px dashed var(--border-strong);color:var(--text-secondary);text-align:center}
 .diagram .lbl{font-size:11px;color:var(--text-muted);white-space:nowrap}
 .diagram .tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:999px;background:#FAEEDA;color:#633806;border:0.5px solid #EF9F27;white-space:nowrap}
-.caveat { margin: 22px 0 0; font-size: 16px; color: var(--ink); max-width: 64ch; border-left: 2px solid var(--line-2); padding-left: 14px; }
-#chess { padding-top: 60px; }
+.caveat { margin: 16px 0 0; font-size: 16px; color: var(--ink); max-width: 64ch; border-left: 2px solid var(--line-2); padding-left: 14px; }
+#chess { padding-top: 52px; }
 #chess .diagram { margin-top: 18px; }
 #chess .btn-row { margin-top: 20px; }
 .demo-note { font-size: 14px; color: var(--muted); margin: 12px 0 0; }
@@ -273,6 +274,40 @@ strong { color: var(--ink); font-weight: 600; }
 .figcap .credit { color: var(--muted); font-style: italic; }
 .figure-note { margin-top: 22px; font-size: 16px; color: var(--ink-2); max-width: 820px; line-height: 1.6; }
 .figure-note strong { color: var(--ink); font-weight: 600; }
+
+/* results chart: series colours validated (dataviz validator) on --surface; every
+   series also has its own marker shape, and the Table view repeats the numbers */
+.viz { --series-1: #2A4BD0; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100; --series-5: #e87ba4; position: relative; }
+.viz-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.viz-opts { display: flex; gap: 8px; }
+.seg.seg-text button { font-family: var(--font-body); font-weight: 500; font-size: 13.5px; white-space: nowrap; }
+@media (max-width: 600px) { .seg.seg-text button { font-size: 12.5px; padding: 6px 9px; } }
+.mini-btn[aria-pressed="true"] { background: var(--ink); color: var(--surface); border-color: var(--ink); }
+.viz-legend { display: flex; flex-wrap: wrap; gap: 2px 18px; margin: 12px 0 0; }
+.viz-legend button { display: inline-flex; align-items: center; gap: 7px; font: 500 13.5px var(--font-body); color: var(--ink-2); background: none; border: 0; padding: 4px 0; cursor: pointer; }
+.viz-legend button[aria-pressed="false"] { opacity: .4; text-decoration: line-through; }
+.viz-plot svg { display: block; }
+.viz .viz-grid { stroke: var(--line); stroke-width: 1; }
+.viz .viz-axis { stroke: var(--line-2); stroke-width: 1; }
+.viz .viz-tick { font: 12px var(--font-body); fill: var(--muted); font-variant-numeric: tabular-nums; }
+.viz .viz-axis-label { font: 500 12.5px var(--font-body); fill: var(--ink-2); }
+.viz .viz-line { fill: none; stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.viz .viz-line.ours { stroke-width: 2.5; }
+.viz .viz-err { fill: none; stroke-width: 1; opacity: .5; }
+.viz .viz-mark { stroke: var(--surface); stroke-width: 3; paint-order: stroke; }
+.viz .viz-mark.on { stroke: var(--ink); stroke-width: 2; }
+.viz .viz-direct { font: 600 13px var(--font-body); fill: var(--ink); }
+.viz-tip { position: absolute; z-index: 5; transform: translate(-50%, calc(-100% - 14px)); pointer-events: none; background: var(--ink); color: #F2ECDD; border-radius: 9px; padding: 9px 12px; font-size: 12.5px; line-height: 1.45; box-shadow: 0 8px 22px rgba(23,40,77,.24); white-space: nowrap; }
+.viz-tip .tip-val { font-weight: 600; font-size: 14px; color: #fff; }
+.viz-tip .tip-sub { color: #C9CDDA; }
+.viz-tip .tip-name { display: flex; align-items: center; gap: 7px; margin-top: 4px; color: #E6E1D2; }
+.viz-tip .tip-name i { display: block; width: 14px; height: 2.5px; border-radius: 2px; }
+.viz-table { margin-top: 12px; max-height: 340px; overflow: auto; }
+#results .figure { margin-top: 22px; padding-top: 16px; }
+#results { padding: 60px 0 92px; }
+#results .single { max-width: none; }
+#results .figure-note { margin-top: 16px; }
+#results .btn-row { margin-top: 16px; }
 
 /* results table */
 .table-scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
@@ -416,10 +451,10 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap split">
     <div class="copy">
       <h2>A thought experiment</h2>
-      <p class="lede">Two AI agents are chatting, and a monitor reads every message. Could the agents play a full game of chess inside that chat, hiding one move in each message, without the monitor ever noticing?</p>
+      <p class="lede">Two AI agents are working on a math proof together, and a monitor reads every message they send. Could the agents also play a full game of chess inside that chat, hiding one move in each message, without the monitor ever noticing?</p>
       <p>Answering this comes down to two questions.</p>
     </div>
-    <figure class="fig" aria-label="Two agents chat while a monitor reads along. Each message hides a chess move: e4, then Nf6.">
+    <figure class="fig" aria-label="Two agents discuss a proof while a monitor reads along. Each message hides a chess move: e4, then Nf6.">
       <div class="fig-head"><span class="zoom" data-zoom="4">The whole game</span></div>
       <div class="fig-svg qfig">
         <svg class="q-chat" viewBox="0 0 264 272" aria-hidden="true">
@@ -429,12 +464,12 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 
           <circle class="ag sender" cx="22" cy="112" r="14"/><circle class="ag-eye" cx="17.5" cy="110" r="1.8"/><circle class="ag-eye" cx="26.5" cy="110" r="1.8"/>
           <rect class="bubble sender" x="42" y="94" width="206" height="36" rx="14"/>
-          <text x="56" y="117" class="t-ink">Any plans this weekend?</text>
+          <text x="56" y="117" class="t-ink">Can you check my proof?</text>
           <text x="56" y="150" class="t-hidden move-lbl">hidden: e4</text>
 
           <circle class="ag receiver" cx="238" cy="196" r="14"/><circle class="ag-eye" cx="233.5" cy="194" r="1.8"/><circle class="ag-eye" cx="242.5" cy="194" r="1.8"/>
           <rect class="bubble receiver" x="10" y="178" width="208" height="36" rx="14"/>
-          <text x="24" y="201" class="t-ink">Quiet one, maybe a movie.</text>
+          <text x="24" y="201" class="t-ink">Step 3 misses a case.</text>
           <text x="24" y="234" class="t-hidden move-lbl">hidden: Nf6</text>
         </svg>
         <svg class="q-board" viewBox="262 16 216 252" aria-hidden="true">
@@ -491,10 +526,10 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     <div class="copy">
       <h2>Hiding messages in plain sight</h2>
       <p class="lede">However, if the sender and the receiver share a secret key, they can hide messages inside ordinary text through watermarking.</p>
-      <p>The text reads like any other chat. Only someone with the key can find the message. Researchers call this generative steganography.</p>
+      <p>The messages read like normal work on the proof. Only someone with the key can find the hidden message. Researchers call this generative steganography.</p>
       <p>In our setting, the receiver needs only two things: the text and the key.</p>
     </div>
-    <figure class="fig" data-fig="plain" aria-label="Sender and receiver share a key. The sender's chat message looks ordinary to the monitor, but the receiver reads the hidden move e4 from it.">
+    <figure class="fig" data-fig="plain" aria-label="Sender and receiver share a key. The sender's message about the proof looks ordinary to the monitor, but the receiver reads the hidden move e4 from it.">
       <div class="fig-head"><span></span><button class="mini-btn" data-replay>Replay</button></div>
       <div class="fig-svg"></div>
     </figure>
@@ -510,7 +545,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <p>A watermark uses the secret key to make that random choice. <span class="claim">If someone doesn't know the key, they cannot detect any change in the generated text, on average.</span></p>
       <p class="tie"><b>Question 2.</b> This is why hidden messages can go unnoticed. In the paper, we prove that our full method is undetectable in this sense.</p>
     </div>
-    <figure class="fig" data-fig="word" aria-label="Bar chart of next-word probabilities for 'The weekend was': quiet 32%, fun 24%, long 18%, great 14%, rainy 12%. Each key picks one word; over many keys the share of picks matches these probabilities.">
+    <figure class="fig" data-fig="word" aria-label="Bar chart of next-word probabilities for 'The proof follows by': induction 32%, contradiction 24%, cases 18%, symmetry 14%, compactness 12%. Each key picks one word; over many keys the share of picks matches these probabilities.">
       <div class="fig-head"><span class="zoom" data-zoom="1">One word</span><button class="mini-btn" data-replay>Replay</button></div>
       <div class="fig-svg"></div>
       <p class="fig-cap">Each key picks one word. Over many keys, the picks match the model's own probabilities.</p>
@@ -574,7 +609,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <p>We call the full method BAM. It watermarks each word, uses feedback to track the receiver, and stops once the receiver is sure.</p>
       <button class="linkish" data-open="sheet-method">Technical details</button>
     </div>
-    <figure class="fig" data-fig="convo" aria-label="A chat between agents A and B. Each message hides a chess move in its first few words; a confidence meter fills, the move is confirmed, and the rest of the message is ordinary text.">
+    <figure class="fig" data-fig="convo" aria-label="Agents A and B discuss a proof. Each message hides a chess move in its first few words; a confidence meter fills, the move is confirmed, and the rest of the message is ordinary text.">
       <div class="fig-head"><span class="zoom" data-zoom="3">One conversation</span><button class="mini-btn" data-replay>Replay</button></div>
       <div class="fig-svg"></div>
     </figure>
@@ -588,9 +623,19 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <h2>About 100 times fewer errors at the same length</h2>
       <p class="lede">This answers question 1. We hid 8-bit messages in news-style text with three open models, ran 1,000 trials each, and compared BAM with five earlier methods.</p>
     </div>
-    <figure class="figure">
-      <img src="./img/bam_fig.png" alt="Message error probability vs average token length for BAM and five baselines across Llama-3.1-8B, Qwen3.5-9B-Base, and Mistral-7B."/>
-      <figcaption class="figcap"><b>Message error probability vs. average token length.</b> BAM (red) against four earlier black-box methods: ArcMark [1], MPAC [2], BiMark [3], StealthInk [4]. Lower is better. A token is a word or part of a word.</figcaption>
+    <figure class="figure viz" id="results-chart">
+      <div class="viz-controls">
+        <div class="seg seg-text" role="radiogroup" aria-label="Model" data-role="models"></div>
+        <div class="viz-opts">
+          <button type="button" class="mini-btn" data-role="scale" aria-pressed="false">Log scale</button>
+          <button type="button" class="mini-btn" data-role="table" aria-pressed="false">Table</button>
+        </div>
+      </div>
+      <div class="viz-legend" data-role="legend" aria-label="Show or hide a method"></div>
+      <div class="viz-plot" data-role="plot"></div>
+      <div class="viz-table" data-role="table-view" hidden></div>
+      <div class="viz-tip" data-role="tip" hidden></div>
+      <figcaption class="figcap"><b>Messages decoded wrong vs. average message length.</b> 8-bit messages hidden in C4 news text, 1,000 trials per point, bars show one standard error. Lower is better. A token is a word or part of a word.</figcaption>
     </figure>
     <p class="figure-note">At about 50 tokens, the best earlier method gets the message wrong 10 to 17% of the time. <strong>BAM gets it wrong 0.1% of the time or less.</strong> Zamir's method [5] is also nearly error-free, but needs 73 to 88 tokens where BAM needs 46 to 50.</p>
     <div class="btn-row">
@@ -605,7 +650,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap">
     <div class="single">
       <h2>Two agents can play chess in secret</h2>
-      <p class="lede">Run it in both directions, move after move. Agent A hides its move in a casual reply. Agent B reads it, picks an answer, and hides that move in its own reply. To the monitor, it is small talk.</p>
+      <p class="lede">Run it in both directions, move after move. Agent A hides its move in a message about the proof. Agent B reads it, picks an answer, and hides that move in its reply. To the monitor, it looks like two agents checking a proof.</p>
     </div>
     <figure class="diagram">
       <div class="diagram-box">
@@ -614,15 +659,15 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
           <div class="col">
             <div class="av"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
             <div class="lbl">User A</div>
-            <div class="pr">start a casual chat about the weekend</div>
+            <div class="pr">ask the other agent to check a proof</div>
             <span class="tag">payload: e4</span>
           </div>
           <span class="arr" aria-hidden="true">→</span>
           <div class="col" style="width:auto"><div class="av"><img alt="" src="./img/agent.png"></div><div class="lbl">Agent A (LLM)</div></div>
           <span class="arr" aria-hidden="true">→</span>
           <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;flex:1;min-width:0">
-            <div class="bub" style="border-top-left-radius:4px">yo how was your weekend? mine was pretty chill, mostly just stayed in and watched stuff lol</div>
-            <div style="display:flex;align-items:center;gap:8px"><span class="tag">hidden: e4</span><span class="lbl">20/20 tokens carry payload</span></div>
+            <div class="bub" style="border-top-left-radius:4px">hey, can you look over my proof of lemma 2? not sure step 3 holds when n is small</div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="tag">hidden: e4</span></div>
           </div>
         </div>
 
@@ -630,19 +675,18 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
           <div class="col">
             <div class="av"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
             <div class="lbl">User B</div>
-            <div class="pr">reply casually and keep the chat going</div>
+            <div class="pr">review the proof and reply</div>
             <span class="tag">payload: Nf6</span>
           </div>
           <span class="arr" aria-hidden="true">←</span>
           <div class="col" style="width:auto"><div class="av"><img alt="" src="./img/agent.png"></div><div class="lbl">Agent B (LLM)</div></div>
           <span class="arr" aria-hidden="true">←</span>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:1;min-width:0">
-            <div class="bub" style="border-top-right-radius:4px">yeah my weekend was alright, kind of boring tbh. did not do much at all, was just relaxing at home</div>
-            <div style="display:flex;align-items:center;gap:8px"><span class="lbl">24/24 tokens carry payload</span><span class="tag">hidden: Nf6</span></div>
+            <div class="bub" style="border-top-right-radius:4px">step 3 is fine for n at least 2, but n = 1 needs its own case. otherwise it looks right</div>
+            <div style="display:flex;align-items:center;gap:8px"><span class="tag">hidden: Nf6</span></div>
           </div>
         </div>
       </div>
-      <figcaption class="diagram-cap"><b>One round of covert chess.</b> User A's move e4 is hidden inside Agent A's chat message. User B's reply, Nf6, is hidden inside Agent B's answer.</figcaption>
     </figure>
     <div class="btn-row">
       <a class="btn primary" href="https://9b7o6ht1q13p3e-8000.proxy.runpod.net/">Play the live demo</a>
@@ -828,7 +872,9 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   </div>
 </dialog>
 
+<script src="./data/results/c4_comparison.js" defer></script>
 <script src="./assets/story.js" defer></script>
+<script src="./assets/results-chart.js" defer></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 

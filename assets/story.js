@@ -242,7 +242,7 @@
     label(s, 428, 230, 'same key', 't-muted', { 'text-anchor': 'middle' });
 
     svgEl('rect', { 'class': 'bubble sender', x: 96, y: 112, width: 288, height: 56, rx: 18 }, s);
-    var WORDS = ['Quiet', 'one,', 'maybe', 'a', 'movie', 'later.'], GAP = 5;
+    var WORDS = ['Step', '3', 'holds', 'for', 'every', 'n.'], GAP = 5;
     var widths = WORDS.map(function (w) { return textWidth(s, w, 't-ink t-big'); });
     var x = 240 - (sum(widths) + GAP * (WORDS.length - 1)) / 2, words = [], hid = [];
     WORDS.forEach(function (w, i) {
@@ -277,10 +277,10 @@
      golden-ratio sequence so the shares converge quickly and smoothly. */
   figures.word = function (fig) {
     var s = makeSvg(fig, 480, 300);
-    var P = [['quiet', .32], ['fun', .24], ['long', .18], ['great', .14], ['rainy', .12]];
+    var P = [['induction', .32], ['contradiction', .24], ['cases', .18], ['symmetry', .14], ['compactness', .12]];
     var BASE = 262, CAP = .4, SCALE = 150 / CAP, W = 58, X0 = 43, STEP = 84, N = 160;
 
-    label(s, 16, 30, 'The weekend was ___', 't-ink t-big');
+    label(s, 16, 30, 'The proof follows by ___', 't-ink t-big');
     svgEl('rect', { 'class': 'legend-odds', x: 316, y: 17, width: 12, height: 12 }, s);
     label(s, 334, 27, 'model’s probability', 't-muted');
     svgEl('rect', { 'class': 'legend-picks', x: 316, y: 37, width: 12, height: 12 }, s);
@@ -293,7 +293,7 @@
       var bar = svgEl('rect', { 'class': 'picks', x: x, y: BASE, width: W, height: 0 }, s);
       svgEl('rect', { 'class': 'odds', x: x, y: BASE - h, width: W, height: h }, s);
       label(s, x + W / 2, BASE - h - 8, Math.round(p[1] * 100) + '%', 't-muted', { 'text-anchor': 'middle' });
-      label(s, x + W / 2, BASE + 22, p[0], 't-ink', { 'text-anchor': 'middle' });
+      label(s, x + W / 2, BASE + 22, p[0], 't-ink t-lab', { 'text-anchor': 'middle' });
       return bar;
     });
     svgEl('line', { 'class': 'axis', x1: 30, x2: 450, y1: BASE, y2: BASE }, s);
@@ -338,12 +338,12 @@
     var s = makeSvg(fig, 300, 300);
     var CX = 150, CY = 150, RI = 70, RO = 116, RL = 93;
     var CTX = [
-      { pre: 'The weekend was', post: '.', opts: [['quiet', .32], ['fun', .24], ['long', .18], ['great', .14], ['rainy', .12]] },
-      { pre: 'I mostly', post: '', opts: [['read', .30], ['slept', .26], ['cooked', .20], ['walked', .14], ['gamed', .10]] },
-      { pre: 'and watched a', post: '', opts: [['movie', .40], ['show', .26], ['game', .16], ['series', .10], ['match', .08]] },
-      { pre: 'with my', post: '.', opts: [['sister', .28], ['friends', .27], ['dog', .20], ['roommate', .15], ['dad', .10]] },
-      { pre: 'Sunday was', post: '.', opts: [['lazy', .35], ['busy', .25], ['nice', .20], ['short', .12], ['cold', .08]] },
-      { pre: 'See you', post: '.', opts: [['tomorrow', .78], ['soon', .12], ['later', .06], ['Monday', .04]] }
+      { pre: 'We prove the', post: '', opts: [['bound', .32], ['lemma', .24], ['claim', .18], ['limit', .14], ['identity', .12]] },
+      { pre: 'by', post: '', opts: [['induction', .34], ['cases', .24], ['parts', .18], ['symmetry', .14], ['algebra', .10]] },
+      { pre: 'on', post: '.', opts: [['n', .40], ['k', .26], ['m', .16], ['d', .10], ['t', .08]] },
+      { pre: 'The base case is', post: '.', opts: [['trivial', .30], ['easy', .26], ['clear', .20], ['direct', .14], ['short', .10]] },
+      { pre: 'Step 3 needs', post: '.', opts: [['care', .35], ['work', .25], ['a bound', .20], ['a lemma', .12], ['cases', .08]] },
+      { pre: 'The proof is', post: '.', opts: [['complete', .78], ['done', .12], ['fine', .06], ['sound', .04]] }
     ];
     var sliceG = svgEl('g', {}, s), lblG = svgEl('g', {}, s), ptrG = svgEl('g', {}, s);
     label(s, CX, CY - 4, 'key', 't-muted', { 'text-anchor': 'middle' });
@@ -502,7 +502,7 @@
   figures.feedback = function (fig) {
     var s = makeSvg(fig, 480, 350);
     var MOVES = ['e4', 'd4', 'Nf3', 'c4', 'e3', 'g3', 'b3', 'f4'], TRUE = 0, EPS = 0.15;
-    var WORDS = ['Quiet', 'one,', 'maybe', 'a', 'movie', 'later', 'if', 'I', 'stay', 'awake.'];
+    var WORDS = ['Step', '3', 'holds', 'because', 'the', 'bound', 'is', 'tight', 'for', 'n.'];
     var NOISE = [0, 0, 1, 0, 0, 0, 0, 0, 0, 0];
     var BASE = 292, H = 140, SLOT = 26.5, BW = 16;
 
@@ -599,10 +599,10 @@
      numbers of words. */
   figures.convo = function (fig) {
     var TURNS = [
-      { left: true, move: 'e4', carry: 7, text: 'Hey, how was your weekend? Did you end up going out?' },
-      { left: false, move: 'Nf6', carry: 11, text: 'Pretty quiet honestly. Mostly stayed in, cooked, and watched a couple of old movies.' },
-      { left: true, move: 'e5', carry: 5, text: 'Nice, any good ones? I need something for tonight.' },
-      { left: false, move: 'Nd5', carry: 8, text: 'Try the heist one set in Lisbon, it was great.' }
+      { left: true, move: 'e4', carry: 7, text: 'Can you check my proof of Lemma 2? I think step 3 is off.' },
+      { left: false, move: 'Nf6', carry: 11, text: 'Step 3 is fine, but step 4 needs n to be at least 2. Easy fix.' },
+      { left: true, move: 'e5', carry: 5, text: 'Good catch. I will add that case and rerun the check.' },
+      { left: false, move: 'Nd5', carry: 8, text: 'Looks right now. The induction goes through for every n.' }
     ];
     var s = makeSvg(fig, 480, 100);
     var FONT = 't-ink t-chat', LINE = 24, PADX = 12, PADY = 10, MAXW = 300;
