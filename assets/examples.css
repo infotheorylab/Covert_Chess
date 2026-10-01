@@ -1,18 +1,20 @@
 /* ===================================================================
    examples.css — styles for examples.html (the concrete-examples page).
-   Palette and type scale are inherited from index.html so the two pages
-   read as one site.
+   Palette, type and buttons mirror index.html (white page, deep-blue ink,
+   crimson highlight words) so the two pages read as one site. Keep the
+   :root tokens here in step with the ones in index.html.
    =================================================================== */
 
 :root {
-  --bg:         #EEE7D6;
-  --surface:    #F7F2E7;
-  --surface-2:  #F2ECDD;
-  --ink:        #17284D;
-  --ink-2:      #47516B;
-  --muted:      #8A836C;
-  --line:       #DED4BE;
-  --line-2:     #CFC3A6;
+  --bg:         #FFFFFF;
+  --surface:    #F6F7FA;   /* panes and panels */
+  --surface-2:  #EDF0F5;
+  --paper-hi:   #FFFFFF;   /* chat bubbles inside panes */
+  --ink:        #17284D;   /* deep blue */
+  --ink-2:      #46506A;
+  --muted:      #687089;
+  --line:       #E3E7EE;
+  --line-2:     #CBD2DD;
   --accent:     #2A4BD0;
   --accent-2:   #4E6BE0;
   --accent-soft:rgba(42,75,208,0.10);
@@ -20,13 +22,14 @@
   --confirm:    #2E7D57;
   --confirm-s:  rgba(46,125,87,0.10);
   --alert:      #B4472F;
-  --amber:      #A9791F;
+  --amber:      #C08A1A;
+  --crimson:    #B3143C;   /* highlighted words in titles */
 
   --font-display: "Space Grotesk", system-ui, sans-serif;
   --font-body:    "Inter", system-ui, sans-serif;
   --font-mono:    "Space Mono", ui-monospace, monospace;
 
-  --wrap: 1180px;
+  --wrap: 1120px;
   --radius: 14px;
 }
 
@@ -39,38 +42,46 @@ body { margin: 0; background: var(--bg); color: var(--ink);
   * { animation: none !important; transition: none !important; } }
 
 .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
-h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.14;
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.12;
              letter-spacing: -0.02em; margin: 0; color: var(--ink); }
-h1 { font-size: clamp(30px, 4.4vw, 46px); letter-spacing: -0.03em; }
-h2 { font-size: clamp(24px, 3.2vw, 32px); }
+h1 { font-weight: 700; font-size: clamp(36px, 5.4vw, 64px); line-height: 1.04;
+     letter-spacing: -0.035em; max-width: 22ch; }
+h2 { font-size: clamp(26px, 3.3vw, 38px); }
 p { margin: 0 0 18px; color: var(--ink-2); }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
-code { font-family: var(--font-mono); font-size: .92em; background: var(--surface-2);
-       border: 1px solid var(--line); border-radius: 4px; padding: 0 4px; }
+em { color: var(--ink); font-style: italic; }
+strong { color: var(--ink); font-weight: 600; }
+code { font-family: var(--font-mono); font-size: .86em; color: var(--ink);
+       background: var(--surface-2); border-radius: 4px; padding: .06em .32em; }
+
+/* highlighted words in titles */
+.hl { color: var(--crimson); }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
 
-.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .15em;
-           text-transform: uppercase; color: var(--accent); margin: 0 0 14px; }
+/* small mono label above a title, as on the question cards in index.html */
+.eyebrow { font-family: var(--font-mono); font-size: 12.5px; color: var(--accent);
+           margin: 0 0 10px; }
 
 /* ---------- nav ---------- */
-.nav { position: sticky; top: 0; z-index: 50; background: rgba(238,231,214,.9);
+.nav { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.93);
        backdrop-filter: saturate(140%) blur(12px); border-bottom: 1px solid var(--line); }
 .nav .wrap { display: flex; align-items: center; justify-content: space-between; height: 60px; }
 .nav .brand { font-family: var(--font-mono); font-weight: 700; font-size: 15px; color: var(--ink); }
 .nav .brand span { color: var(--accent); }
 .nav .links { display: flex; gap: 10px; align-items: center; }
 .nav .links a { color: var(--ink); font-size: 14px; font-weight: 500; padding: 7px 14px;
-                border: 1px solid var(--line-2); border-radius: 8px; }
-.nav .links a:hover { border-color: var(--accent); color: var(--accent); text-decoration: none; }
-.nav .links a.primary { background: var(--accent); color: #F4EFE2; border-color: var(--accent); }
-.nav .links a.primary:hover { background: var(--accent-2); }
+                background: var(--surface); border: 1px solid var(--line-2); border-radius: 9px; }
+.nav .links a:hover { border-color: var(--accent); text-decoration: none; }
+.nav .links a.primary { background: var(--accent); color: #FFFFFF; border-color: var(--accent);
+                        font-weight: 600; }
+.nav .links a.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
 @media (max-width: 620px) { .nav .links a.ghost { display: none; } }
 
 /* ---------- page head ---------- */
-.page-head { padding: 62px 0 46px; border-bottom: 1px solid var(--line); }
-.page-head .lede { font-size: clamp(17px, 2vw, 20px); color: var(--ink-2);
-                   max-width: 74ch; margin-top: 18px; line-height: 1.55; }
+.page-head { padding: 76px 0 56px; border-bottom: 1px solid var(--line); }
+.page-head .lede { font-size: clamp(17px, 1.9vw, 20px); color: var(--ink-2);
+                   max-width: 68ch; margin: 24px 0 0; line-height: 1.55; }
 .page-head .lede b { color: var(--ink); font-weight: 600; }
 
 .banner { margin-top: 26px; display: flex; gap: 12px; align-items: flex-start;
@@ -82,9 +93,10 @@ code { font-family: var(--font-mono); font-size: .92em; background: var(--surfac
 .banner b { color: var(--ink); font-weight: 600; }
 
 /* ---------- example section ---------- */
-.ex { padding: 70px 0; border-bottom: 1px solid var(--line); }
-.ex h2.eyebrow { font-size: 12px; font-weight: 400; }
-.ex .blurb { max-width: 76ch; font-size: 16.5px; margin-top: 14px; }
+.ex { padding: 72px 0; border-bottom: 1px solid var(--line); }
+.ex h2 { margin: 0 0 22px; }
+.ex .blurb { max-width: 64ch; font-size: clamp(17px, 1.7vw, 19px); color: var(--ink);
+             line-height: 1.55; margin: -6px 0 0; }
 
 /* what produced the two panes — model and prompt — shown underneath them */
 .prompt-after { margin-top: 16px; background: var(--surface); border: 1px solid var(--line);
@@ -146,7 +158,7 @@ code { font-family: var(--font-mono); font-size: .92em; background: var(--surfac
 .probe.inline::after { content: none; }
 .probe .probe-hint { position: absolute; inset: auto 10px 10px auto; z-index: 3;
                      font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .05em;
-                     color: #F4EFE2; background: var(--accent); border-radius: 999px;
+                     color: #FFFFFF; background: var(--accent); border-radius: 999px;
                      padding: 4px 11px; opacity: 0; transform: translateY(4px);
                      transition: opacity .16s ease, transform .16s ease;
                      pointer-events: none; box-shadow: 0 4px 14px rgba(23,40,77,.24); }
@@ -164,9 +176,9 @@ code { font-family: var(--font-mono); font-size: .92em; background: var(--surfac
                 color: var(--muted); margin-bottom: 5px; }
 .turn.a .blabel { color: var(--ink-2); }
 .bubble { border: 1px solid var(--line); border-radius: 12px; padding: 11px 14px;
-          font-size: 15px; line-height: 1.6; color: var(--ink); background: var(--bg); }
+          font-size: 15px; line-height: 1.6; color: var(--ink); background: var(--paper-hi); }
 .turn.b .bubble { background: var(--surface-2); }
-.pane.stego .turn .bubble { background: var(--surface); }
+.pane.stego .turn .bubble { background: var(--paper-hi); border-color: var(--accent-brd); }
 .carrier { background: var(--accent-soft); border-radius: 3px;
            box-shadow: 0 0 0 1px rgba(42,75,208,0.10); }
 .turn-badge { font-family: var(--font-mono); font-size: 10px; letter-spacing: .05em;
@@ -200,7 +212,7 @@ code { font-family: var(--font-mono); font-size: .92em; background: var(--surfac
        border: 1px solid var(--line-2); background: var(--surface); color: var(--ink);
        transition: transform .12s ease, border-color .12s ease, background .12s ease; }
 .btn:hover { text-decoration: none; border-color: var(--accent); transform: translateY(-1px); }
-.btn.primary { background: var(--accent); color: #F4EFE2; border-color: var(--accent);
+.btn.primary { background: var(--accent); color: #FFFFFF; border-color: var(--accent);
                font-weight: 600; }
 .btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
 
@@ -230,12 +242,12 @@ code { font-family: var(--font-mono); font-size: .92em; background: var(--surfac
                text-transform: uppercase; color: var(--ink-2); margin-top: 6px; }
 
 /* ---------- diagnosis modal ---------- */
-#diag-overlay { position: fixed; inset: 0; background: rgba(23,40,77,.40); z-index: 300;
+#diag-overlay { position: fixed; inset: 0; background: rgba(23,40,77,.38); z-index: 300;
                 display: none; align-items: center; justify-content: center; padding: 20px; }
 #diag-overlay.show { display: flex; }
 #diag-panel { width: min(820px, 96vw); max-height: 88vh; display: flex; flex-direction: column;
-              background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
-              box-shadow: 0 12px 44px rgba(23,40,77,.30); overflow: hidden; }
+              background: var(--bg); border: 1px solid var(--line-2); border-radius: 16px;
+              box-shadow: 0 24px 60px rgba(23,40,77,.25); overflow: hidden; }
 #diag-hdr { display: flex; align-items: center; justify-content: space-between; gap: 14px;
             padding: 14px 18px 12px; border-bottom: 1px solid var(--line); }
 #diag-title { font-family: var(--font-display); font-size: 16px; font-weight: 600; color: var(--ink); }
@@ -249,7 +261,7 @@ code { font-family: var(--font-mono); font-size: .92em; background: var(--surfac
                       background: var(--surface); border: 1px solid var(--line-2);
                       border-radius: 999px; padding: 4px 11px; cursor: pointer; }
 #diag-rounds button:hover { border-color: var(--accent); color: var(--accent); }
-#diag-rounds button.on { background: var(--accent); border-color: var(--accent); color: #F4EFE2; }
+#diag-rounds button.on { background: var(--accent); border-color: var(--accent); color: #FFFFFF; }
 #diag-body { overflow-y: auto; padding: 14px 18px 20px; }
 
 .diag-sum { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -261,7 +273,7 @@ code { font-family: var(--font-mono); font-size: .92em; background: var(--surfac
 .diag-kv .bad { color: var(--alert); font-weight: 700; }
 .diag-sec { font-family: var(--font-mono); font-size: 11px; font-weight: 700; letter-spacing: .06em;
             color: var(--muted); text-transform: uppercase; margin: 16px 0 7px; }
-.diag-chart { width: 100%; height: auto; display: block; background: var(--bg);
+.diag-chart { width: 100%; height: auto; display: block; background: var(--surface);
               border: 1px solid var(--line); border-radius: 10px; }
 .diag-legend { display: flex; flex-wrap: wrap; gap: 4px 14px; margin-top: 7px;
                font-family: var(--font-mono); font-size: 10.5px; color: var(--ink-2); }

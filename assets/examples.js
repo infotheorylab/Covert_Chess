@@ -12,6 +12,14 @@
 
   var DEMOS = window.COVERT_DEMOS || {};
 
+  /* Section titles by demo kind. Trusted markup: .hl marks the crimson word,
+     matching the titles on index.html. */
+  var TITLES = {
+    conversation: 'Hiding a message in a <span class="hl">conversation</span>',
+    image: 'Hiding a message in an <span class="hl">image</span>',
+    code: 'Hiding a message in <span class="hl">code</span>'
+  };
+
   function esc(s) {
     return String(s).replace(/[&<>"']/g, function (c) {
       return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
@@ -434,8 +442,15 @@
       return;
     }
     var wrap = el('div', 'wrap');
-    // the eyebrow doubles as the section heading
-    wrap.appendChild(el('h2', 'eyebrow', esc(demo.eyebrow)));
+    // "example 01 · conversation" → a small label, then a title in the
+    // landing page's style with its key word highlighted
+    var label = String(demo.eyebrow || '').split(' · ')[0];
+    if (TITLES[demo.kind]) {
+      wrap.appendChild(el('p', 'eyebrow', esc(label.charAt(0).toUpperCase() + label.slice(1))));
+      wrap.appendChild(el('h2', '', TITLES[demo.kind]));
+    } else {
+      wrap.appendChild(el('h2', '', esc(demo.eyebrow)));
+    }
     wrap.appendChild(payloadStrip(demo));
     RENDERERS[demo.kind](demo, wrap);
     // the prompt sits under the generation it produced; the image example
