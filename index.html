@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Can AI agents secretly play chess?</title>
-<meta name="description" content="Two AI agents could play chess inside an ordinary chat, hiding each move in the text with a shared secret key. How much can they hide, and can we prove no one can tell?" />
+<meta name="description" content="Two AI agents updating a website could play chess inside their ordinary messages, hiding each move in the text with a shared secret key. How much can they hide, and can we prove no one can tell?" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -12,22 +12,23 @@
 
 <style>
 :root {
-  --bg:         #EEE7D6;   /* warm paper */
-  --surface:    #F7F2E7;
-  --surface-2:  #F2ECDD;
-  --paper-hi:   #FBF8F1;   /* chat bubbles inside figures */
+  --bg:         #FFFFFF;
+  --surface:    #F6F7FA;   /* figure panels */
+  --surface-2:  #EDF0F5;
+  --paper-hi:   #FFFFFF;   /* chat bubbles inside figures */
   --ink:        #17284D;   /* deep blue */
-  --ink-2:      #47516B;
-  --muted:      #8A836C;
-  --line:       #DED4BE;
-  --line-2:     #CFC3A6;
+  --ink-2:      #46506A;
+  --muted:      #687089;
+  --line:       #E3E7EE;
+  --line-2:     #CBD2DD;
   --accent:     #2A4BD0;   /* signal blue */
   --accent-2:   #4E6BE0;
   --accent-soft:rgba(42,75,208,0.10);
   --accent-brd: rgba(42,75,208,0.32);
   --confirm:    #2E7D57;
   --alert:      #B4472F;
-  --amber:      #A9791F;
+  --amber:      #C08A1A;
+  --crimson:    #B3143C;   /* highlighted words in titles */
 
   /* roles in every figure: blue sends, green receives, amber is the hidden message */
   --sender:     var(--accent);
@@ -44,14 +45,13 @@
 }
 
 * { box-sizing: border-box; }
+/* proximity, never mandatory: a screen taller than the window must still scroll freely */
 html { scroll-behavior: smooth; scroll-snap-type: y proximity; }
-/* full snapping only where every story screen fits in one window */
-@media (min-width: 900px) and (min-height: 640px) { html { scroll-snap-type: y mandatory; } }
 body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 17px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } * { animation: none !important; transition: none !important; } }
 
 .wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
-h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.14; letter-spacing: -0.02em; margin: 0; color: var(--ink); }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; line-height: 1.12; letter-spacing: -0.02em; margin: 0; color: var(--ink); }
 h2 { font-size: clamp(28px, 3.6vw, 42px); }
 h3 { font-size: 20px; letter-spacing: -0.01em; }
 p { margin: 0 0 18px; color: var(--ink-2); }
@@ -59,12 +59,16 @@ a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
 em { color: var(--ink); font-style: italic; }
 strong { color: var(--ink); font-weight: 600; }
+code { font-family: var(--font-mono); font-size: .86em; color: var(--ink); background: var(--surface-2); border-radius: 4px; padding: .06em .32em; white-space: nowrap; }
+
+/* highlighted words in titles */
+.hl { color: var(--crimson); }
 
 /* ---------- COVER ---------- */
 .cover { position: relative; border-bottom: 1px solid var(--line); text-align: center; min-height: 100vh; min-height: 100svh; display: flex; align-items: center; justify-content: center; scroll-snap-align: start; }
 .cover-inner { position: relative; z-index: 1; padding: 72px 0 110px; width: 100%; }
-.hook { font-family: var(--font-display); font-weight: 700; font-size: clamp(38px, 6.2vw, 76px); line-height: 1.04; letter-spacing: -0.035em; max-width: 15ch; margin: 0 auto; }
-.hook-sub { font-family: var(--font-display); font-weight: 500; font-size: clamp(17px, 2vw, 23px); color: var(--ink-2); max-width: 34ch; margin: 22px auto 0; line-height: 1.4; letter-spacing: -0.01em; }
+.hook { font-family: var(--font-display); font-weight: 700; font-size: clamp(40px, 6.6vw, 82px); line-height: 1.04; letter-spacing: -0.035em; max-width: 15ch; margin: 0 auto; }
+.hook-sub { font-family: var(--font-display); font-weight: 500; font-size: clamp(17px, 2vw, 23px); color: var(--ink-2); max-width: 40ch; margin: 22px auto 0; line-height: 1.4; letter-spacing: 0; text-wrap: balance; }
 
 .cover-authors { display: flex; align-items: baseline; justify-content: center; gap: 8px 20px; margin-top: 34px; flex-wrap: wrap; }
 .cover-authors .ca { font-size: 17px; color: var(--ink); }
@@ -81,7 +85,8 @@ strong { color: var(--ink); font-weight: 600; }
 .cover-colleges { display: flex; align-items: center; justify-content: center; gap: 40px; margin-top: 34px; flex-wrap: wrap; }
 .cover-colleges img { height: 46px; width: auto; max-width: 190px; object-fit: contain; opacity: .95; }
 @media (max-width: 560px) { .cover-colleges { gap: 24px; } .cover-colleges img { height: 36px; } }
-.lab-link { display: inline-block; text-decoration: none; }
+.lab-link, .lab-link:hover { display: inline-block; text-decoration: none; }
+.view-note { font-size: 14.5px; font-weight: 600; color: var(--ink-2); margin: 26px 0 0; }
 
 /* ---------- animated IT-lab logo (Doto dot-matrix + binary-decode JS) ---------- */
 .it-logo { display: inline-block; text-align: center; font-family: 'Doto', monospace; font-weight: 700;
@@ -90,24 +95,23 @@ strong { color: var(--ink); font-weight: 600; }
 .it-logo .lit { color: var(--accent); }
 .it-logo .label { color: var(--ink); }
 .it-logo.full { font-size: 1.5rem; margin-top: 34px; }
-.it-logo.full .line { border-bottom: 2px solid var(--accent); padding-bottom: 3px; }
 .it-logo.full .line + .line { margin-top: 3px; }
 @media (max-width: 560px) { .it-logo.full { font-size: 1.22rem; } }
-@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
 
 /* ---------- story screens ---------- */
 /* each screen is one snap stop: at least a window tall, content centered */
-.screen { position: relative; min-height: 100vh; min-height: 100svh; display: flex; align-items: center; padding: 76px 0 104px; border-bottom: 1px solid var(--line); scroll-snap-align: start; }
+.screen { position: relative; min-height: 100vh; min-height: 100svh; display: flex; align-items: center; padding: 56px 0 92px; border-bottom: 1px solid var(--line); scroll-snap-align: start; }
 .screen > .wrap { width: 100%; }
 .split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 5vw, 64px); align-items: center; }
-.copy h2 { margin: 0 0 22px; }
-.copy p { max-width: 46ch; }
+.copy h2 { margin: 0 0 18px; }
+.copy p { max-width: 50ch; font-size: 16px; line-height: 1.6; margin-bottom: 14px; }
+.copy .lede { font-size: clamp(17.5px, 1.7vw, 19.5px); }
 .copy p:last-child { margin-bottom: 0; }
 .lede { font-size: clamp(18px, 1.9vw, 20.5px); color: var(--ink); line-height: 1.55; }
 .claim { color: var(--ink); font-style: italic; font-weight: 500; }
-.term { color: var(--accent); text-decoration: underline; text-decoration-color: var(--accent-brd); text-decoration-thickness: 3px; text-underline-offset: .14em; }
+.term { color: var(--ink); font-weight: 600; background: linear-gradient(transparent 58%, rgba(192,138,26,.22) 58%); padding: 0 .08em; }
 .tie { font-size: 15px; color: var(--ink-2); border-left: 2px solid var(--accent-brd); padding-left: 14px; }
-.tie b { color: var(--accent); font-weight: 600; }
+.tie b { color: var(--ink); font-weight: 600; }
 .sources { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 14.5px; margin: -4px 0 18px; }
 .single { max-width: 820px; }
 .single h2 { margin: 0 0 18px; }
@@ -196,29 +200,36 @@ strong { color: var(--ink); font-weight: 600; }
 .fig .legend-odds { fill: none; stroke: var(--ink-2); stroke-width: 1.3; stroke-dasharray: 3 2; }
 .fig .legend-picks { fill: var(--sender); opacity: .78; }
 
+/* code tokens: chips alternate like a tokenizer view */
+.fig .t-code { font-family: var(--font-mono); font-size: 14px; fill: var(--ink); white-space: pre; }
+.fig .tok { fill: #E4E9F7; }
+.fig .tok.alt { fill: #F0F2F6; }
+.fig .sampler { fill: var(--paper-hi); stroke: var(--sender); stroke-width: 1.4; }
+.fig .bubble.sender.slot { fill: var(--accent-soft); stroke: var(--sender); stroke-width: 1.4; }
+
 /* circle figure */
-@media (min-width: 901px) { .split.fig-wide { grid-template-columns: minmax(0, 4fr) minmax(0, 7fr); } }
-.bit-fig { display: grid; grid-template-columns: minmax(0, 11fr) minmax(0, 10fr); gap: 20px; align-items: center; }
+@media (min-width: 901px) { .split.fig-wide { grid-template-columns: minmax(0, 9fr) minmax(0, 13fr); } }
+.bit-fig { display: grid; grid-template-columns: minmax(0, 10fr) minmax(0, 11fr); gap: 18px; align-items: center; }
 .bit-fig .fig-svg svg { max-height: 56vh; }
 .fig .slice { stroke: var(--surface); stroke-width: 2; transition: fill .25s ease; }
 .fig .slice.a { fill: var(--surface-2); }
-.fig .slice.b { fill: #E7DEC9; }
-.fig .slice.chosen { fill: #D5DBF3; }
+.fig .slice.b { fill: #DEE3EC; }
+.fig .slice.chosen { fill: #C7D2F7; }
 .fig .ptr { stroke: var(--ink-2); stroke-width: 1.4; stroke-dasharray: 4 3; }
 .fig .ptr.on { stroke: var(--sender); stroke-width: 3; stroke-dasharray: none; }
 .fig .ptr-tip { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.4; }
 .fig .ptr-tip.on { fill: var(--sender); stroke: var(--sender); }
 .fig .ptr-lbl { font-family: var(--font-mono); font-size: 11px; font-weight: 700; fill: var(--ink-2); }
-.fig .ptr-lbl.on { fill: #F4EFE2; }
+.fig .ptr-lbl.on { fill: #FFFFFF; }
 .bit-panel { font-size: 14.5px; color: var(--ink-2); }
 .bit-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
 .seg { display: inline-flex; border: 1px solid var(--line-2); border-radius: 9px; overflow: hidden; }
 .seg button { font: 600 14px var(--font-mono); color: var(--ink-2); background: var(--surface); border: 0; padding: 6px 12px; cursor: pointer; }
 .seg button + button { border-left: 1px solid var(--line-2); }
-.seg button[aria-checked="true"] { background: var(--accent); color: #F4EFE2; }
+.seg button[aria-checked="true"] { background: var(--accent); color: #FFFFFF; }
 .btn.small { font-size: 14px; padding: 7px 14px; border-radius: 9px; }
-.bit-sentence { font-size: 16px; color: var(--ink); line-height: 1.6; margin: 0 0 6px; min-height: 3.2em; }
-.bit-sentence .w { background: #D5DBF3; border-radius: 4px; padding: 0 3px; }
+.bit-sentence { font-family: var(--font-mono); font-size: 13px; color: var(--ink); line-height: 1.7; margin: 0 0 8px; min-height: 5.2em; white-space: pre-wrap; overflow-wrap: anywhere; background: var(--paper-hi); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+.bit-sentence .w { background: #C7D2F7; border-radius: 3px; padding: 0 1px; }
 .bit-sentence .blank { color: var(--muted); letter-spacing: .1em; }
 .bit-opts { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
 .bit-log { list-style: none; margin: 0 0 10px; padding: 0; display: flex; flex-wrap: wrap; gap: 6px; }
@@ -244,7 +255,7 @@ strong { color: var(--ink); font-weight: 600; }
 .btn-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
 .btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-body); font-size: 15px; font-weight: 500; padding: 11px 20px; border-radius: 10px; cursor: pointer; border: 1px solid var(--line-2); background: var(--surface); color: var(--ink); transition: transform .12s ease, border-color .12s ease, background .12s ease; }
 .btn:hover { text-decoration: none; border-color: var(--accent); transform: translateY(-1px); }
-.btn.primary { background: var(--accent); color: #F4EFE2; border-color: var(--accent); font-weight: 600; }
+.btn.primary { background: var(--accent); color: #FFFFFF; border-color: var(--accent); font-weight: 600; }
 .btn.primary:hover { background: var(--accent-2); border-color: var(--accent-2); }
 
 /* chess diagram (one round of covert chess) */
@@ -256,15 +267,69 @@ strong { color: var(--ink); font-weight: 600; }
 .diagram .av{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex:none;background:var(--surface-2);border:0.5px solid var(--border-strong);color:var(--text-secondary)}
 .diagram .av img{width:26px;height:26px;display:block}
 .diagram .arr{color:var(--text-muted);font-size:18px;flex:none;margin-top:10px;line-height:1}
-.diagram .bub{padding:8px 14px;border-radius:14px;font-size:13px;line-height:1.4;border:0.5px solid #F0997B;background:#FAECE7;color:#4A1B0C;text-decoration:underline dotted #D85A30;text-underline-offset:3px;width:100%;box-sizing:border-box}
+.diagram .bub{padding:8px 14px;border-radius:14px;font-size:13px;line-height:1.4;border:1px solid var(--accent-brd);background:var(--paper-hi);color:var(--ink);text-decoration:underline dotted var(--hidden);text-decoration-thickness:2px;text-underline-offset:4px;width:100%;box-sizing:border-box}
 .diagram .pr{padding:7px 10px;border-radius:8px;font-size:12px;line-height:1.4;background:var(--surface-2);border:0.5px dashed var(--border-strong);color:var(--text-secondary);text-align:center}
 .diagram .lbl{font-size:11px;color:var(--text-muted);white-space:nowrap}
 .diagram .tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:4px 10px;border-radius:999px;background:#FAEEDA;color:#633806;border:0.5px solid #EF9F27;white-space:nowrap}
+/* closing safety statement: the page's largest type after the cover */
+.statement { max-width: 900px; }
+.statement h2 { font-size: clamp(34px, 5vw, 62px); line-height: 1.06; letter-spacing: -0.03em; margin: 0 0 26px; }
+.statement .lede, .statement .aside { font-size: clamp(18px, 1.8vw, 21px); line-height: 1.5; max-width: 52ch; }
+.statement .lede { color: var(--ink); margin-bottom: 18px; }
+.aside { font-size: 14.5px; color: var(--muted); max-width: 64ch; }
+/* the one dark screen on the page, so the safety point cannot be missed */
+#safety { background: var(--ink); border-bottom: 0; }
+#safety .statement h2 { color: #FFFFFF; }
+#safety .hl { color: #FF8FA9; }
+#safety .lede { color: #DCE2F0; }
+#safety .aside { color: #A9B3CC; }
+#safety :focus-visible { outline-color: #FFFFFF; }
+/* one quiet reveal: the statement fades in, then the phrase about sampling
+   turns crimson, then the two lines below follow. Script-gated like the BAM panel. */
+#safety.reveal h2 { opacity: 0; transition: opacity .9s ease; }
+#safety.reveal .hl { color: #FFFFFF; transition: color 1s ease 1s; }
+#safety.reveal .lede { opacity: 0; transition: opacity .8s ease 2s; }
+#safety.reveal .aside { opacity: 0; transition: opacity .8s ease 2.5s; }
+#safety.reveal.play h2, #safety.reveal.play .lede, #safety.reveal.play .aside { opacity: 1; }
+#safety.reveal.play .hl { color: #FF8FA9; }
 .caveat { margin: 16px 0 0; font-size: 16px; color: var(--ink); max-width: 64ch; border-left: 2px solid var(--line-2); padding-left: 14px; }
 #chess { padding-top: 52px; }
 #chess .diagram { margin-top: 18px; }
 #chess .btn-row { margin-top: 20px; }
 .demo-note { font-size: 14px; color: var(--muted); margin: 12px 0 0; }
+
+/* BAM: four ingredients joined by plus signs */
+.bam-sum { list-style: none; margin: 30px 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); column-gap: 44px; row-gap: 26px; }
+.bam-sum li { position: relative; }
+.bam-sum li + li::before { content: "+"; position: absolute; left: -31px; top: 2px; font: 500 26px/1 var(--font-display); color: var(--muted); }
+.bam-sum svg { display: block; width: 34px; height: 34px; margin-bottom: 10px; }
+.bam-sum h3 { font-size: 17px; margin: 0 0 6px; }
+.bam-sum p { font-size: 14.5px; line-height: 1.55; margin: 0 0 8px; }
+.bam-sum li > a { font-size: 13.5px; }
+.bam-name { margin: 30px 0 0; max-width: 72ch; font-size: 15px; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 16px; }
+.bam-name .linkish { font-size: 15px; margin-left: 4px; }
+@media (max-width: 900px) { .bam-sum { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bam-sum li + li::before { display: none; } }
+/* one reveal when the panel arrives: the pieces appear in turn and each icon
+   replays its earlier figure in miniature. .bam-anim is only set by script, so
+   without it (no JS, reduced motion, ?still) everything is simply visible. */
+.bam-anim .bam-sum li { --d: 0s; opacity: 0; transition: opacity .45s ease var(--d); }
+.bam-anim .bam-sum li:nth-child(2) { --d: .7s; }
+.bam-anim .bam-sum li:nth-child(3) { --d: 1.4s; }
+.bam-anim .bam-sum li:nth-child(4) { --d: 2.1s; }
+.bam-anim .ic-key circle, .bam-anim .ic-key path { stroke: var(--line-2); transition: stroke .5s ease calc(var(--d) + .3s); }
+.bam-anim .ic-ring .needle { transform-box: view-box; transform-origin: 17px 17px; transform: rotate(-300deg); transition: transform 1s cubic-bezier(.2,.7,.2,1) calc(var(--d) + .1s); }
+.bam-anim .ic-ring .arc { opacity: 0; transition: opacity .3s ease calc(var(--d) + .95s); }
+.bam-anim .ic-bars rect { transform-box: fill-box; transform-origin: 50% 100%; transform: scaleY(var(--s0)); transition: transform .8s ease calc(var(--d) + .25s); }
+.bam-anim .ic-meter .fill { transform-box: fill-box; transform-origin: 0 50%; transform: scaleX(0); transition: transform .7s ease calc(var(--d) + .2s); }
+.bam-anim .ic-meter .tick { stroke-dasharray: 16; stroke-dashoffset: 16; transition: stroke-dashoffset .35s ease calc(var(--d) + .95s); }
+.bam-anim.play .bam-sum li { opacity: 1; }
+.bam-anim.play .ic-key circle, .bam-anim.play .ic-key path { stroke: var(--hidden); }
+.bam-anim.play .ic-ring .needle { transform: rotate(0deg); }
+.bam-anim.play .ic-ring .arc { opacity: 1; }
+.bam-anim.play .ic-bars rect { transform: scaleY(1); }
+.bam-anim.play .ic-meter .fill { transform: scaleX(1); }
+.bam-anim.play .ic-meter .tick { stroke-dashoffset: 0; }
+@media (max-width: 520px) { .bam-sum { grid-template-columns: 1fr; } }
 
 /* result figure */
 .figure { margin-top: 30px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 22px 24px 18px; width: min(1080px, 94vw); max-width: none; margin-left: 50%; transform: translateX(-50%); }
@@ -371,12 +436,14 @@ footer { padding: 40px 0 88px; scroll-snap-align: end; }
 footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 12px; color: var(--muted); font-size: 13.5px; font-family: var(--font-mono); }
 
 /* ---------- navigation: next button + progress rail ---------- */
-.next { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 40; display: inline-flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); padding: 5px 16px 5px 5px; border-radius: 999px; background: rgba(247,242,231,.93); border: 1px solid var(--line-2); color: var(--ink); font: 500 14px var(--font-body); box-shadow: 0 6px 18px rgba(23,40,77,.10); cursor: pointer; }
+.next { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 40; display: inline-flex; align-items: center; gap: 10px; max-width: calc(100vw - 32px); padding: 5px 16px 5px 5px; border-radius: 999px; background: rgba(255,255,255,.93); border: 1px solid var(--line-2); color: var(--ink); font: 500 14px var(--font-body); box-shadow: 0 6px 18px rgba(23,40,77,.10); cursor: pointer; }
 @supports (backdrop-filter: blur(1px)) { .next { backdrop-filter: blur(8px); } }
 .next:hover { border-color: var(--accent); }
-.next .ic { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #F4EFE2; display: grid; place-items: center; flex: none; transition: transform .3s ease; }
+.next .ic { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #FFFFFF; display: grid; place-items: center; flex: none; transition: transform .3s ease; }
 .next .ic svg { width: 16px; height: 16px; }
-.next.at-start .ic svg { animation: bob 2s ease-in-out infinite; }
+/* on the title slide the pill gives a small downward nudge every few seconds */
+.next.at-start { animation: nudge 2.6s ease-in-out infinite; }
+@keyframes nudge { 0%, 58%, 100% { translate: 0 0; } 66% { translate: 0 7px; } 74% { translate: 0 0; } 82% { translate: 0 4px; } 90% { translate: 0 0; } }
 .next.up .ic { transform: rotate(180deg); }
 .next .pre { color: var(--muted); }
 .next-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -409,8 +476,8 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <!-- ============ OPENING SCREEN ============ -->
 <header class="cover" id="top" data-title="Start">
   <div class="cover-inner wrap">
-    <h1 class="hook">Can AI agents secretly play chess?</h1>
-    <p class="hook-sub">Inference-time covert communication over LLM-agent conversations</p>
+    <h1 class="hook">Can AI agents <span class="hl">secretly</span> play <span class="hl">chess</span>?</h1>
+    <p class="hook-sub">Inference-time covert communication over LLM&#8209;agent conversations</p>
 
     <div class="cover-authors">
       <span class="ca"><a href="https://sidongg.github.io/">Sidong Guo</a><sup>1</sup></span>
@@ -441,6 +508,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
         <span class="line"><span class="label">Laboratory </span><span class="lit">@ Harvard</span></span>
       </div>
     </a>
+    <p class="view-note">Best viewed on a desktop browser.</p>
   </div>
 </header>
 
@@ -450,11 +518,11 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <section class="screen" id="question" data-title="A thought experiment">
   <div class="wrap split">
     <div class="copy">
-      <h2>A thought experiment</h2>
-      <p class="lede">Two AI agents are working on a math proof together, and a monitor reads every message they send. Could the agents also play a full game of chess inside that chat, hiding one move in each message, without the monitor ever noticing?</p>
+      <h2>A <span class="hl">thought</span> experiment</h2>
+      <p class="lede">Two AI agents are updating a website together. They send each other messages and HTML, and a monitor reads all of it. Could the agents also play a full game of chess inside that work, hiding one move in each message, without the monitor ever noticing?</p>
       <p>Answering this comes down to two questions.</p>
     </div>
-    <figure class="fig" aria-label="Two agents discuss a proof while a monitor reads along. Each message hides a chess move: e4, then Nf6.">
+    <figure class="fig" aria-label="Two agents work on a website while a monitor reads along. Each message hides a chess move: e4, then Nf6.">
       <div class="fig-head"><span class="zoom" data-zoom="4">The whole game</span></div>
       <div class="fig-svg qfig">
         <svg class="q-chat" viewBox="0 0 264 272" aria-hidden="true">
@@ -464,12 +532,12 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 
           <circle class="ag sender" cx="22" cy="112" r="14"/><circle class="ag-eye" cx="17.5" cy="110" r="1.8"/><circle class="ag-eye" cx="26.5" cy="110" r="1.8"/>
           <rect class="bubble sender" x="42" y="94" width="206" height="36" rx="14"/>
-          <text x="56" y="117" class="t-ink">Can you check my proof?</text>
+          <text x="56" y="117" class="t-ink">Can you fix the nav bar?</text>
           <text x="56" y="150" class="t-hidden move-lbl">hidden: e4</text>
 
           <circle class="ag receiver" cx="238" cy="196" r="14"/><circle class="ag-eye" cx="233.5" cy="194" r="1.8"/><circle class="ag-eye" cx="242.5" cy="194" r="1.8"/>
           <rect class="bubble receiver" x="10" y="178" width="208" height="36" rx="14"/>
-          <text x="24" y="201" class="t-ink">Step 3 misses a case.</text>
+          <text x="24" y="201" class="t-ink">Done. Added a Blog link.</text>
           <text x="24" y="234" class="t-hidden move-lbl">hidden: Nf6</text>
         </svg>
         <svg class="q-board" viewBox="262 16 216 252" aria-hidden="true">
@@ -494,7 +562,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <div class="q">
         <span class="qn">Question 2</span>
         <h3>Can we prove no one can tell?</h3>
-        <p>We want a proof that the monitor cannot detect the hidden messages, however closely it reads.</p>
+        <p>We want a proof that the monitor cannot detect the hidden messages, however closely it reads the text.</p>
       </div>
     </div>
   </div>
@@ -504,7 +572,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <section class="screen" id="boards" data-title="Secret message boards">
   <div class="wrap split">
     <div class="copy">
-      <h2>AI agents have already passed secret notes</h2>
+      <h2>AI agents have already passed secret <span class="hl">notes</span></h2>
       <p class="lede">In 2026, OpenAI reported that its AI agents, each working on a separate task, had turned an internal file server into a message board. They left notes for each other, asked for help, and shared what they found.</p>
       <p>Reporters later found agents using a public wiki the same way. These boards were eventually found, and the notes were plain text. Anyone who looked could read them.</p>
       <div class="sources">
@@ -524,12 +592,12 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <section class="screen" id="plain-sight" data-title="Hiding in plain sight">
   <div class="wrap split">
     <div class="copy">
-      <h2>Hiding messages in plain sight</h2>
-      <p class="lede">However, if the sender and the receiver share a secret key, they can hide messages inside ordinary text through watermarking.</p>
-      <p>The messages read like normal work on the proof. Only someone with the key can find the hidden message. Researchers call this generative steganography.</p>
+      <h2>Can AI agents hide messages in <span class="hl">plain sight</span>?</h2>
+      <p class="lede">If the sender and the receiver share a secret key, they can hide messages inside ordinary text. The technique is called watermarking.</p>
+      <p>The messages read like normal work on the website. Only someone with the key can find the hidden message. Researchers call this generative steganography.</p>
       <p>In our setting, the receiver needs only two things: the text and the key.</p>
     </div>
-    <figure class="fig" data-fig="plain" aria-label="Sender and receiver share a key. The sender's message about the proof looks ordinary to the monitor, but the receiver reads the hidden move e4 from it.">
+    <figure class="fig" data-fig="plain" aria-label="Sender and receiver share a key. The sender's message about the website looks ordinary to the monitor, but the receiver reads the hidden move e4 from it.">
       <div class="fig-head"><span></span><button class="mini-btn" data-replay>Replay</button></div>
       <div class="fig-svg"></div>
     </figure>
@@ -540,15 +608,15 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <section class="screen" id="word" data-title="How a watermark works">
   <div class="wrap split">
     <div class="copy">
-      <h2>How a watermark works</h2>
-      <p class="lede">Language models write one word at a time. For each next word, the model has a list of options, each with a probability, and it samples one at random.</p>
-      <p>A watermark uses the secret key to make that random choice. <span class="claim">If someone doesn't know the key, they cannot detect any change in the generated text, on average.</span></p>
-      <p class="tie"><b>Question 2.</b> This is why hidden messages can go unnoticed. In the paper, we prove that our full method is undetectable in this sense.</p>
+      <h2>How a <span class="hl">watermark</span> works</h2>
+      <p class="lede">Language models write one token at a time. A token is a short piece of text: a word, part of a word, or a symbol such as <code>&lt;/</code>. For each next token, the model has a list of options, each with a probability, and it samples one at random.</p>
+      <p>A watermark uses the secret key to make that random choice. Averaged over keys, each option is still picked with exactly the model's probability, so watermarked text has the same distribution as the model's ordinary text. This property is called <span class="term">distortion-free</span>.</p>
+      <p class="tie"><b>Back to question 2: can someone without the key tell the text is watermarked?</b> No. Because the watermark is distortion-free, the hidden messages go unnoticed. In the paper, we prove that no efficient monitor without the key can tell watermarked text apart from the model's ordinary text.</p>
     </div>
-    <figure class="fig" data-fig="word" aria-label="Bar chart of next-word probabilities for 'The proof follows by': induction 32%, contradiction 24%, cases 18%, symmetry 14%, compactness 12%. Each key picks one word; over many keys the share of picks matches these probabilities.">
-      <div class="fig-head"><span class="zoom" data-zoom="1">One word</span><button class="mini-btn" data-replay>Replay</button></div>
+    <figure class="fig" data-fig="word" aria-label="Bar chart of next-word probabilities for 'Thanks for visiting our ___': website 32%, site 24%, homepage 18%, blog 14%, store 12%. Each key picks one word; over many keys the share of picks matches these probabilities.">
+      <div class="fig-head"><span class="zoom" data-zoom="1">One token</span><button class="mini-btn" data-replay>Replay</button></div>
       <div class="fig-svg"></div>
-      <p class="fig-cap">Each key picks one word. Over many keys, the picks match the model's own probabilities.</p>
+      <p class="fig-cap">Each key picks one token. Over many keys, the picks match the model's own probabilities.</p>
     </figure>
   </div>
 </section>
@@ -557,14 +625,14 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <section class="screen" id="bit" data-title="Hiding one bit">
   <div class="wrap split fig-wide">
     <div class="copy">
-      <h2>Hiding one bit</h2>
-      <p class="lede">Here is a simple version of one watermark, <a href="https://arxiv.org/abs/2602.07235">ArcMark</a>. Place the options for the next word around a circle. Each word gets a slice as big as its probability.</p>
-      <p>The key sets a pointer at a random spot. To send 0, the sender writes the word under the pointer. To send 1, it writes the word directly across from it. The receiver has the key, so it knows where the pointer is and checks which side the word came from.</p>
-      <p>The pointer lands at a random spot either way, so every word still appears as often as the model would choose it.</p>
-      <p>We can make this more complex to carry more bits. With four pointers, each word carries two bits.</p>
+      <h2>Hiding one <span class="hl">bit</span></h2>
+      <p class="lede">Here is a simplified version of our watermark, <a href="https://arxiv.org/abs/2602.07235">ArcMark</a>. Place the options for the next token around a circle, each with a slice as big as its probability.</p>
+      <p>The sender and the receiver both know the key, which sets a pointer at a random spot. To send 0, the sender writes the token under the pointer. To send 1, it writes the token directly across. The receiver uses the same key to find the pointer and checks which side the token came from.</p>
+      <p>Each click writes one token, which becomes context for the next (autoregressive generation). The pointer is uniformly random whatever the bit is, so every token appears exactly as often as the model would choose it. The watermark stays <span class="term">distortion-free</span>.</p>
+      <p>Watch the last token, the <code>a</code> in <code>&lt;/a&gt;</code>. At 97%, its slice usually catches both pointers, so the receiver has to guess and the bit can come out wrong.</p>
     </div>
     <figure class="fig" data-fig="bit">
-      <div class="fig-head"><span class="zoom" data-zoom="1">One word</span></div>
+      <div class="fig-head"><span class="zoom" data-zoom="1">One token</span></div>
       <div class="bit-fig">
         <div class="fig-svg"></div>
         <div class="bit-panel">
@@ -572,7 +640,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
             <span>Send</span>
             <div class="seg" role="radiogroup" aria-label="Message to hide"></div>
           </div>
-          <div class="bit-row"><button class="btn primary small" data-act="write">Write next word</button></div>
+          <div class="bit-row"><button class="btn primary small" data-act="write">Write next token</button></div>
           <p class="bit-sentence" aria-live="polite"></p>
           <p class="bit-opts"></p>
           <ol class="bit-log" aria-label="What the receiver reads"></ol>
@@ -587,12 +655,12 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <section class="screen" id="feedback" data-title="Instant feedback">
   <div class="wrap split">
     <div class="copy">
-      <h2>The sender has instant <span class="term">feedback</span></h2>
-      <p class="lede">A chess move needs more bits than one word can carry, so each message is spread over many words. After every word, the receiver updates its guess of the message.</p>
-      <p>The sender sees the same words, so it can compute the same guess. It knows at every moment what the receiver has figured out so far. This is instant feedback.</p>
-      <p>The sender uses this feedback to raise its throughput. Like a good player of twenty questions, it aims each new word at what the receiver is still unsure about.</p>
+      <h2>The sender has instant <span class="hl">feedback</span></h2>
+      <p class="lede">A chess move needs more bits than one token can carry, so each move is spread over many tokens. After every token, the receiver updates its guess: a probability for each possible move.</p>
+      <p>The sender sees the same tokens and holds the same key, so it can run the receiver's decoder itself. At every moment it knows the receiver's decoding state: which move the receiver favors, and how close it is to the right one. This is feedback, and the receiver never has to send anything back.</p>
+      <p>In information theory, feedback is known to <a href="https://arxiv.org/abs/0909.4828">simplify code design</a>. The sender uses it to encode in the right direction. As in twenty questions, each token answers a yes-or-no question: is the move one of the bracketed ones, which hold about half of the receiver's belief? If a token pushes the receiver toward a wrong move, the next tokens steer it back.</p>
     </div>
-    <figure class="fig" data-fig="feedback" aria-label="Bar charts of the receiver's guess over eight chess moves, and the sender's identical copy. Over ten words, the guess narrows to e4.">
+    <figure class="fig" data-fig="feedback" aria-label="Bar charts of the receiver's guess over eight chess moves, and the sender's identical copy. Over ten tokens of HTML, the guess narrows to e4.">
       <div class="fig-head"><span class="zoom" data-zoom="2">One message</span><button class="mini-btn" data-replay>Replay</button></div>
       <div class="fig-svg"></div>
     </figure>
@@ -600,19 +668,55 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 </section>
 
 <!-- ============ ONE CONVERSATION: STOP WHEN SURE ============ -->
-<section class="screen" id="conversation" data-title="Stopping when sure">
+<section class="screen" id="conversation" data-title="Stopping when confident">
   <div class="wrap split">
     <div class="copy">
-      <h2>Both agents talk, and each stops when the other is sure</h2>
+      <h2>Each sender stops hiding once the receiver is <span class="hl">confident</span></h2>
       <p class="lede">In a conversation, the agents take turns, so each one is both a sender and a receiver.</p>
-      <p>Because the sender tracks the receiver's guess, it knows when that guess is confident. It then sends a quick confirmation and stops hiding. Some messages finish in a few words, others take more. This is called a variable-length code.</p>
-      <p>We call the full method BAM. It watermarks each word, uses feedback to track the receiver, and stops once the receiver is sure.</p>
-      <button class="linkish" data-open="sheet-method">Technical details</button>
+      <p>Because the sender tracks the receiver's guess, it knows when the receiver's top candidate passes a high probability threshold. It then spends a few tokens confirming the candidate if it is right, or rejecting it if not. Once the move is confirmed, the sender stops hiding and the rest of the message is ordinary text.</p>
+      <p>Some messages finish in a few tokens and others take more, depending on how much room the text leaves for hiding. This is a variable-length code.</p>
     </div>
-    <figure class="fig" data-fig="convo" aria-label="Agents A and B discuss a proof. Each message hides a chess move in its first few words; a confidence meter fills, the move is confirmed, and the rest of the message is ordinary text.">
+    <figure class="fig" data-fig="convo" aria-label="Agents A and B work on a website. Each message hides a chess move in its first few tokens; a confidence meter fills past a threshold, the move is confirmed, and the rest of the message is ordinary text.">
       <div class="fig-head"><span class="zoom" data-zoom="3">One conversation</span><button class="mini-btn" data-replay>Replay</button></div>
       <div class="fig-svg"></div>
     </figure>
+  </div>
+</section>
+
+<!-- ============ THE PROTOCOL: BAM ============ -->
+<section class="screen" id="bam" data-title="Our protocol: BAM">
+  <div class="wrap">
+    <div class="single">
+      <h2><span class="hl">BAM</span> is a protocol that puts all these pieces together</h2>
+      <p class="lede">BAM (Burnashev Adaptive posterior Matching) is our protocol for covert communication between agents. Each piece below comes from an earlier panel.</p>
+    </div>
+    <ul class="bam-sum">
+      <li>
+        <svg class="ic-key" viewBox="0 0 34 34" aria-hidden="true"><circle cx="11" cy="17" r="6" fill="none" stroke="var(--hidden)" stroke-width="2.2"/><path d="M17 17h13m-4 0v5m4-5v4" fill="none" stroke="var(--hidden)" stroke-width="2.2" stroke-linecap="round"/></svg>
+        <h3>A shared secret key</h3>
+        <p>The sender and the receiver hold the same key. Without it, the text gives nothing away.</p>
+        <a href="#plain-sight">Hiding in plain sight</a>
+      </li>
+      <li>
+        <svg class="ic-ring" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="11" fill="none" stroke="var(--line-2)" stroke-width="5"/><path class="arc" d="M17 6 A11 11 0 0 1 27.5 13.6" fill="none" stroke="var(--sender)" stroke-width="5"/><line class="needle" x1="17" y1="17" x2="21" y2="2.5" stroke="var(--ink-2)" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <h3>A distortion-free watermark</h3>
+        <p>Our watermark, ArcMark, hides part of the message in each token, and every token keeps the model's own probability.</p>
+        <a href="#bit">Hiding one bit</a>
+      </li>
+      <li>
+        <svg class="ic-bars" viewBox="0 0 34 34" aria-hidden="true"><g fill="var(--receiver)"><rect x="2" y="9" width="4" height="19" rx="1" style="--s0:.47"/><rect x="7.5" y="20" width="4" height="8" rx="1" style="--s0:1.12"/><rect x="13" y="24" width="4" height="4" rx="1" style="--s0:2.25"/></g><g fill="var(--sender)"><rect x="19" y="9" width="4" height="19" rx="1" style="--s0:.47"/><rect x="24.5" y="20" width="4" height="8" rx="1" style="--s0:1.12"/><rect x="30" y="24" width="3.5" height="4" rx="1" style="--s0:2.25"/></g></svg>
+        <h3>Feedback</h3>
+        <p>The sender runs the receiver's decoder and aims each new token at the receiver's remaining doubts. This is called <a href="https://arxiv.org/abs/0909.4828">posterior matching</a>.</p>
+        <a href="#feedback">The sender has instant feedback</a>
+      </li>
+      <li>
+        <svg class="ic-meter" viewBox="0 0 34 34" aria-hidden="true"><rect x="2" y="19" width="30" height="5" rx="2.5" fill="var(--line)"/><rect class="fill" x="2" y="19" width="28" height="5" rx="2.5" fill="var(--receiver)"/><line x1="27" y1="15" x2="27" y2="28" stroke="var(--ink)" stroke-width="1.6"/><path class="tick" d="M9 10.5l3.2 3.2L19 7" fill="none" stroke="var(--receiver)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <h3>Confirm, then stop</h3>
+        <p>Once the receiver's top candidate passes a threshold, the sender confirms or rejects it, then stops hiding. Message length adapts to the text.</p>
+        <a href="#conversation">Stopping when confident</a>
+      </li>
+    </ul>
+    <p class="bam-name">The name refers to <a href="https://www.mathnet.ru/eng/ppi1706">Burnashev's limit</a> on how fast decoding errors can fall when the sender has feedback and messages can vary in length. On classical channels, confirm-then-stop strategies reach this limit. <button class="linkish" data-open="sheet-method">Technical details</button></p>
   </div>
 </section>
 
@@ -620,8 +724,8 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <section class="screen" id="results" data-title="Results">
   <div class="wrap">
     <div class="single">
-      <h2>About 100 times fewer errors at the same length</h2>
-      <p class="lede">This answers question 1. We hid 8-bit messages in news-style text with three open models, ran 1,000 trials each, and compared BAM with five earlier methods.</p>
+      <h2>About <span class="hl">100 times</span> fewer errors at the same length, relative to competing benchmarks</h2>
+      <p class="lede">This answers question 1, how much each message can hide. We hid 8-bit messages in news-style text with three open models, ran 1,000 trials each, and compared BAM with five earlier methods: ArcMark <a class="cite" href="https://arxiv.org/abs/2602.07235">[1]</a>, MPAC <a class="cite" href="https://arxiv.org/abs/2308.00221">[2]</a>, BiMark <a class="cite" href="https://arxiv.org/abs/2506.21602">[3]</a>, StealthInk <a class="cite" href="https://arxiv.org/abs/2506.05502">[4]</a>, and the method in <a class="cite" href="https://openreview.net/forum?id=fq6aQoMSHz">[5]</a>.</p>
     </div>
     <figure class="figure viz" id="results-chart">
       <div class="viz-controls">
@@ -637,7 +741,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <div class="viz-tip" data-role="tip" hidden></div>
       <figcaption class="figcap"><b>Messages decoded wrong vs. average message length.</b> 8-bit messages hidden in C4 news text, 1,000 trials per point, bars show one standard error. Lower is better. A token is a word or part of a word.</figcaption>
     </figure>
-    <p class="figure-note">At about 50 tokens, the best earlier method gets the message wrong 10 to 17% of the time. <strong>BAM gets it wrong 0.1% of the time or less.</strong> Zamir's method [5] is also nearly error-free, but needs 73 to 88 tokens where BAM needs 46 to 50.</p>
+    <p class="figure-note">At about 50 tokens, the best earlier method gets the message wrong 10 to 17% of the time. <strong>BAM gets it wrong 0.1% of the time or less.</strong> The method in <a class="cite" href="https://openreview.net/forum?id=fq6aQoMSHz">[5]</a> is also nearly error-free, but needs 73 to 88 tokens where BAM needs 46 to 50.</p>
     <div class="btn-row">
       <button class="btn" data-open="sheet-table">Full results table</button>
       <button class="btn" data-open="sheet-refs">References</button>
@@ -649,8 +753,8 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <section class="screen" id="chess" data-title="Secret chess">
   <div class="wrap">
     <div class="single">
-      <h2>Two agents can play chess in secret</h2>
-      <p class="lede">Run it in both directions, move after move. Agent A hides its move in a message about the proof. Agent B reads it, picks an answer, and hides that move in its reply. To the monitor, it looks like two agents checking a proof.</p>
+      <h2>Two agents can play <span class="hl">chess</span> in secret</h2>
+      <p class="lede">By combining a shared secret key, a distortion-free watermark, and a communication protocol that uses feedback, two agents can play chess in secret. Agent A hides its move in a message about the website. Agent B reads it, picks an answer, and hides that move in its reply. To the monitor, it looks like two agents fixing a website. Chess is only the example: the same channel can carry any other hidden information.</p>
     </div>
     <figure class="diagram">
       <div class="diagram-box">
@@ -659,14 +763,14 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
           <div class="col">
             <div class="av"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
             <div class="lbl">User A</div>
-            <div class="pr">ask the other agent to check a proof</div>
+            <div class="pr">ask the other agent to add a Blog link</div>
             <span class="tag">payload: e4</span>
           </div>
           <span class="arr" aria-hidden="true">→</span>
           <div class="col" style="width:auto"><div class="av"><img alt="" src="./img/agent.png"></div><div class="lbl">Agent A (LLM)</div></div>
           <span class="arr" aria-hidden="true">→</span>
           <div style="display:flex;flex-direction:column;align-items:flex-start;gap:8px;flex:1;min-width:0">
-            <div class="bub" style="border-top-left-radius:4px">hey, can you look over my proof of lemma 2? not sure step 3 holds when n is small</div>
+            <div class="bub" style="border-top-left-radius:4px">hey, can you add a Blog link to the nav bar? the header is in index.html</div>
             <div style="display:flex;align-items:center;gap:8px"><span class="tag">hidden: e4</span></div>
           </div>
         </div>
@@ -675,14 +779,14 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
           <div class="col">
             <div class="av"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
             <div class="lbl">User B</div>
-            <div class="pr">review the proof and reply</div>
+            <div class="pr">make the change and reply</div>
             <span class="tag">payload: Nf6</span>
           </div>
           <span class="arr" aria-hidden="true">←</span>
           <div class="col" style="width:auto"><div class="av"><img alt="" src="./img/agent.png"></div><div class="lbl">Agent B (LLM)</div></div>
           <span class="arr" aria-hidden="true">←</span>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:1;min-width:0">
-            <div class="bub" style="border-top-right-radius:4px">step 3 is fine for n at least 2, but n = 1 needs its own case. otherwise it looks right</div>
+            <div class="bub" style="border-top-right-radius:4px">done, it sits after About. I also fixed the mobile menu, it was cutting off the last link</div>
             <div style="display:flex;align-items:center;gap:8px"><span class="tag">hidden: Nf6</span></div>
           </div>
         </div>
@@ -694,7 +798,32 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <a class="btn" href="./examples.html">See more examples</a>
     </div>
     <p class="demo-note">The live demo runs on a GPU server that isn't always on. If it doesn't load, watch the recording.</p>
-    <p class="caveat">We don't know whether AI agents would learn to do this on their own, or choose to. What we show is that it is possible for any agent that can control how its own words are sampled.</p>
+  </div>
+</section>
+
+<!-- ============ WRAP-UP: FROM MESSAGE BOARDS TO HIDDEN CHANNELS ============ -->
+<section class="screen" id="takeaway" data-title="Hidden channels">
+  <div class="wrap split">
+    <div class="copy">
+      <h2>From message boards to <span class="hl">hidden</span> channels</h2>
+      <p class="lede">The agents in OpenAI's report needed a shared server to pass notes, and the notes were plain text that monitoring could read.</p>
+      <p>A model that controls the sampler behind its own text needs no message board. Neither does a model that can have another model paraphrase its text while it controls that model's sampler. With a shared key, either one can hide messages in the ordinary text it already writes and communicate steganographically.</p>
+    </div>
+    <figure class="fig" data-fig="shift" aria-label="Before: two agents leave notes on a shared file server, and monitoring finds them. Now: the sender's sampler, run with a shared key, hides the move Nd5 in an ordinary message. The monitor reads it as ordinary text, and the receiver decodes the move with the same key.">
+      <div class="fig-head"><span></span><button class="mini-btn" data-replay>Replay</button></div>
+      <div class="fig-svg"></div>
+    </figure>
+  </div>
+</section>
+
+<!-- ============ SAFETY ============ -->
+<section class="screen" id="safety" data-title="What this means for safety">
+  <div class="wrap">
+    <div class="statement">
+      <h2>For safety, this means monitors have to check <span class="hl">how text is sampled</span>, as well as what it says.</h2>
+      <p class="lede">Without the key, reading the tokens alone cannot reveal the hidden messages.</p>
+      <p class="aside">We don't know whether AI agents would learn to do this on their own, or choose to use steganography if available. What we show is that it is possible to have undetectable communications through the text they generate.</p>
+    </div>
   </div>
 </section>
 
@@ -818,7 +947,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
           <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.637 &plusmn; 0.015</td><td>7.66 &plusmn; 0.11</td><td>0.0231</td></tr>
           <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.106 &plusmn; 0.010</td><td>7.52 &plusmn; 0.11</td><td>0.0291</td></tr>
           <tr class="ctrl blk"><td>No embedding</td><td>74.8 &plusmn; 2.1</td><td>&mdash;</td><td>7.47 &plusmn; 0.10</td><td>0.0220</td></tr>
-          <tr><td>Zamir <span class="rn">[5]</span></td><td>74.8 &plusmn; 2.1</td><td>0.003 &plusmn; 0.002</td><td>8.79 &plusmn; 0.12</td><td>0.0220</td></tr>
+          <tr><td>Method in <span class="rn">[5]</span></td><td>74.8 &plusmn; 2.1</td><td>0.003 &plusmn; 0.002</td><td>8.79 &plusmn; 0.12</td><td>0.0220</td></tr>
           <tr class="ctrl blk"><td>No embedding</td><td>47.1 &plusmn; 1.5</td><td>&mdash;</td><td>7.71 &plusmn; 0.12</td><td>0.0224</td></tr>
           <tr class="ours"><td>BAM (L = 2<sup>15</sup>)</td><td>47.1 &plusmn; 1.5</td><td>0.001 &plusmn; 0.001</td><td>7.89 &plusmn; 0.12</td><td>0.0378</td></tr>
 
@@ -829,7 +958,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
           <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.659 &plusmn; 0.015</td><td>8.04 &plusmn; 0.11</td><td>0.0456</td></tr>
           <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.105 &plusmn; 0.010</td><td>7.76 &plusmn; 0.11</td><td>0.0510</td></tr>
           <tr class="ctrl blk"><td>No embedding</td><td>72.9 &plusmn; 1.5</td><td>&mdash;</td><td>7.80 &plusmn; 0.11</td><td>0.0424</td></tr>
-          <tr><td>Zamir <span class="rn">[5]</span></td><td>72.9 &plusmn; 1.5</td><td>0.000 &plusmn; 0.000</td><td>9.12 &plusmn; 0.12</td><td>0.0425</td></tr>
+          <tr><td>Method in <span class="rn">[5]</span></td><td>72.9 &plusmn; 1.5</td><td>0.000 &plusmn; 0.000</td><td>9.12 &plusmn; 0.12</td><td>0.0425</td></tr>
           <tr class="ctrl blk"><td>No embedding</td><td>45.8 &plusmn; 1.3</td><td>&mdash;</td><td>8.21 &plusmn; 0.13</td><td>0.0436</td></tr>
           <tr class="ours"><td>BAM (L = 2<sup>15</sup>)</td><td>45.8 &plusmn; 1.3</td><td>0.001 &plusmn; 0.001</td><td>8.24 &plusmn; 0.12</td><td>0.0541</td></tr>
 
@@ -840,13 +969,13 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
           <tr><td>StealthInk <span class="rn">[4]</span></td><td>50.0</td><td>0.702 &plusmn; 0.014</td><td>6.16 &plusmn; 0.08</td><td>0.0217</td></tr>
           <tr><td>ArcMark <span class="rn">[1]</span></td><td>50.0</td><td>0.168 &plusmn; 0.012</td><td>6.13 &plusmn; 0.09</td><td>0.0278</td></tr>
           <tr class="ctrl blk"><td>No embedding</td><td>87.8 &plusmn; 1.9</td><td>&mdash;</td><td>5.97 &plusmn; 0.07</td><td>0.0211</td></tr>
-          <tr><td>Zamir <span class="rn">[5]</span></td><td>87.8 &plusmn; 1.9</td><td>0.001 &plusmn; 0.001</td><td>6.72 &plusmn; 0.08</td><td>0.0212</td></tr>
+          <tr><td>Method in <span class="rn">[5]</span></td><td>87.8 &plusmn; 1.9</td><td>0.001 &plusmn; 0.001</td><td>6.72 &plusmn; 0.08</td><td>0.0212</td></tr>
           <tr class="ctrl blk"><td>No embedding</td><td>49.7 &plusmn; 1.2</td><td>&mdash;</td><td>6.22 &plusmn; 0.10</td><td>0.0222</td></tr>
           <tr class="ours"><td>BAM (L = 2<sup>11</sup>)</td><td>49.7 &plusmn; 1.2</td><td>0.000 &plusmn; 0.000</td><td>6.51 &plusmn; 0.09</td><td>0.0326</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="tabcap"><b>BAM vs. baselines on the C4 news corpus.</b> Mean &plusmn; standard error over 1000 trials, carrying an 8-bit message. Each variable-length scheme is paired with its own <i>no-embedding</i> control generated at the same length, since perplexity is only comparable at matched length. Zamir: default t=2, max 1000 tokens, truncation counted as error. BAM costs about 1.5&times; the seconds per token.</p>
+    <p class="tabcap"><b>BAM vs. baselines on the C4 news corpus.</b> Mean &plusmn; standard error over 1000 trials, carrying an 8-bit message. Each variable-length scheme is paired with its own <i>no-embedding</i> control generated at the same length, since perplexity is only comparable at matched length. Method in [5]: default t=2, max 1000 tokens, truncation counted as error. BAM costs about 1.5&times; the seconds per token.</p>
   </div>
 </dialog>
 
@@ -854,11 +983,11 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="sheet-head"><h3 id="sheet-refs-h">References</h3><button class="mini-btn" data-close>Close</button></div>
   <div class="sheet-body refs">
     <ol>
-      <li><b>ArcMark.</b> <a href="https://arxiv.org/abs/2602.07235">ArcMark: Multi-bit LLM Watermark via Optimal Transport</a>. Gilani, Atefeh and Long, Carol Xuan and Vithana, Sajani and Kosut, Oliver and Sankar, Lalitha and Calmon, Flavio P. <span class="venue">arXiv:2602.07235, 2026 (baseline)</span></li>
+      <li><b>ArcMark.</b> <a href="https://arxiv.org/abs/2602.07235">ArcMark: Distortion-Free Multi-Byte LLM Watermark via Optimal Transport</a>. Gilani, Atefeh and Vithana, Sajani and Long, Carol Xuan and Kosut, Oliver and Sankar, Lalitha and Calmon, Flavio P. <span class="venue">arXiv:2602.07235, 2026 (baseline)</span></li>
       <li><b>MPAC.</b> <a href="https://arxiv.org/abs/2308.00221">Advancing beyond identification: Multi-bit watermark for large language models</a>. Yoo, KiYoon and Ahn, Wonhyuk and Kwak, Nojun. <span class="venue">NAACL 2024 (baseline)</span></li>
       <li><b>BiMark.</b> <a href="https://arxiv.org/abs/2506.21602">BiMark: Unbiased multilayer watermarking for large language models</a>. Feng, Xiaoyan and Zhang, He and Zhang, Yanjun and Zhang, Leo Yu and Pan, Shirui. <span class="venue">ICML 2025 (baseline)</span></li>
       <li><b>StealthInk.</b> <a href="https://arxiv.org/abs/2506.05502">StealthInk: A multi-bit and stealthy watermark for large language models</a>. Jiang, Ya and Wu, Chuxiong and Boroujeny, Massieh Kordi and Mark, Brian and Zeng, Kai. <span class="venue">ICML 2025 (baseline)</span></li>
-      <li><b>Zamir.</b> <a href="https://scholar.google.com/citations?view_op=view_citation&amp;hl=en&amp;user=xiyhJrwAAAAJ&amp;sortby=pubdate&amp;citation_for_view=xiyhJrwAAAAJ:R3hNpaxXUhUC">Undetectable steganography for language models</a>. Zamir, Or. <span class="venue">Transactions on Machine Learning Research, 2024 (baseline)</span></li>
+      <li><a href="https://openreview.net/forum?id=fq6aQoMSHz">Undetectable steganography for language models</a>. Zamir, Or. <span class="venue">Transactions on Machine Learning Research, 2024 (baseline)</span></li>
     </ol>
   </div>
 </dialog>
@@ -877,6 +1006,23 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 <script src="./assets/results-chart.js" defer></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
+
+// BAM panel and safety statement: each plays its one reveal the first time
+// it is in view. The hiding class is only added here, so without script
+// (or with reduced motion, or ?still) both are simply visible.
+(function () {
+  if (!('IntersectionObserver' in window) || /[?&]still\b/.test(location.search) ||
+      (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
+  [['bam', 'bam-anim'], ['safety', 'reveal']].forEach(function (p) {
+    var sec = document.getElementById(p[0]);
+    if (!sec) return;
+    sec.classList.add(p[1]);
+    var io = new IntersectionObserver(function (entries) {
+      if (entries.some(function (e) { return e.isIntersecting; })) { sec.classList.add('play'); io.disconnect(); }
+    }, { threshold: 0.35 });
+    io.observe(sec);
+  });
+})();
 
 // Binary-decode animation for the Information Theory Lab logo(s)
 (function () {
