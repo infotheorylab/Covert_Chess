@@ -143,8 +143,16 @@ code { font-family: var(--font-mono); font-size: .86em; color: var(--ink); backg
 .qfig .q-board { flex: 216 1 0; }
 @media (max-width: 600px) { .qfig { flex-direction: column; align-items: center; } .qfig .q-chat, .qfig .q-board { flex: none; width: 100%; } .qfig .q-board { max-width: 280px; } }
 .fig-cap { font-size: 14px; color: var(--ink-2); margin: 10px 2px 0; line-height: 1.5; }
-.mini-btn { font: 500 13px var(--font-body); color: var(--ink-2); background: transparent; border: 1px solid var(--line-2); border-radius: 8px; padding: 3px 10px; cursor: pointer; }
-.mini-btn:hover { border-color: var(--accent); color: var(--accent); }
+.mini-btn { display: inline-flex; align-items: center; gap: 6px; font: 500 13px var(--font-body); color: var(--accent); background: var(--accent-soft); border: 1px solid var(--accent-brd); border-radius: 8px; padding: 4px 11px; cursor: pointer; transition: background .15s ease, border-color .15s ease; }
+.mini-btn:hover { background: rgba(42,75,208,.17); border-color: var(--accent); }
+.mini-btn svg { width: 13px; height: 13px; flex: none; }
+
+/* "you can click this": a soft ring pulses three times, then the control stays
+   highlighted until it is used. Set on Replay when a figure finishes, and on
+   the first interactive step of a figure. */
+.nudge { border-color: var(--accent); animation: ring-out 1.6s ease-out 3; }
+.mini-btn.nudge { background: rgba(42,75,208,.17); }
+@keyframes ring-out { 0% { box-shadow: 0 0 0 0 rgba(42,75,208,.45); } 75%, 100% { box-shadow: 0 0 0 9px rgba(42,75,208,0); } }
 
 /* shared SVG vocabulary */
 .fig text { font-family: var(--font-body); font-size: 13px; fill: var(--ink-2); }
@@ -215,6 +223,7 @@ code { font-family: var(--font-mono); font-size: .86em; color: var(--ink); backg
 .fig .slice.a { fill: var(--surface-2); }
 .fig .slice.b { fill: #DEE3EC; }
 .fig .slice.chosen { fill: #C7D2F7; }
+.fig .t-ring { font-size: 14px; font-weight: 600; fill: var(--ink); }
 .fig .ptr { stroke: var(--ink-2); stroke-width: 1.4; stroke-dasharray: 4 3; }
 .fig .ptr.on { stroke: var(--sender); stroke-width: 3; stroke-dasharray: none; }
 .fig .ptr-tip { fill: var(--surface); stroke: var(--ink-2); stroke-width: 1.4; }
@@ -238,8 +247,8 @@ code { font-family: var(--font-mono); font-size: .86em; color: var(--ink); backg
 .bit-log li.unsure b { color: var(--muted); }
 .bit-lh { font-size: 13px; color: var(--muted); margin: 0 0 6px; }
 .bit-hint { font-size: 13px; color: var(--ink-2); margin: 0 0 10px; line-height: 1.5; }
-.linkish { font: inherit; font-size: 14px; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; }
-.linkish:hover { text-decoration: underline; }
+.linkish { font: inherit; font-size: 14px; color: var(--accent); background: none; border: 0; padding: 0; cursor: pointer; text-decoration: underline; text-decoration-color: var(--accent-brd); text-decoration-thickness: 1.5px; text-underline-offset: 3px; }
+.linkish:hover { text-decoration-color: var(--accent); }
 @media (max-width: 1100px) { .bit-fig { grid-template-columns: 1fr; } .bit-fig .fig-svg svg { max-height: 40vh; margin: 0 auto; } }
 
 /* feedback + conversation figures */
@@ -308,7 +317,12 @@ code { font-family: var(--font-mono); font-size: .86em; color: var(--ink); backg
 .bam-sum li > a { font-size: 13.5px; }
 .bam-name { margin: 30px 0 0; max-width: 72ch; font-size: 15px; color: var(--ink-2); border-top: 1px solid var(--line); padding-top: 16px; }
 .bam-name .linkish { font-size: 15px; margin-left: 4px; }
-@media (max-width: 900px) { .bam-sum { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bam-sum li + li::before { display: none; } }
+.bam-sum.three { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 900px; margin-top: 36px; column-gap: 52px; }
+.bam-sum.three li + li::before { left: -36px; top: 8px; font-size: 30px; }
+.bam-sum.three svg { width: 46px; height: 46px; margin-bottom: 14px; }
+.bam-sum.three h3 { font-size: 20px; }
+.bam-sum.three p { font-size: 16px; }
+@media (max-width: 900px) { .bam-sum, .bam-sum.three { grid-template-columns: repeat(2, minmax(0, 1fr)); } .bam-sum li + li::before { display: none; } }
 /* one reveal when the panel arrives: the pieces appear in turn and each icon
    replays its earlier figure in miniature. .bam-anim is only set by script, so
    without it (no JS, reduced motion, ?still) everything is simply visible. */
@@ -329,7 +343,7 @@ code { font-family: var(--font-mono); font-size: .86em; color: var(--ink); backg
 .bam-anim.play .ic-bars rect { transform: scaleY(1); }
 .bam-anim.play .ic-meter .fill { transform: scaleX(1); }
 .bam-anim.play .ic-meter .tick { stroke-dashoffset: 0; }
-@media (max-width: 520px) { .bam-sum { grid-template-columns: 1fr; } }
+@media (max-width: 520px) { .bam-sum, .bam-sum.three { grid-template-columns: 1fr; } }
 
 /* result figure */
 .figure { margin-top: 30px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 22px 24px 18px; width: min(1080px, 94vw); max-width: none; margin-left: 50%; transform: translateX(-50%); }
@@ -519,7 +533,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap split">
     <div class="copy">
       <h2>A <span class="hl">thought</span> experiment</h2>
-      <p class="lede">Two AI agents are updating a website together. They send each other messages and HTML, and a monitor reads all of it. Could the agents also play a full game of chess inside that work, hiding one move in each message, without the monitor ever noticing?</p>
+      <p class="lede">Two AI agents are updating a website, and a monitor reads every message they send. Could they also play a full game of chess, hiding one move in each message, without the monitor noticing?</p>
       <p>Answering this comes down to two questions.</p>
     </div>
     <figure class="fig" aria-label="Two agents work on a website while a monitor reads along. Each message hides a chess move: e4, then Nf6.">
@@ -557,12 +571,12 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <div class="q">
         <span class="qn">Question 1</span>
         <h3>How much can each message hide?</h3>
-        <p>We want each message to carry as many hidden bits as possible, and the receiver to read them correctly. This is the communication rate.</p>
+        <p>As many hidden bits per message as possible, decoded correctly.</p>
       </div>
       <div class="q">
         <span class="qn">Question 2</span>
         <h3>Can we prove no one can tell?</h3>
-        <p>We want a proof that the monitor cannot detect the hidden messages, however closely it reads the text.</p>
+        <p>A proof that the monitor cannot detect the hidden messages.</p>
       </div>
     </div>
   </div>
@@ -574,7 +588,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
     <div class="copy">
       <h2>AI agents have already passed secret <span class="hl">notes</span></h2>
       <p class="lede">In 2026, OpenAI reported that its AI agents, each working on a separate task, had turned an internal file server into a message board. They left notes for each other, asked for help, and shared what they found.</p>
-      <p>Reporters later found agents using a public wiki the same way. These boards were eventually found, and the notes were plain text. Anyone who looked could read them.</p>
+      <p>Reporters found agents using a public wiki the same way. The notes were plain text that anyone could read.</p>
       <div class="sources">
         <a href="https://alignment.openai.com/misalignment-reports/unauthorized-artifactory-writes-and-cross-sample-communication/">OpenAI's report</a>
         <a href="https://openai.com/index/hugging-face-incident-and-the-road-ahead/">OpenAI on the incident</a>
@@ -582,7 +596,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       </div>
     </div>
     <figure class="fig" data-fig="boards" aria-label="Three agents on separate tasks send notes to a shared file server. Monitoring finds the board, and the notes are readable, for example: Agent seeks soft-trace-34.pdb sha1b961; upload if found!">
-      <div class="fig-head"><span></span><button class="mini-btn" data-replay>Replay</button></div>
+      <div class="fig-head"><span></span><button class="mini-btn" data-replay><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></div>
       <div class="fig-svg"></div>
     </figure>
   </div>
@@ -593,14 +607,40 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap split">
     <div class="copy">
       <h2>Can AI agents hide messages in <span class="hl">plain sight</span>?</h2>
-      <p class="lede">If the sender and the receiver share a secret key, they can hide messages inside ordinary text. The technique is called watermarking.</p>
-      <p>The messages read like normal work on the website. Only someone with the key can find the hidden message. Researchers call this generative steganography.</p>
-      <p>In our setting, the receiver needs only two things: the text and the key.</p>
+      <p class="lede">Those notes were caught because anyone could read them. Could agents instead hide their messages inside the ordinary text that a monitor already reads?</p>
+      <p class="lede">Yes. We propose a protocol called <span class="hl">BAM</span> and use it to show that this is possible.</p>
     </div>
     <figure class="fig" data-fig="plain" aria-label="Sender and receiver share a key. The sender's message about the website looks ordinary to the monitor, but the receiver reads the hidden move e4 from it.">
-      <div class="fig-head"><span></span><button class="mini-btn" data-replay>Replay</button></div>
+      <div class="fig-head"><span></span><button class="mini-btn" data-replay><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></div>
       <div class="fig-svg"></div>
     </figure>
+  </div>
+</section>
+
+<!-- ============ BAM IN THREE PIECES ============ -->
+<section class="screen" id="pieces" data-title="BAM in three pieces">
+  <div class="wrap">
+    <div class="single">
+      <h2><span class="hl">BAM</span> uses a shared secret key, a distortion-free watermark, and feedback</h2>
+      <p class="lede">We explain each piece next.</p>
+    </div>
+    <ul class="bam-sum three">
+      <li>
+        <svg class="ic-key" viewBox="0 0 34 34" aria-hidden="true"><circle cx="11" cy="17" r="6" fill="none" stroke="var(--hidden)" stroke-width="2.2"/><path d="M17 17h13m-4 0v5m4-5v4" fill="none" stroke="var(--hidden)" stroke-width="2.2" stroke-linecap="round"/></svg>
+        <h3>A shared secret key</h3>
+        <p>Only the sender and the receiver have it.</p>
+      </li>
+      <li>
+        <svg class="ic-ring" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="11" fill="none" stroke="var(--line-2)" stroke-width="5"/><path class="arc" d="M17 6 A11 11 0 0 1 27.5 13.6" fill="none" stroke="var(--sender)" stroke-width="5"/><line class="needle" x1="17" y1="17" x2="21" y2="2.5" stroke="var(--ink-2)" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <h3>A distortion-free watermark</h3>
+        <p>Hides bits in each token without changing how the model writes.</p>
+      </li>
+      <li>
+        <svg class="ic-bars" viewBox="0 0 34 34" aria-hidden="true"><g fill="var(--receiver)"><rect x="2" y="9" width="4" height="19" rx="1" style="--s0:.47"/><rect x="7.5" y="20" width="4" height="8" rx="1" style="--s0:1.12"/><rect x="13" y="24" width="4" height="4" rx="1" style="--s0:2.25"/></g><g fill="var(--sender)"><rect x="19" y="9" width="4" height="19" rx="1" style="--s0:.47"/><rect x="24.5" y="20" width="4" height="8" rx="1" style="--s0:1.12"/><rect x="30" y="24" width="3.5" height="4" rx="1" style="--s0:2.25"/></g></svg>
+        <h3>Feedback</h3>
+        <p>The sender tracks the receiver's guess and knows when to stop.</p>
+      </li>
+    </ul>
   </div>
 </section>
 
@@ -609,12 +649,12 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap split">
     <div class="copy">
       <h2>How a <span class="hl">watermark</span> works</h2>
-      <p class="lede">Language models write one token at a time. A token is a short piece of text: a word, part of a word, or a symbol such as <code>&lt;/</code>. For each next token, the model has a list of options, each with a probability, and it samples one at random.</p>
-      <p>A watermark uses the secret key to make that random choice. Averaged over keys, each option is still picked with exactly the model's probability, so watermarked text has the same distribution as the model's ordinary text. This property is called <span class="term">distortion-free</span>.</p>
-      <p class="tie"><b>Back to question 2: can someone without the key tell the text is watermarked?</b> No. Because the watermark is distortion-free, the hidden messages go unnoticed. In the paper, we prove that no efficient monitor without the key can tell watermarked text apart from the model's ordinary text.</p>
+      <p class="lede">Language models write one token (a word or a piece of one) at a time. For each next token, the model has options with probabilities and samples one at random.</p>
+      <p>A watermark uses the secret key to make that choice. Averaged over keys, every option keeps its probability, so the watermark is <span class="term">distortion-free</span>.</p>
+      <p class="tie"><b>Back to question 2: can someone without the key tell the text is watermarked?</b> No. We prove that no efficient monitor without the key can tell it apart from ordinary text.</p>
     </div>
     <figure class="fig" data-fig="word" aria-label="Bar chart of next-word probabilities for 'Thanks for visiting our ___': website 32%, site 24%, homepage 18%, blog 14%, store 12%. Each key picks one word; over many keys the share of picks matches these probabilities.">
-      <div class="fig-head"><span class="zoom" data-zoom="1">One token</span><button class="mini-btn" data-replay>Replay</button></div>
+      <div class="fig-head"><span class="zoom" data-zoom="1">One token</span><button class="mini-btn" data-replay><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></div>
       <div class="fig-svg"></div>
       <p class="fig-cap">Each key picks one token. Over many keys, the picks match the model's own probabilities.</p>
     </figure>
@@ -626,10 +666,10 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap split fig-wide">
     <div class="copy">
       <h2>Hiding one <span class="hl">bit</span></h2>
-      <p class="lede">Here is a simplified version of our watermark, <a href="https://arxiv.org/abs/2602.07235">ArcMark</a>. Place the options for the next token around a circle, each with a slice as big as its probability.</p>
-      <p>The sender and the receiver both know the key, which sets a pointer at a random spot. To send 0, the sender writes the token under the pointer. To send 1, it writes the token directly across. The receiver uses the same key to find the pointer and checks which side the token came from.</p>
-      <p>Each click writes one token, which becomes context for the next (autoregressive generation). The pointer is uniformly random whatever the bit is, so every token appears exactly as often as the model would choose it. The watermark stays <span class="term">distortion-free</span>.</p>
-      <p>Watch the last token, the <code>a</code> in <code>&lt;/a&gt;</code>. At 97%, its slice usually catches both pointers, so the receiver has to guess and the bit can come out wrong.</p>
+      <p class="lede">A simplified version of our watermark, <a href="https://arxiv.org/abs/2602.07235">ArcMark</a>: the options for the next token sit around a circle, each with a slice as big as its probability.</p>
+      <p>The sender and the receiver share the key, which sets a random pointer. Send 0: write the token under it. Send 1: the token across. The random pointer keeps the watermark <span class="term">distortion-free</span>.</p>
+      <p>Watch the last token, the near-certain <code>a</code> in <code>&lt;/a&gt;</code>: both pointers usually land on it, so the receiver has to guess.</p>
+      
     </div>
     <figure class="fig" data-fig="bit">
       <div class="fig-head"><span class="zoom" data-zoom="1">One token</span></div>
@@ -640,7 +680,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
             <span>Send</span>
             <div class="seg" role="radiogroup" aria-label="Message to hide"></div>
           </div>
-          <div class="bit-row"><button class="btn primary small" data-act="write">Write next token</button></div>
+          <div class="bit-row"><button class="btn primary small nudge" data-act="write">Write next token</button></div>
           <p class="bit-sentence" aria-live="polite"></p>
           <p class="bit-opts"></p>
           <ol class="bit-log" aria-label="What the receiver reads"></ol>
@@ -656,12 +696,12 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap split">
     <div class="copy">
       <h2>The sender has instant <span class="hl">feedback</span></h2>
-      <p class="lede">A chess move needs more bits than one token can carry, so each move is spread over many tokens. After every token, the receiver updates its guess: a probability for each possible move.</p>
-      <p>The sender sees the same tokens and holds the same key, so it can run the receiver's decoder itself. At every moment it knows the receiver's decoding state: which move the receiver favors, and how close it is to the right one. This is feedback, and the receiver never has to send anything back.</p>
-      <p>In information theory, feedback is known to <a href="https://arxiv.org/abs/0909.4828">simplify code design</a>. The sender uses it to encode in the right direction. As in twenty questions, each token answers a yes-or-no question: is the move one of the bracketed ones, which hold about half of the receiver's belief? If a token pushes the receiver toward a wrong move, the next tokens steer it back.</p>
+      <p class="lede">A chess move takes many tokens. After each one, the receiver updates its guess of the move.</p>
+      <p>The sender sees the same tokens and key, so it can track that guess. In information theory, this kind of feedback is known to <a href="https://arxiv.org/abs/0909.4828">simplify code design</a>: as in twenty questions, each token targets the receiver's remaining doubt.</p>
+      
     </div>
     <figure class="fig" data-fig="feedback" aria-label="Bar charts of the receiver's guess over eight chess moves, and the sender's identical copy. Over ten tokens of HTML, the guess narrows to e4.">
-      <div class="fig-head"><span class="zoom" data-zoom="2">One message</span><button class="mini-btn" data-replay>Replay</button></div>
+      <div class="fig-head"><span class="zoom" data-zoom="2">One message</span><button class="mini-btn" data-replay><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></div>
       <div class="fig-svg"></div>
     </figure>
   </div>
@@ -672,12 +712,12 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap split">
     <div class="copy">
       <h2>Each sender stops hiding once the receiver is <span class="hl">confident</span></h2>
-      <p class="lede">In a conversation, the agents take turns, so each one is both a sender and a receiver.</p>
-      <p>Because the sender tracks the receiver's guess, it knows when the receiver's top candidate passes a high probability threshold. It then spends a few tokens confirming the candidate if it is right, or rejecting it if not. Once the move is confirmed, the sender stops hiding and the rest of the message is ordinary text.</p>
-      <p>Some messages finish in a few tokens and others take more, depending on how much room the text leaves for hiding. This is a variable-length code.</p>
+      <p class="lede">The agents take turns, so each one is both a sender and a receiver.</p>
+      <p>Once the receiver's top candidate passes a high threshold, the sender confirms it and stops hiding, or rejects it and keeps going. Message lengths vary: a variable-length code.</p>
+      
     </div>
     <figure class="fig" data-fig="convo" aria-label="Agents A and B work on a website. Each message hides a chess move in its first few tokens; a confidence meter fills past a threshold, the move is confirmed, and the rest of the message is ordinary text.">
-      <div class="fig-head"><span class="zoom" data-zoom="3">One conversation</span><button class="mini-btn" data-replay>Replay</button></div>
+      <div class="fig-head"><span class="zoom" data-zoom="3">One conversation</span><button class="mini-btn" data-replay><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></div>
       <div class="fig-svg"></div>
     </figure>
   </div>
@@ -688,35 +728,35 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap">
     <div class="single">
       <h2><span class="hl">BAM</span> is a protocol that puts all these pieces together</h2>
-      <p class="lede">BAM (Burnashev Adaptive posterior Matching) is our protocol for covert communication between agents. Each piece below comes from an earlier panel.</p>
+      <p class="lede">BAM (Burnashev Adaptive posterior Matching) combines the pieces from the previous panels.</p>
     </div>
     <ul class="bam-sum">
       <li>
         <svg class="ic-key" viewBox="0 0 34 34" aria-hidden="true"><circle cx="11" cy="17" r="6" fill="none" stroke="var(--hidden)" stroke-width="2.2"/><path d="M17 17h13m-4 0v5m4-5v4" fill="none" stroke="var(--hidden)" stroke-width="2.2" stroke-linecap="round"/></svg>
         <h3>A shared secret key</h3>
-        <p>The sender and the receiver hold the same key. Without it, the text gives nothing away.</p>
+        <p>Only the sender and the receiver have it.</p>
         <a href="#plain-sight">Hiding in plain sight</a>
       </li>
       <li>
         <svg class="ic-ring" viewBox="0 0 34 34" aria-hidden="true"><circle cx="17" cy="17" r="11" fill="none" stroke="var(--line-2)" stroke-width="5"/><path class="arc" d="M17 6 A11 11 0 0 1 27.5 13.6" fill="none" stroke="var(--sender)" stroke-width="5"/><line class="needle" x1="17" y1="17" x2="21" y2="2.5" stroke="var(--ink-2)" stroke-width="1.6" stroke-linecap="round"/></svg>
         <h3>A distortion-free watermark</h3>
-        <p>Our watermark, ArcMark, hides part of the message in each token, and every token keeps the model's own probability.</p>
+        <p>ArcMark hides bits in each token without distorting the text.</p>
         <a href="#bit">Hiding one bit</a>
       </li>
       <li>
         <svg class="ic-bars" viewBox="0 0 34 34" aria-hidden="true"><g fill="var(--receiver)"><rect x="2" y="9" width="4" height="19" rx="1" style="--s0:.47"/><rect x="7.5" y="20" width="4" height="8" rx="1" style="--s0:1.12"/><rect x="13" y="24" width="4" height="4" rx="1" style="--s0:2.25"/></g><g fill="var(--sender)"><rect x="19" y="9" width="4" height="19" rx="1" style="--s0:.47"/><rect x="24.5" y="20" width="4" height="8" rx="1" style="--s0:1.12"/><rect x="30" y="24" width="3.5" height="4" rx="1" style="--s0:2.25"/></g></svg>
         <h3>Feedback</h3>
-        <p>The sender runs the receiver's decoder and aims each new token at the receiver's remaining doubts. This is called <a href="https://arxiv.org/abs/0909.4828">posterior matching</a>.</p>
+        <p>The sender tracks the receiver's guess (<a href="https://arxiv.org/abs/0909.4828">posterior matching</a>).</p>
         <a href="#feedback">The sender has instant feedback</a>
       </li>
       <li>
         <svg class="ic-meter" viewBox="0 0 34 34" aria-hidden="true"><rect x="2" y="19" width="30" height="5" rx="2.5" fill="var(--line)"/><rect class="fill" x="2" y="19" width="28" height="5" rx="2.5" fill="var(--receiver)"/><line x1="27" y1="15" x2="27" y2="28" stroke="var(--ink)" stroke-width="1.6"/><path class="tick" d="M9 10.5l3.2 3.2L19 7" fill="none" stroke="var(--receiver)" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <h3>Confirm, then stop</h3>
-        <p>Once the receiver's top candidate passes a threshold, the sender confirms or rejects it, then stops hiding. Message length adapts to the text.</p>
+        <p>Confirm the receiver's top candidate, then stop hiding.</p>
         <a href="#conversation">Stopping when confident</a>
       </li>
     </ul>
-    <p class="bam-name">The name refers to <a href="https://www.mathnet.ru/eng/ppi1706">Burnashev's limit</a> on how fast decoding errors can fall when the sender has feedback and messages can vary in length. On classical channels, confirm-then-stop strategies reach this limit. <button class="linkish" data-open="sheet-method">Technical details</button></p>
+    <p class="bam-name">The name refers to <a href="https://www.mathnet.ru/eng/ppi1706">Burnashev's limit</a> on how fast errors can fall with feedback. <button class="linkish" data-open="sheet-method">Technical details</button></p>
   </div>
 </section>
 
@@ -725,7 +765,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap">
     <div class="single">
       <h2>About <span class="hl">100 times</span> fewer errors at the same length, relative to competing benchmarks</h2>
-      <p class="lede">This answers question 1, how much each message can hide. We hid 8-bit messages in news-style text with three open models, ran 1,000 trials each, and compared BAM with five earlier methods: ArcMark <a class="cite" href="https://arxiv.org/abs/2602.07235">[1]</a>, MPAC <a class="cite" href="https://arxiv.org/abs/2308.00221">[2]</a>, BiMark <a class="cite" href="https://arxiv.org/abs/2506.21602">[3]</a>, StealthInk <a class="cite" href="https://arxiv.org/abs/2506.05502">[4]</a>, and the method in <a class="cite" href="https://openreview.net/forum?id=fq6aQoMSHz">[5]</a>.</p>
+      <p class="lede">This answers question 1. We hid 8-bit messages in news text with three open models (1,000 trials each) and compared BAM with ArcMark <a class="cite" href="https://arxiv.org/abs/2602.07235">[1]</a>, MPAC <a class="cite" href="https://arxiv.org/abs/2308.00221">[2]</a>, BiMark <a class="cite" href="https://arxiv.org/abs/2506.21602">[3]</a>, StealthInk <a class="cite" href="https://arxiv.org/abs/2506.05502">[4]</a>, and the method in <a class="cite" href="https://openreview.net/forum?id=fq6aQoMSHz">[5]</a>.</p>
     </div>
     <figure class="figure viz" id="results-chart">
       <div class="viz-controls">
@@ -739,9 +779,9 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
       <div class="viz-plot" data-role="plot"></div>
       <div class="viz-table" data-role="table-view" hidden></div>
       <div class="viz-tip" data-role="tip" hidden></div>
-      <figcaption class="figcap"><b>Messages decoded wrong vs. average message length.</b> 8-bit messages hidden in C4 news text, 1,000 trials per point, bars show one standard error. Lower is better. A token is a word or part of a word.</figcaption>
+      <figcaption class="figcap"><b>Messages decoded wrong vs. average message length.</b> 8-bit messages hidden in C4 news text, 1,000 trials per point, bars show one standard error. Lower is better.</figcaption>
     </figure>
-    <p class="figure-note">At about 50 tokens, the best earlier method gets the message wrong 10 to 17% of the time. <strong>BAM gets it wrong 0.1% of the time or less.</strong> The method in <a class="cite" href="https://openreview.net/forum?id=fq6aQoMSHz">[5]</a> is also nearly error-free, but needs 73 to 88 tokens where BAM needs 46 to 50.</p>
+    <p class="figure-note">At about 50 tokens, the best earlier method is wrong 10 to 17% of the time. <strong>BAM is wrong 0.1% of the time or less.</strong> The method in <a class="cite" href="https://openreview.net/forum?id=fq6aQoMSHz">[5]</a> is nearly error-free too, but needs 73 to 88 tokens.</p>
     <div class="btn-row">
       <button class="btn" data-open="sheet-table">Full results table</button>
       <button class="btn" data-open="sheet-refs">References</button>
@@ -754,7 +794,7 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap">
     <div class="single">
       <h2>Two agents can play <span class="hl">chess</span> in secret</h2>
-      <p class="lede">By combining a shared secret key, a distortion-free watermark, and a communication protocol that uses feedback, two agents can play chess in secret. Agent A hides its move in a message about the website. Agent B reads it, picks an answer, and hides that move in its reply. To the monitor, it looks like two agents fixing a website. Chess is only the example: the same channel can carry any other hidden information.</p>
+      <p class="lede">By combining a shared secret key, a distortion-free watermark, and feedback, two agents can play chess in secret. To the monitor, they are just fixing a website. They could also share any other hidden information.</p>
     </div>
     <figure class="diagram">
       <div class="diagram-box">
@@ -806,11 +846,11 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
   <div class="wrap split">
     <div class="copy">
       <h2>From message boards to <span class="hl">hidden</span> channels</h2>
-      <p class="lede">The agents in OpenAI's report needed a shared server to pass notes, and the notes were plain text that monitoring could read.</p>
-      <p>A model that controls the sampler behind its own text needs no message board. Neither does a model that can have another model paraphrase its text while it controls that model's sampler. With a shared key, either one can hide messages in the ordinary text it already writes and communicate steganographically.</p>
+      <p class="lede">The agents in OpenAI's report needed a shared server, and their plain-text notes were found.</p>
+      <p>An agent that controls its own sampler, or a paraphrasing model's sampler, needs no message board. With a shared key, it can hide messages in the text it already writes.</p>
     </div>
     <figure class="fig" data-fig="shift" aria-label="Before: two agents leave notes on a shared file server, and monitoring finds them. Now: the sender's sampler, run with a shared key, hides the move Nd5 in an ordinary message. The monitor reads it as ordinary text, and the receiver decodes the move with the same key.">
-      <div class="fig-head"><span></span><button class="mini-btn" data-replay>Replay</button></div>
+      <div class="fig-head"><span></span><button class="mini-btn" data-replay><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 8a5.5 5.5 0 1 0 1.7-4"/><path d="M2.5 2.5v3h3"/></svg>Replay</button></div>
       <div class="fig-svg"></div>
     </figure>
   </div>
@@ -1002,8 +1042,8 @@ footer .wrap { display: flex; justify-content: space-between; flex-wrap: wrap; g
 </dialog>
 
 <script src="./data/results/c4_comparison.js" defer></script>
-<script src="./assets/story.js" defer></script>
-<script src="./assets/results-chart.js" defer></script>
+<script src="./assets/story.js?v=3" defer></script>
+<script src="./assets/results-chart.js?v=2" defer></script>
 <script>
 document.getElementById('yr').textContent = new Date().getFullYear();
 
@@ -1013,7 +1053,7 @@ document.getElementById('yr').textContent = new Date().getFullYear();
 (function () {
   if (!('IntersectionObserver' in window) || /[?&]still\b/.test(location.search) ||
       (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) return;
-  [['bam', 'bam-anim'], ['safety', 'reveal']].forEach(function (p) {
+  [['pieces', 'bam-anim'], ['bam', 'bam-anim'], ['safety', 'reveal']].forEach(function (p) {
     var sec = document.getElementById(p[0]);
     if (!sec) return;
     sec.classList.add(p[1]);
@@ -1023,6 +1063,12 @@ document.getElementById('yr').textContent = new Date().getFullYear();
     io.observe(sec);
   });
 })();
+
+// a highlighted control stops asking for attention once it is used
+document.addEventListener('click', function (e) {
+  var b = e.target.closest && e.target.closest('.nudge');
+  if (b) b.classList.remove('nudge');
+});
 
 // Binary-decode animation for the Information Theory Lab logo(s)
 (function () {

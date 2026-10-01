@@ -356,7 +356,7 @@
      near-certain, so both pointers usually land in its slice. */
   figures.bit = function (fig) {
     var s = makeSvg(fig, 300, 300);
-    var CX = 150, CY = 150, RI = 70, RO = 116, RL = 93;
+    var CX = 150, CY = 150, RI = 62, RO = 120, RL = 91;
     var LINK = {
       blog: [['Blog', .52], ['News', .18], ['Posts', .14], ['Articles', .10], ['Updates', .06]],
       about: [['About', .50], ['About us', .24], ['Team', .12], ['Company', .08], ['Story', .06]],
@@ -372,7 +372,7 @@
       { pre: '</', post: '>\n</li>', opts: [['a', .97], ['span', .02], ['div', .01]] }
     ];
     var sliceG = svgEl('g', {}, s), lblG = svgEl('g', {}, s), ptrG = svgEl('g', {}, s);
-    label(s, CX, CY - 4, 'shared key', 't-muted', { 'text-anchor': 'middle' });
+    label(s, CX, CY - 4, 'shared key', 't-ink', { 'text-anchor': 'middle' });
     var keyHex = label(s, CX, CY + 14, '----', 't-mono t-ink', { 'text-anchor': 'middle' });
 
     var seg = fig.querySelector('.seg');
@@ -425,7 +425,7 @@
         var path = svgEl('path', { 'class': 'slice ' + (i % 2 ? 'b' : 'a'), d: sector(a0, a1) }, sliceG);
         if (o[1] >= .07) {
           var m = pt(RL, (a0 + a1) / 2);
-          label(lblG, m[0], +m[1] + 4, o[0], 't-mono t-s t-ink', { 'text-anchor': 'middle' });
+          label(lblG, m[0], +m[1] + 5, o[0], 't-ring halo', { 'text-anchor': 'middle' });
         }
         return { tok: o[0], a1: a1, path: path };
       });
@@ -844,8 +844,18 @@
       var play = build(fig);
       if (!play) return;
       var run = 0;
-      function start() { var mine = ++run; play(function () { return mine === run; }); }
       var replay = fig.querySelector('[data-replay]');
+      // when a run finishes undisturbed, the Replay button pulses to show it is there
+      function start() {
+        var mine = ++run;
+        if (replay) replay.classList.remove('nudge');
+        var done = play(function () { return mine === run; });
+        if (replay && done && done.then) done.then(function () {
+          if (mine !== run) return;
+          void replay.offsetWidth;   // restart the pulse if it was already showing
+          replay.classList.add('nudge');
+        });
+      }
       if (replay) replay.addEventListener('click', start);
       if (!('IntersectionObserver' in window)) { start(); return; }
       var io = new IntersectionObserver(function (entries) {
